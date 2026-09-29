@@ -1,0 +1,137 @@
+/* Custom Styles for MRUNMAY DIGITAL SERVICE */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rozha+One&display=swap');
+
+:root {
+    --primary: #1e40af;
+    --primary-dark: #1e3a8a;
+    --secondary: #0284c7;
+    --whatsapp: #25D366;
+    --whatsapp-dark: #128C7E;
+    --solar: #f59e0b;
+    --success: #10b981;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    scroll-behavior: smooth;
+}
+
+/* CRITICAL: Guarantee modals are strictly hidden until opened */
+.hidden, [hidden] {
+    display: none !important;
+}
+
+#enquiryModal,
+#successModal,
+#adminPortalModal {
+    display: none;
+}
+
+#enquiryModal.flex,
+#successModal.flex,
+#adminPortalModal.flex {
+    display: flex !important;
+}
+
+/* Ensure background glow layers never block clicks */
+.hero-glow, .solar-glow {
+    pointer-events: none !important;
+}
+
+/* Ensure buttons and links are always on top and clickable */
+button, a, input, select, textarea {
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+input, textarea {
+    cursor: text;
+}
+
+/* WhatsApp Pulse Animation */
+@keyframes wa-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 16px rgba(37, 211, 102, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+    }
+}
+
+.whatsapp-float-btn {
+    animation: wa-pulse 2s infinite;
+}
+
+/* Glassmorphism modal backdrop */
+.modal-backdrop {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Service Card Hover Effect */
+.service-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Subtle Gradient Glow */
+.hero-glow {
+    background: radial-gradient(circle at 50% 30%, rgba(37, 99, 235, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+.solar-glow {
+    background: radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+/* Badge Styling */
+.badge-service {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    letter-spacing: 0.025em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* Modal transition */
+.modal-enter {
+    opacity: 0;
+    transform: scale(0.95);
+}
+.modal-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 250ms ease-out, transform 250ms ease-out;
+}
+
+/* Print Styles */
+@media print {
+    header, footer, .no-print, .whatsapp-float-btn {
+        display: none !important;
+    }
+}
