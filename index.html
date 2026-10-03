@@ -816,8 +816,10 @@
                         <p class="text-xs text-slate-300 font-bold">Scan with Google Pay, PhonePe, or Paytm:</p>
                         
                         <div class="flex justify-center">
-                            <img id="bookingModalQrImg" src="/static/default_upi_qr.png" onerror="this.src='/api/payment/qr?amount=299'" 
-                                 alt="UPI QR Code" class="w-44 h-44 rounded-xl border border-slate-700 p-1 bg-white">
+                            <img id="bookingModalQrImg" 
+                                 src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi%3A%2F%2Fpay%3Fpa%3DPPQR01.DOENZS%40iob%26pn%3DMRUNMAYA%2520ASSOCIATES%26am%3D299%26cu%3DINR%26tn%3DFamily%2520Dandia%2520Night%2520Ticket" 
+                                 onerror="this.src='/default_upi_qr.png'" 
+                                 alt="UPI QR Code" class="w-44 h-44 rounded-xl border-2 border-amber-400 p-1 bg-white shadow-lg">
                         </div>
                         
                         <p class="text-xs text-amber-300 font-mono font-bold">UPI ID: PPQR01.DOENZS@iob</p>
@@ -899,11 +901,21 @@
                     </div>
 
                     <!-- Pass Verification QR Code -->
-                    <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-                        <div class="text-[10px] text-slate-400">
-                            Present this digital ticket or physical printout at the entrance gate.
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-800 gap-3">
+                        <div class="text-[10px] text-slate-400 space-y-1">
+                            <span class="text-amber-400 font-bold block text-xs flex items-center gap-1">
+                                <span>🛡️</span> <span>Official Gate Entry QR Code</span>
+                            </span>
+                            <p>Present this dynamic QR code or physical printout at the entrance gate for instant barcode/camera scanning.</p>
                         </div>
-                        <img id="passQrPreview" src="/static/default_upi_qr.png" alt="QR" class="w-14 h-14 bg-white p-0.5 rounded-lg border border-slate-700">
+                        <div class="shrink-0 text-center">
+                            <img id="passQrPreview" 
+                                 src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Dandia/2026/301" 
+                                 onerror="this.src='/default_upi_qr.png'"
+                                 alt="Entry QR" 
+                                 class="w-20 h-20 bg-white p-1 rounded-xl border-2 border-amber-400 shadow-md">
+                            <span class="text-[9px] font-mono font-black text-amber-300 block mt-0.5">SCAN AT GATE</span>
+                        </div>
                     </div>
                 </div>
 
@@ -1979,15 +1991,49 @@
         function showGeneratedPass(data) {
             const ticket = data.ticket || {};
             const passId = data.pass_id || ticket.pass_id || "Dandia/2026/301";
-            
-            document.getElementById("passIdDisplay").textContent = passId;
-            document.getElementById("passNameDisplay").textContent = ticket.customer_name || "Valued Guest";
-            document.getElementById("passQtyDisplay").textContent = `${ticket.quantity || 1} Guest(s)`;
-            document.getElementById("passDateDisplay").textContent = ticket.date_selected || "17/10/2026 (Saturday)";
+            const cName = ticket.customer_name || "Valued Guest";
+            const cPhone = ticket.phone || "9938866544";
+            const cAddr = ticket.city || "Sundarpada, BBSR";
+            const cDate = ticket.date_selected || "17/10/2026 (Saturday)";
+            const cQty = ticket.quantity || 1;
+            const cRate = ticket.rate_per_ticket || 299;
+            const cTotal = ticket.total_amount || (cQty * cRate);
+            const cEvent = ticket.event_title || (currentlyBookingEvent ? currentlyBookingEvent.title : "Family Dandia Night 2026");
 
-            // Set Download URL
+            document.getElementById("passIdDisplay").textContent = passId;
+            document.getElementById("passNameDisplay").textContent = cName;
+            document.getElementById("passQtyDisplay").textContent = `${cQty} Guest(s)`;
+            document.getElementById("passDateDisplay").textContent = cDate;
+
+            // Generate Full Dynamic Gate Entry QR Data
+            const gateQrText = [
+                `MRUNMAYA ASSOCIATES | ${cEvent.toUpperCase()}`,
+                `TICKET NO: ${passId}`,
+                `NAME: ${cName}`,
+                `MOB: ${cPhone}`,
+                `ADDRESS: ${cAddr}`,
+                `DATE: ${cDate}`,
+                `VENUE: Trilochan Resorts, Sundarpada`,
+                `AMOUNT: Rs.${cTotal}`,
+                `STATUS: VERIFIED & CONFIRMED`,
+                `GATE VERIFY: https://mrunmayaleads.onrender.com/api/tickets/verify-pass/${encodeURIComponent(passId)}`
+            ].join("\n");
+
+            // Update QR Code Image element
+            const qrImg = document.getElementById("passQrPreview");
+            if (qrImg) {
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=2&data=${encodeURIComponent(gateQrText)}`;
+                qrImg.onerror = function() {
+                    this.src = `https://quickchart.io/qr?size=300&text=${encodeURIComponent(gateQrText)}`;
+                };
+            }
+
+            // Set Download URL with automated client-side Canvas fallback
             const dlBtn = document.getElementById("btnDownloadPass");
             dlBtn.href = `/api/tickets/${encodeURIComponent(passId)}/image?download=true`;
+            dlBtn.onclick = function(e) {
+                triggerClientTicketDownload(passId, cName, cPhone, cAddr, cDate, cTotal, cEvent, gateQrText);
+            };
 
             // Set WhatsApp URL
             const waBtn = document.getElementById("btnWhatsAppPass");
@@ -1997,6 +2043,71 @@
             const modal = document.getElementById("ticketPassModal");
             modal.style.display = "flex";
             modal.classList.remove("hidden");
+        }
+
+        async function triggerClientTicketDownload(passId, cName, cPhone, cAddr, cDate, cTotal, cEvent, gateQrText) {
+            try {
+                // If server is active, default browser download will execute from href
+                const check = await fetch(`/api/tickets/${encodeURIComponent(passId)}/image?download=true`);
+                if (check.ok) return;
+            } catch (e) {}
+
+            // Fallback: draw official ticket with QR stamped onto red box via HTML5 Canvas
+            const canvas = document.createElement("canvas");
+            canvas.width = 1042;
+            canvas.height = 362;
+            const ctx = canvas.getContext("2d");
+
+            const bg = new Image();
+            bg.crossOrigin = "anonymous";
+            bg.onload = function() {
+                ctx.drawImage(bg, 0, 0, 1042, 362);
+
+                // Serial numbers
+                ctx.fillStyle = "#c80000";
+                ctx.font = "bold 13px Arial";
+                ctx.fillText(passId, 105, 34);
+                ctx.font = "bold 11px Arial";
+                ctx.fillText(passId, 948, 43);
+
+                // Customer Details
+                ctx.fillStyle = "#0a1464";
+                ctx.font = "bold 13px Arial";
+                ctx.fillText(cName.slice(0, 24), 72, 198);
+                ctx.fillText(cAddr.slice(0, 24), 80, 252);
+                ctx.fillText(cPhone.slice(0, 15), 62, 291);
+
+                // Rs Box
+                ctx.fillStyle = "#c80000";
+                ctx.font = "bold 18px Arial";
+                ctx.fillText(`${cTotal}/-`, 80, 328);
+
+                // Red Box QR
+                const qrImg = new Image();
+                qrImg.crossOrigin = "anonymous";
+                qrImg.onload = function() {
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(877, 230, 136, 107);
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(877, 230, 136, 107);
+                    ctx.drawImage(qrImg, 894, 232, 102, 102);
+
+                    canvas.toBlob(function(blob) {
+                        const a = document.createElement("a");
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `Family_Dandia_Night_Ticket_${passId.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }, "image/png");
+                };
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=1&data=${encodeURIComponent(gateQrText)}`;
+            };
+            bg.src = "/dandia_ticket_template_official_2026.jpg";
+            bg.onerror = function() {
+                bg.src = "dandia_ticket_template_official_2026.jpg";
+            };
         }
 
         function closeTicketPassModal() {
@@ -2044,6 +2155,8 @@
                     "p-4 rounded-xl border bg-blue-950/60 border-blue-500/60 text-xs text-blue-200" :
                     "p-4 rounded-xl border bg-emerald-950/60 border-emerald-500/60 text-xs text-emerald-200";
 
+                const gateQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=1&data=${encodeURIComponent('MRUNMAYA ASSOCIATES | ' + t.pass_id + ' | ' + t.customer_name + ' | ' + t.date_selected)}`;
+
                 resBox.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2 font-black text-sm ${isAdmitted ? 'text-blue-400' : 'text-emerald-400'}">
@@ -2051,12 +2164,18 @@
                         </div>
                         <span class="px-2 py-0.5 rounded font-mono font-bold bg-slate-950 text-white">${t.pass_id}</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-slate-800 text-slate-300">
-                        <div><strong>Attendee:</strong> ${t.customer_name}</div>
-                        <div><strong>Phone:</strong> ${t.phone_masked || 'Verified'}</div>
-                        <div><strong>Event Date:</strong> ${t.date_selected}</div>
-                        <div><strong>Tickets:</strong> ${t.quantity} Guest(s)</div>
-                        <div class="col-span-2"><strong>Event:</strong> ${t.event_title}</div>
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-3 pt-3 border-t border-slate-800">
+                        <div class="grid grid-cols-2 gap-2 text-slate-300 text-xs flex-1">
+                            <div><strong>Attendee:</strong> ${t.customer_name}</div>
+                            <div><strong>Phone:</strong> ${t.phone_masked || 'Verified'}</div>
+                            <div><strong>Event Date:</strong> ${t.date_selected}</div>
+                            <div><strong>Tickets:</strong> ${t.quantity} Guest(s)</div>
+                            <div class="col-span-2"><strong>Event:</strong> ${t.event_title}</div>
+                        </div>
+                        <div class="shrink-0 text-center">
+                            <img src="${gateQrUrl}" alt="Verified QR" class="w-20 h-20 bg-white p-1 rounded-xl border border-amber-400">
+                            <span class="text-[9px] font-mono text-emerald-400 font-bold block mt-0.5">VERIFIED QR</span>
+                        </div>
                     </div>
                 `;
 
@@ -2139,6 +2258,21 @@
             currentAdminPin = "";
             document.getElementById("adminLoginSection").classList.remove("hidden");
             document.getElementById("adminDashboardSection").classList.add("hidden");
+        }
+
+        function previewTicketDirectly(passId) {
+            const t = allTickets.find(item => item.pass_id === passId) || {
+                pass_id: passId,
+                customer_name: "Valued Guest",
+                phone: "9938866544",
+                city: "Sundarpada, BBSR",
+                date_selected: "17/10/2026 (Saturday)",
+                quantity: 1,
+                rate_per_ticket: 299,
+                total_amount: 299,
+                event_title: "Family Dandia Night 2026"
+            };
+            showGeneratedPass({ ticket: t, pass_id: passId });
         }
 
         function switchAdminTab(tabName) {
@@ -2265,9 +2399,9 @@
                                     Admit
                                 </button>
                             ` : ''}
-                            <a href="/api/tickets/${encodeURIComponent(t.pass_id)}/image?download=true" target="_blank" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[10px]">
+                            <button type="button" onclick="previewTicketDirectly('${t.pass_id}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-[10px]">
                                 View Ticket
-                            </a>
+                            </button>
                             ${!isCancelled ? `
                                 <button onclick="updateTicketStatus(${t.id}, 'Cancelled')" class="px-2 py-1 rounded bg-rose-900/60 hover:bg-rose-800 text-rose-300 font-bold text-[10px]">
                                     Cancel
