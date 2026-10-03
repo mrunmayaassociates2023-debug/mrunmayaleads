@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRUNMAYA EVENTS | Dandia Night 2026 & Live Melodies - Official Passes</title>
+    <title>MRUNMAYA ASSOCIATES | Family Dandia Night 2026 & Live Melodies - Official Tickets</title>
     
     <!-- Custom Favicon -->
     <link rel="icon" type="image/png" href="/static/logo.png">
@@ -114,7 +114,7 @@
         </div>
         <div class="overflow-hidden whitespace-nowrap flex-1">
             <div id="liveTickerBar" class="animate-marquee font-extrabold text-xs">
-                🔥 ONLINE ENTRY PASSES OPEN FOR DANDIA NIGHT 2026! Date: 17th & 18th Oct 2026 @ Trilochan Resorts, Sundarpada, Bhubaneswar | Official Passes ₹299/- | Instant Verified Pass with Anti-Fraud Gate QR Code | Instant Booking via Razorpay (UPI, GPay, PhonePe, Cards)
+                🔥 ONLINE ENTRY TICKETS OPEN FOR FAMILY DANDIA NIGHT 2026! Date: 17th & 18th Oct 2026 @ Trilochan Resorts, Sundarpada, Bhubaneswar | Official Tickets ₹299/- | Instant Verified Ticket with Anti-Fraud Gate QR Code | Instant Booking via Razorpay (UPI, GPay, PhonePe, Cards)
             </div>
         </div>
     </header>
@@ -127,7 +127,7 @@
                 <!-- Logo & Brand Header -->
                 <a href="#home" class="flex items-center gap-3 group">
                     <div class="relative">
-                        <img src="/static/logo.png" onerror="this.src='logo.png'" alt="MRUNMAYA EVENTS Logo" 
+                        <img src="/static/logo.png" onerror="this.src='logo.png'" alt="MRUNMAYA ASSOCIATES Logo" 
                              class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-amber-400 p-0.5 bg-slate-900 object-cover brand-badge-glow group-hover:scale-105 transition-transform">
                         <span class="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full border border-slate-900">
                             LIVE
@@ -136,14 +136,14 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-heading font-black text-lg sm:text-2xl tracking-tight text-white group-hover:text-amber-400 transition-colors">
-                                MRUNMAYA <span class="text-amber-400">EVENTS</span>
+                                MRUNMAYA <span class="text-amber-400">ASSOCIATES</span>
                             </span>
                             <span class="hidden md:inline-block px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 text-[10px] font-black border border-amber-400/30">
-                                OFFICIAL PASSES
+                                OFFICIAL TICKETS
                             </span>
                         </div>
                         <p class="text-[11px] sm:text-xs font-semibold text-slate-400 tracking-wide flex items-center gap-1.5">
-                            <span>Dandia Night 2026</span>
+                            <span>Family Dandia Night 2026</span>
                             <span class="text-slate-600">•</span>
                             <span class="text-amber-300">Sundarpada, Bhubaneswar</span>
                         </p>
@@ -153,20 +153,20 @@
                 <!-- Desktop Navigation Links -->
                 <div class="hidden lg:flex items-center gap-7 text-xs font-extrabold uppercase tracking-wider text-slate-300">
                     <a href="#events" class="hover:text-amber-400 transition-colors">🎪 Events</a>
-                    <a href="#passes" class="hover:text-amber-400 transition-colors">🎟️ Passes & Pricing</a>
+                    <a href="#passes" class="hover:text-amber-400 transition-colors">🎟️ Tickets & Pricing</a>
                     <a href="#highlights" class="hover:text-amber-400 transition-colors">✨ Highlights</a>
                     <a href="#venue" class="hover:text-amber-400 transition-colors">📍 Venue & Directions</a>
                     <a href="#gateVerify" class="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
-                        <span>🛡️ Verify Pass</span>
+                        <span>🛡️ Verify Ticket</span>
                     </a>
                 </div>
 
                 <!-- Right Action Buttons -->
                 <div class="flex items-center gap-2.5 sm:gap-4">
                     <!-- Book Pass Primary CTA -->
-                    <button onclick="openTicketBookingModal(1)" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all border border-amber-300">
-                        <span>🎟️ BOOK PASSES</span>
-                        <span class="hidden sm:inline bg-slate-950 text-amber-300 text-[10px] px-1.5 py-0.5 rounded font-bold">₹299</span>
+                    <button id="navBookPassesBtn" onclick="openTicketBookingModal(featuredEventId)" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all border border-amber-300">
+                        <span>🎟️ BOOK TICKETS</span>
+                        <span id="navPassRateBadge" class="hidden sm:inline bg-slate-950 text-amber-300 text-[10px] px-1.5 py-0.5 rounded font-bold">₹299</span>
                     </button>
 
                     <!-- Admin Portal Trigger -->
@@ -187,10 +187,10 @@
         <!-- Mobile Menu Drawer -->
         <div id="mobileMenu" class="hidden lg:hidden bg-night-900 border-t border-slate-800 px-4 py-4 space-y-3">
             <a href="#events" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🎪 Events</a>
-            <a href="#passes" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🎟️ Passes & Pricing</a>
+            <a href="#passes" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🎟️ Tickets & Pricing</a>
             <a href="#highlights" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">✨ Highlights</a>
             <a href="#venue" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">📍 Venue & Directions</a>
-            <a href="#gateVerify" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-amber-400">🛡️ Gate Pass Verification</a>
+            <a href="#gateVerify" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-amber-400">🛡️ Gate Ticket Verification</a>
             <button onclick="toggleMobileMenu(); openAdminPortal()" class="w-full text-left py-2 text-sm font-bold text-slate-400 hover:text-white flex items-center gap-2">
                 <span>🔐 Organizer Admin Login</span>
             </button>
@@ -212,53 +212,56 @@
                     
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-wider">
                         <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                        <span>BHUBANESWAR'S PREMIER DANDIA CELEBRATION 2026</span>
+                        <span id="heroTopBadge">BHUBANESWAR'S PREMIER FAMILY DANDIA CELEBRATION 2026</span>
                     </div>
 
-                    <h1 class="font-heading text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08]">
-                        DANDIA NIGHT <span class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">2026</span>
+                    <!-- Multi-Event Switcher Pill Bar (Dynamically populated if >1 event) -->
+                    <div id="heroEventSwitcher" class="hidden flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1"></div>
+
+                    <h1 id="heroTitle" class="font-heading text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08]">
+                        FAMILY DANDIA NIGHT <span class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">2026</span>
                     </h1>
 
-                    <p class="text-base sm:text-xl font-bold text-amber-100/90 leading-snug">
+                    <p id="heroSubtitle" class="text-base sm:text-xl font-bold text-amber-100/90 leading-snug">
                         Grand Musical Melody Show & High-Voltage Garba Beats
                     </p>
 
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                        Experience two magical evenings of sensational live orchestra melodies, non-stop DJ dandia dance tracks, star celebrity performers, mouth-watering food courts, and a secure family atmosphere!
+                    <p id="heroHighlights" class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                        Experience sensational live orchestra melodies, non-stop DJ dandia dance tracks, star celebrity performers, mouth-watering food courts, and a secure family atmosphere!
                     </p>
 
                     <!-- Key Event Badges Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-2xl mx-auto lg:mx-0 pt-2">
                         <div class="bg-slate-900/90 border border-slate-700/80 p-3 rounded-2xl">
                             <span class="text-[10px] text-amber-400 font-extrabold uppercase block">📅 Dates</span>
-                            <span class="text-xs sm:text-sm font-black text-white block mt-0.5">17 & 18 Oct 2026</span>
-                            <span class="text-[10px] text-slate-400">Sat & Sun</span>
+                            <span id="heroDates" class="text-xs sm:text-sm font-black text-white block mt-0.5">17 & 18 Oct 2026</span>
+                            <span class="text-[10px] text-slate-400">Live Show</span>
                         </div>
                         <div class="bg-slate-900/90 border border-slate-700/80 p-3 rounded-2xl">
                             <span class="text-[10px] text-amber-400 font-extrabold uppercase block">⏰ Timings</span>
-                            <span class="text-xs sm:text-sm font-black text-white block mt-0.5">7 PM - 10 PM</span>
+                            <span id="heroTimings" class="text-xs sm:text-sm font-black text-white block mt-0.5">7 PM - 10 PM</span>
                             <span class="text-[10px] text-slate-400">Evening Show</span>
                         </div>
                         <div class="bg-slate-900/90 border border-slate-700/80 p-3 rounded-2xl">
                             <span class="text-[10px] text-amber-400 font-extrabold uppercase block">📍 Venue</span>
-                            <span class="text-xs sm:text-sm font-black text-white block mt-0.5">Trilochan Resorts</span>
+                            <span id="heroVenue" class="text-xs sm:text-sm font-black text-white block mt-0.5">Trilochan Resorts</span>
                             <span class="text-[10px] text-slate-400">Sundarpada, BBSR</span>
                         </div>
                         <div class="bg-gradient-to-br from-amber-500/20 to-yellow-500/10 border border-amber-400/40 p-3 rounded-2xl">
-                            <span class="text-[10px] text-amber-300 font-extrabold uppercase block">🎟️ Pass Rate</span>
-                            <span class="text-base sm:text-lg font-black text-amber-400 block mt-0.5">₹299</span>
+                            <span class="text-[10px] text-amber-300 font-extrabold uppercase block">🎟️ Ticket Rate</span>
+                            <span id="heroRate" class="text-base sm:text-lg font-black text-amber-400 block mt-0.5">₹299</span>
                             <span class="text-[10px] text-emerald-400 font-bold">Instant E-Ticket</span>
                         </div>
                     </div>
 
                     <!-- Hero Call to Actions -->
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-4">
-                        <button onclick="openTicketBookingModal(1)" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 transition-all border border-amber-300">
-                            <span>🎟️ BOOK ENTRY PASS NOW</span>
-                            <span class="text-xs bg-slate-950 text-amber-300 px-2 py-0.5 rounded font-black">₹299</span>
+                        <button id="heroMainBookBtn" onclick="openTicketBookingModal(featuredEventId)" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 transition-all border border-amber-300">
+                            <span>🎟️ BOOK ENTRY TICKET NOW</span>
+                            <span id="heroBtnRateBadge" class="text-xs bg-slate-950 text-amber-300 px-2 py-0.5 rounded font-black">₹299</span>
                         </button>
-                        <a href="#gateVerify" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm border border-slate-700 flex items-center justify-center gap-2 transition-all">
-                            <span>🔍 Verify Pass Status</span>
+                        <a href="#events" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm border border-slate-700 flex items-center justify-center gap-2 transition-all">
+                            <span>🎪 All Events Listing</span>
                         </a>
                     </div>
 
@@ -270,7 +273,7 @@
                         </span>
                         <span class="flex items-center gap-1.5 text-amber-300">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path></svg>
-                            Instant PNG Pass
+                            Instant PNG Ticket (301+)
                         </span>
                         <span class="flex items-center gap-1.5 text-blue-400">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884zM18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" clip-rule="evenodd"></path></svg>
@@ -287,22 +290,22 @@
                         <div class="relative bg-slate-950 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-2xl">
                             
                             <img id="heroPosterImg" src="/static/dandia_night_2026.jpg" onerror="this.src='dandia_night_2026.jpg'" 
-                                 alt="Dandia Night 2026 Official Poster" 
+                                 alt="Official Event Poster" 
                                  class="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300">
 
                             <!-- Overlay Ribbon -->
                             <div class="p-4 bg-gradient-to-t from-slate-950 via-slate-900 to-transparent">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <span class="text-[10px] font-black uppercase text-amber-400 tracking-wider">OFFICIAL PASS</span>
-                                        <h3 class="text-base font-black text-white">Dandia Night 2026</h3>
+                                        <span class="text-[10px] font-black uppercase text-amber-400 tracking-wider">OFFICIAL TICKET</span>
+                                        <h3 id="heroPosterTitle" class="text-base font-black text-white">Family Dandia Night 2026</h3>
                                     </div>
                                     <div class="text-right">
-                                        <span class="text-2xl font-black text-amber-400">₹299</span>
-                                        <span class="text-[10px] text-slate-400 block">per pass</span>
+                                        <span id="heroPosterRate" class="text-2xl font-black text-amber-400">₹299</span>
+                                        <span class="text-[10px] text-slate-400 block">per ticket</span>
                                     </div>
                                 </div>
-                                <button onclick="openTicketBookingModal(1)" class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition active:scale-95">
+                                <button id="heroPosterBookBtn" onclick="openTicketBookingModal(featuredEventId)" class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition active:scale-95">
                                     Instant Book via Razorpay
                                 </button>
                             </div>
@@ -327,7 +330,7 @@
                     Featured Events
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-400 mt-2">
-                    Select your event to book official entry passes with automated Razorpay checkout and instant digital pass issuance.
+                    Select your event to book official entry tickets with automated Razorpay checkout and instant digital ticket issuance.
                 </p>
             </div>
 
@@ -345,24 +348,24 @@
             
             <div class="text-center max-w-2xl mx-auto mb-12">
                 <span class="px-3 py-1 rounded-full bg-amber-400/10 text-amber-400 text-xs font-black uppercase tracking-wider border border-amber-400/20">
-                    PASS CATEGORIES
+                    TICKET CATEGORIES
                 </span>
                 <h2 class="font-heading text-3xl sm:text-5xl font-black text-white mt-3">
-                    Select Your Entry Pass
+                    Select Your Entry Ticket
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-400 mt-2">
-                    All passes include full access to the live melody show, orchestra, and DJ dandia dance floor.
+                    All tickets include full access to the live melody show, orchestra, and DJ dandia dance floor.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                 
-                <!-- Saturday Pass -->
+                <!-- Saturday Ticket -->
                 <div class="bg-slate-950/90 rounded-3xl p-6 sm:p-8 border border-slate-800 hover:border-amber-400/50 transition duration-300 flex flex-col justify-between group">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-black border border-amber-500/30">
-                                DAY 1 PASS
+                                DAY 1 TICKET
                             </span>
                             <span class="text-xs text-slate-400 font-bold">17 Oct (Saturday)</span>
                         </div>
@@ -378,21 +381,21 @@
                             <li class="flex items-center gap-2">✅ 7:00 PM to 10:00 PM Entry</li>
                             <li class="flex items-center gap-2">✅ Full Stage & Dance Floor Access</li>
                             <li class="flex items-center gap-2">✅ Free Parking at Resort</li>
-                            <li class="flex items-center gap-2">✅ Instant QR Code Pass</li>
+                            <li class="flex items-center gap-2">✅ Instant QR Code Ticket</li>
                         </ul>
                     </div>
 
                     <button onclick="openTicketBookingModal(1, '17/10/2026 (Saturday)')" class="w-full mt-6 py-3.5 rounded-2xl bg-slate-900 group-hover:bg-amber-400 text-slate-300 group-hover:text-slate-950 font-black text-xs uppercase tracking-wider transition-all border border-slate-700 group-hover:border-amber-400 shadow">
-                        Book Saturday Pass
+                        Book Saturday Ticket
                     </button>
                 </div>
 
-                <!-- Sunday Pass -->
+                <!-- Sunday Ticket -->
                 <div class="bg-slate-950/90 rounded-3xl p-6 sm:p-8 border border-slate-800 hover:border-amber-400/50 transition duration-300 flex flex-col justify-between group">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 text-xs font-black border border-amber-500/30">
-                                DAY 2 PASS
+                                DAY 2 TICKET
                             </span>
                             <span class="text-xs text-slate-400 font-bold">18 Oct (Sunday)</span>
                         </div>
@@ -408,16 +411,16 @@
                             <li class="flex items-center gap-2">✅ 7:00 PM to 10:00 PM Entry</li>
                             <li class="flex items-center gap-2">✅ Grand Finale Melodies</li>
                             <li class="flex items-center gap-2">✅ Dandia King & Queen Contest</li>
-                            <li class="flex items-center gap-2">✅ Instant QR Code Pass</li>
+                            <li class="flex items-center gap-2">✅ Instant QR Code Ticket</li>
                         </ul>
                     </div>
 
                     <button onclick="openTicketBookingModal(1, '18/10/2026 (Sunday)')" class="w-full mt-6 py-3.5 rounded-2xl bg-slate-900 group-hover:bg-amber-400 text-slate-300 group-hover:text-slate-950 font-black text-xs uppercase tracking-wider transition-all border border-slate-700 group-hover:border-amber-400 shadow">
-                        Book Sunday Pass
+                        Book Sunday Ticket
                     </button>
                 </div>
 
-                <!-- 2-Day Festival Combo Pass -->
+                <!-- 2-Day Festival Combo Ticket -->
                 <div class="bg-gradient-to-br from-amber-500/15 via-slate-950 to-slate-950 rounded-3xl p-6 sm:p-8 border-2 border-amber-400 shadow-xl flex flex-col justify-between relative group">
                     <div class="absolute -top-3 right-6 bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 text-[10px] font-black uppercase px-3 py-1 rounded-full shadow">
                         BEST VALUE COMBO
@@ -426,7 +429,7 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <span class="px-2.5 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black">
-                                2-DAY FULL PASS
+                                2-DAY FULL TICKET
                             </span>
                             <span class="text-xs text-amber-300 font-bold">17 & 18 Oct</span>
                         </div>
@@ -442,12 +445,12 @@
                             <li class="flex items-center gap-2">⭐ Both Saturday & Sunday Access</li>
                             <li class="flex items-center gap-2">⭐ Fast-Track Gate Entry</li>
                             <li class="flex items-center gap-2">⭐ Full Musical Troupe & DJ</li>
-                            <li class="flex items-center gap-2">⭐ Instant Razorpay Verified Pass</li>
+                            <li class="flex items-center gap-2">⭐ Instant Razorpay Verified Ticket</li>
                         </ul>
                     </div>
 
                     <button onclick="openTicketBookingModal(1, 'Both Days (17 & 18 Oct 2026)')" class="w-full mt-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95">
-                        Book 2-Day Combo Pass
+                        Book 2-Day Combo Ticket
                     </button>
                 </div>
 
@@ -575,7 +578,7 @@
                         <a href="tel:7008955582" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 flex items-center gap-2">
                             <span>📞 Call 7008955582</span>
                         </a>
-                        <a href="https://wa.me/919938866544?text=Hello%20Mrunmaya%20Events!%20I%20have%20an%20enquiry%20regarding%20Dandia%20Night%202026%20Passes." target="_blank" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow">
+                        <a href="https://wa.me/919938866544?text=Hello%20Mrunmaya%20Associates!%20I%20have%20an%20enquiry%20regarding%20Family%20Dandia%20Night%202026%20Tickets." target="_blank" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow">
                             <span>💬 WhatsApp Support</span>
                         </a>
                     </div>
@@ -612,21 +615,21 @@
                     GATE CHECK-IN & VERIFICATION
                 </span>
                 <h2 class="font-heading text-2xl sm:text-3xl font-black text-white mt-2">
-                    Verify Entry Pass Authenticity
+                    Verify Entry Ticket Authenticity
                 </h2>
                 <p class="text-xs text-slate-400 mt-1">
-                    Attendees and gate security can check the validity and status of any booked pass.
+                    Attendees and gate security can check the validity and status of any booked ticket.
                 </p>
             </div>
 
             <div class="bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Enter Pass ID or Ticket Number:</label>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Enter Ticket Sl.No or Ticket ID:</label>
                     <div class="flex gap-2.5">
-                        <input type="text" id="verifyPassIdInput" placeholder="e.g. Dandia/2026/001 or 013" 
+                        <input type="text" id="verifyPassIdInput" placeholder="e.g. Dandia/2026/301 or 305" 
                                class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-sm uppercase placeholder-slate-500 focus:outline-none focus:border-amber-400">
                         <button onclick="checkPassValidityLive()" class="px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow">
-                            Verify Pass
+                            Verify Ticket
                         </button>
                     </div>
                 </div>
@@ -646,14 +649,14 @@
                 <div class="flex items-center gap-3">
                     <img src="/static/logo.png" onerror="this.src='logo.png'" alt="Logo" class="w-10 h-10 rounded-full border border-amber-400">
                     <div>
-                        <span class="font-heading font-black text-lg text-white">MRUNMAYA <span class="text-amber-400">EVENTS</span></span>
-                        <p class="text-[11px] text-slate-500">Official Ticket Booking & Entry Passes Platform</p>
+                        <span class="font-heading font-black text-lg text-white">MRUNMAYA <span class="text-amber-400">ASSOCIATES</span></span>
+                        <p class="text-[11px] text-slate-500">Official Ticket Booking & Entry Platform</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-6 text-xs font-bold text-slate-400">
                     <a href="#events" class="hover:text-amber-400">Events</a>
-                    <a href="#passes" class="hover:text-amber-400">Passes</a>
+                    <a href="#passes" class="hover:text-amber-400">Tickets</a>
                     <a href="#venue" class="hover:text-amber-400">Venue</a>
                     <a href="#gateVerify" class="hover:text-amber-400">Gate Check</a>
                     <button onclick="openAdminPortal()" class="text-amber-400 hover:underline">Organizer Login</button>
@@ -680,8 +683,8 @@
                 <div class="flex items-center gap-2.5">
                     <span class="text-2xl">🎟️</span>
                     <div>
-                        <h3 id="modalEventTitle" class="font-heading font-black text-base sm:text-lg text-white">Dandia Night 2026 Pass</h3>
-                        <p class="text-[11px] text-amber-300 font-bold">₹<span id="modalEventRate">299</span> per person • Instant E-Pass</p>
+                        <h3 id="modalEventTitle" class="font-heading font-black text-base sm:text-lg text-white">Family Dandia Night 2026 Tickets</h3>
+                        <p class="text-[11px] text-amber-300 font-bold">₹<span id="modalEventRate">299</span> per person • Instant E-Ticket</p>
                     </div>
                 </div>
                 <button onclick="closeTicketBookingModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-sm font-bold">
@@ -727,8 +730,8 @@
                     <!-- Quantity Stepper -->
                     <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 flex items-center justify-between">
                         <div>
-                            <span class="font-extrabold text-white text-xs block">Number of Attendees / Passes</span>
-                            <span class="text-[10px] text-slate-400">Max 10 passes per single order</span>
+                            <span class="font-extrabold text-white text-xs block">Number of Attendees / Tickets</span>
+                            <span class="text-[10px] text-slate-400">Max 10 tickets per single order</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="adjustQty(-1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-black text-sm flex items-center justify-center">
@@ -745,7 +748,7 @@
                     <!-- Price Breakdown Summary with Dynamic GST Display -->
                     <div class="bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10 p-3.5 rounded-2xl border border-amber-400/40 space-y-2">
                         <div class="flex items-center justify-between text-xs text-slate-300">
-                            <span>Base Ticket (<span id="summaryQty">1</span> Pass × ₹<span id="summaryRate">299</span>):</span>
+                            <span>Base Ticket (<span id="summaryQty">1</span> Ticket × ₹<span id="summaryRate">299</span>):</span>
                             <span id="summaryBasePrice" class="font-bold text-white">₹299</span>
                         </div>
                         <div id="summaryGstRow" class="hidden flex items-center justify-between text-xs text-amber-300 border-t border-slate-800/60 pt-1.5">
@@ -800,11 +803,11 @@
                         <!-- Main Razorpay Action Button -->
                         <button type="button" id="payRazorpayBtn" onclick="startRazorpayPayment()" 
                                 class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
-                            <span>💳 Pay <span id="rzpBtnAmountText">₹299</span> via Razorpay & Get E-Pass</span>
+                            <span>💳 Pay <span id="rzpBtnAmountText">₹299</span> via Razorpay & Get E-Ticket</span>
                         </button>
                         
                         <p class="text-[10px] text-slate-400 text-center">
-                            Entry Pass is generated and validated immediately upon bank verification.
+                            Entry Ticket is generated and validated immediately upon bank verification.
                         </p>
                     </div>
 
@@ -826,7 +829,7 @@
                         </div>
 
                         <button type="button" onclick="submitManualUpiTicket()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider">
-                            Confirm UPI Payment & Issue Pass
+                            Confirm UPI Payment & Issue Ticket
                         </button>
                     </div>
 
@@ -846,7 +849,7 @@
             
             <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
                 <span class="text-xs font-black uppercase text-emerald-400 flex items-center gap-1.5">
-                    <span>✅ PAYMENT VERIFIED & PASS CONFIRMED</span>
+                    <span>✅ PAYMENT VERIFIED & TICKET CONFIRMED</span>
                 </span>
                 <button onclick="closeTicketPassModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">
                     ✕
@@ -861,15 +864,15 @@
 
                 <div>
                     <h3 class="font-heading font-black text-xl text-white">Booking Confirmed!</h3>
-                    <p class="text-xs text-slate-400 mt-1">Here is your official digital entry pass for Dandia Night 2026.</p>
+                    <p class="text-xs text-slate-400 mt-1">Here is your official digital entry ticket for Family Dandia Night 2026.</p>
                 </div>
 
                 <!-- Digital Pass Graphic Card -->
                 <div class="bg-slate-950 p-5 rounded-2xl border-2 border-amber-400 text-left space-y-3 relative overflow-hidden">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                         <div>
-                            <span class="text-[10px] font-black uppercase text-amber-400">ENTRY PASS SERIAL NO.</span>
-                            <div id="passIdDisplay" class="text-lg font-mono font-black text-white">Dandia/2026/001</div>
+                            <span class="text-[10px] font-black uppercase text-amber-400">ENTRY TICKET SERIAL NO.</span>
+                            <div id="passIdDisplay" class="text-lg font-mono font-black text-white">Dandia/2026/301</div>
                         </div>
                         <div class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/30">
                             VERIFIED
@@ -882,7 +885,7 @@
                             <span id="passNameDisplay" class="font-bold text-white block">Ramesh Kumar</span>
                         </div>
                         <div>
-                            <span class="text-slate-500 text-[10px] uppercase font-bold block">Passes Count</span>
+                            <span class="text-slate-500 text-[10px] uppercase font-bold block">Tickets Count</span>
                             <span id="passQtyDisplay" class="font-bold text-amber-300 block">1 Guest</span>
                         </div>
                         <div class="col-span-2">
@@ -898,7 +901,7 @@
                     <!-- Pass Verification QR Code -->
                     <div class="flex items-center justify-between pt-3 border-t border-slate-800">
                         <div class="text-[10px] text-slate-400">
-                            Present this digital pass or physical printout at the entrance gate.
+                            Present this digital ticket or physical printout at the entrance gate.
                         </div>
                         <img id="passQrPreview" src="/static/default_upi_qr.png" alt="QR" class="w-14 h-14 bg-white p-0.5 rounded-lg border border-slate-700">
                     </div>
@@ -907,10 +910,10 @@
                 <!-- Action Buttons -->
                 <div class="space-y-2 pt-2">
                     <a id="btnDownloadPass" href="#" target="_blank" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow transition">
-                        <span>📥 Download Official Pass PNG</span>
+                        <span>📥 Download Official Ticket PNG</span>
                     </a>
                     <a id="btnWhatsAppPass" href="#" target="_blank" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition">
-                        <span>💬 Send Pass to WhatsApp</span>
+                        <span>💬 Send Ticket to WhatsApp</span>
                     </a>
                 </div>
 
@@ -934,7 +937,7 @@
                     </div>
                     <div>
                         <h3 class="font-heading font-black text-base sm:text-lg text-white">Organizer Admin Panel</h3>
-                        <p class="text-[11px] text-slate-400">Events, Booked Passes, Razorpay Gateway & Financial Ledger</p>
+                        <p class="text-[11px] text-slate-400">Events, Booked Tickets, Razorpay Gateway & Financial Ledger</p>
                     </div>
                 </div>
                 <button onclick="closeAdminPortal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">
@@ -967,7 +970,7 @@
                 <div class="px-6 pt-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between overflow-x-auto">
                     <div class="flex items-center gap-6">
                         <button id="adminTabBtnTickets" onclick="switchAdminTab('tickets')" class="pb-3 text-xs sm:text-sm font-black border-b-2 border-amber-400 text-amber-400 shrink-0">
-                            🎟️ Booked Passes (<span id="adminPassesCount">0</span>)
+                            🎟️ Booked Tickets (<span id="adminPassesCount">0</span>)
                         </button>
                         <button id="adminTabBtnEvents" onclick="switchAdminTab('events')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
                             🎪 Events Manager
@@ -987,7 +990,7 @@
                 <!-- Top 4 Metrics Summary Cards -->
                 <div class="p-4 sm:p-6 bg-slate-900 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
                     <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-                        <span class="text-[10px] uppercase font-bold text-amber-400 block">Total Passes Booked</span>
+                        <span class="text-[10px] uppercase font-bold text-amber-400 block">Total Tickets Booked</span>
                         <span id="statPassesCount" class="text-2xl font-black text-white mt-0.5 block">0</span>
                     </div>
                     <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
@@ -1010,7 +1013,7 @@
                     <!-- Search & Action Bar -->
                     <div class="flex items-center justify-between flex-wrap gap-3">
                         <div class="flex items-center gap-2 flex-1 max-w-md">
-                            <input type="text" id="adminTicketSearch" oninput="renderTicketsTable()" placeholder="Search by Attendee Name, Mobile, Pass ID..." 
+                            <input type="text" id="adminTicketSearch" oninput="renderTicketsTable()" placeholder="Search by Attendee Name, Mobile, Ticket Sl.No..." 
                                    class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400">
                         </div>
                         <div class="flex items-center gap-2">
@@ -1031,7 +1034,7 @@
                         <table class="w-full text-left text-xs whitespace-nowrap">
                             <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 sticky top-0">
                                 <tr>
-                                    <th class="p-3">Pass ID</th>
+                                    <th class="p-3">Ticket Sl.No</th>
                                     <th class="p-3">Attendee Name</th>
                                     <th class="p-3">Phone</th>
                                     <th class="p-3">Date Selected</th>
@@ -1053,8 +1056,46 @@
                 <!-- Tab 2: Events Manager -->
                 <div id="adminTabEvents" class="hidden flex-1 overflow-auto p-4 sm:p-6 space-y-6 max-w-4xl mx-auto w-full">
                     
-                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
-                        <h4 class="font-heading font-black text-lg text-white">Add or Update Event</h4>
+                    <!-- Header with Title and Add Event Button -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
+                        <div>
+                            <div class="flex items-center gap-2.5">
+                                <h4 class="font-heading font-black text-xl text-white">Events Manager</h4>
+                                <span id="adminEventsCountBadge" class="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-black">
+                                    Active Events
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Events shown below are live on the website and open for ticket booking.</p>
+                        </div>
+                        <button type="button" onclick="showCreateEventForm()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow transition">
+                            <span>➕ Add New Event</span>
+                        </button>
+                    </div>
+
+                    <!-- Current Events List (PROMINENTLY AT TOP) -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h5 class="font-heading font-bold text-sm text-slate-300 uppercase tracking-wider">Current Live Events</h5>
+                            <button type="button" onclick="loadAdminEvents()" class="text-xs text-amber-400 hover:underline flex items-center gap-1">
+                                <span>🔄 Refresh Events</span>
+                            </button>
+                        </div>
+                        <div id="adminEventsList" class="space-y-3">
+                            <!-- Populated dynamically via loadAdminEvents() -->
+                        </div>
+                    </div>
+
+                    <!-- Add or Update Event Form Card -->
+                    <div id="adminEventFormCard" class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <div>
+                                <h4 id="eventFormHeader" class="font-heading font-black text-base text-white">➕ Add New Event</h4>
+                                <p class="text-[11px] text-slate-400">Fill in event details. The event will appear immediately on the website home page.</p>
+                            </div>
+                            <button type="button" onclick="resetEventForm()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+                                Clear / Reset Form
+                            </button>
+                        </div>
                         
                         <form onsubmit="handleSaveEvent(event)" class="space-y-3.5">
                             <input type="hidden" id="editEventId" value="">
@@ -1062,11 +1103,11 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Event Title *</label>
-                                    <input type="text" id="eventTitleInput" required placeholder="e.g. Dandia Night 2026" 
+                                    <input type="text" id="eventTitleInput" required placeholder="e.g. Family Dandia Night 2026" 
                                            class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Pass Rate (₹) *</label>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ticket Rate (₹) *</label>
                                     <input type="number" id="eventRateInput" required min="0" placeholder="299" 
                                            class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
                                 </div>
@@ -1127,7 +1168,7 @@
                             </div>
 
                             <div class="flex gap-2 pt-2">
-                                <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs uppercase tracking-wider">
+                                <button id="eventSaveSubmitBtn" type="submit" class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow">
                                     Save Event
                                 </button>
                                 <button type="button" onclick="resetEventForm()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">
@@ -1135,12 +1176,6 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-
-                    <!-- Current Events List -->
-                    <div class="space-y-3">
-                        <h4 class="font-heading font-black text-base text-white">Current Active Events</h4>
-                        <div id="adminEventsList" class="space-y-3"></div>
                     </div>
 
                 </div>
@@ -1335,11 +1370,13 @@
     <script>
         // State
         let activeEvents = [];
+        let featuredEventId = 1;
         let currentlyBookingEvent = null;
         let currentAdminPin = "";
         let portalSettings = {};
         let allTickets = [];
         let allPayments = [];
+        let adminEventsData = [];
 
         // Initialization
         document.addEventListener("DOMContentLoaded", () => {
@@ -1365,15 +1402,105 @@
             }
         }
 
-        // 2. Fetch Active Events
+        // 2. Fetch Active Events & Bind Dynamic Website State
         async function fetchEvents() {
             try {
                 const res = await fetch("/api/events");
                 const data = await res.json();
                 activeEvents = data.events || [];
+                
+                if (activeEvents.length > 0) {
+                    if (!activeEvents.some(e => e.id == featuredEventId)) {
+                        featuredEventId = activeEvents[0].id;
+                    }
+                    updateHeroSectionWithEvent(featuredEventId);
+                }
+                
                 renderEventsList();
             } catch (err) {
                 console.error("Error loading events:", err);
+            }
+        }
+
+        function updateHeroSectionWithEvent(eventId) {
+            const ev = activeEvents.find(e => e.id == eventId) || activeEvents[0];
+            if (!ev) return;
+            featuredEventId = ev.id;
+
+            // Update Hero Text & Badges
+            const hTitle = document.getElementById("heroTitle");
+            if (hTitle) hTitle.innerHTML = `${ev.title}`;
+
+            const hDates = document.getElementById("heroDates");
+            if (hDates) hDates.textContent = ev.dates || "17 & 18 Oct 2026";
+
+            const hTimings = document.getElementById("heroTimings");
+            if (hTimings) hTimings.textContent = ev.timings || "7 PM - 10 PM";
+
+            const hVenue = document.getElementById("heroVenue");
+            if (hVenue) hVenue.textContent = ev.venue || "Bhubaneswar";
+
+            const hRate = document.getElementById("heroRate");
+            if (hRate) hRate.textContent = `₹${ev.rate}`;
+
+            const hSub = document.getElementById("heroSubtitle");
+            if (hSub && ev.highlights) hSub.textContent = ev.highlights;
+
+            // Update Hero Poster Card
+            const posterSrc = ev.poster_image || '/static/dandia_night_2026.jpg';
+            const hImg = document.getElementById("heroPosterImg");
+            if (hImg) {
+                hImg.src = posterSrc;
+                hImg.alt = ev.title;
+            }
+            const hPosterTitle = document.getElementById("heroPosterTitle");
+            if (hPosterTitle) hPosterTitle.textContent = ev.title;
+
+            const hPosterRate = document.getElementById("heroPosterRate");
+            if (hPosterRate) hPosterRate.textContent = `₹${ev.rate}`;
+
+            // Update Buttons & Badges
+            const heroBtn = document.getElementById("heroMainBookBtn");
+            if (heroBtn) {
+                heroBtn.setAttribute("onclick", `openTicketBookingModal(${ev.id})`);
+                const rBadge = document.getElementById("heroBtnRateBadge");
+                if (rBadge) rBadge.textContent = `₹${ev.rate}`;
+            }
+
+            const heroPosterBtn = document.getElementById("heroPosterBookBtn");
+            if (heroPosterBtn) heroPosterBtn.setAttribute("onclick", `openTicketBookingModal(${ev.id})`);
+
+            const navBtn = document.getElementById("navBookPassesBtn");
+            if (navBtn) {
+                navBtn.setAttribute("onclick", `openTicketBookingModal(${ev.id})`);
+                const navBadge = document.getElementById("navPassRateBadge");
+                if (navBadge) navBadge.textContent = `₹${ev.rate}`;
+            }
+
+            // Update Event Switcher Pills if more than 1 event
+            const switcher = document.getElementById("heroEventSwitcher");
+            if (switcher) {
+                if (activeEvents.length > 1) {
+                    switcher.classList.remove("hidden");
+                    switcher.innerHTML = `
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Switch Event:</span>
+                        ${activeEvents.map(e => {
+                            const isSelected = e.id == ev.id;
+                            const bg = isSelected 
+                                ? "bg-amber-400 text-slate-950 font-black shadow-lg scale-105 border-amber-300" 
+                                : "bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-700";
+                            return `
+                                <button type="button" onclick="updateHeroSectionWithEvent(${e.id})" class="px-3 py-1.5 rounded-xl text-xs border transition transform active:scale-95 flex items-center gap-1.5 ${bg}">
+                                    <span>🎪</span>
+                                    <span>${e.title}</span>
+                                    <span class="text-[10px] opacity-80">(₹${e.rate})</span>
+                                </button>
+                            `;
+                        }).join("")}
+                    `;
+                } else {
+                    switcher.classList.add("hidden");
+                }
             }
         }
 
@@ -1384,21 +1511,26 @@
             if (activeEvents.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full p-8 text-center bg-slate-900 rounded-3xl border border-slate-800">
-                        <p class="text-sm text-slate-400">No active events found. Check back soon!</p>
+                        <p class="text-sm text-slate-400 font-bold">No active events found. Check back soon!</p>
                     </div>
                 `;
                 return;
             }
 
             grid.innerHTML = activeEvents.map(ev => `
-                <div class="bg-slate-900 rounded-3xl overflow-hidden border border-slate-850 hover:border-amber-400/50 transition duration-300 flex flex-col justify-between group shadow-xl">
+                <div class="bg-slate-900 rounded-3xl overflow-hidden border ${ev.id == featuredEventId ? 'border-amber-400 shadow-amber-500/20 shadow-2xl' : 'border-slate-800 hover:border-amber-400/50'} transition duration-300 flex flex-col justify-between group shadow-xl">
                     <div>
                         <div class="relative overflow-hidden h-52 bg-slate-950">
                             <img src="${ev.poster_image || '/static/dandia_night_2026.jpg'}" onerror="this.src='/static/dandia_night_2026.jpg'" 
                                  alt="${ev.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-amber-400/40 text-amber-300 font-black text-xs">
-                                ₹${ev.rate}/Pass
+                                ₹${ev.rate}/Ticket
                             </div>
+                            ${ev.id == featuredEventId ? `
+                                <div class="absolute top-3 left-3 bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-2.5 py-0.5 rounded-full shadow">
+                                    ★ Featured Now
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="p-5 sm:p-6 space-y-3">
                             <div class="flex items-center gap-2 text-[10px] text-amber-400 font-extrabold uppercase">
@@ -1410,16 +1542,17 @@
                                 ${ev.title}
                             </h3>
                             <p class="text-xs text-slate-400 line-clamp-2">
-                                ${ev.highlights || 'Celebrity Singers, Live Orchestra Melodies & DJ Dandia Beats.'}
+                                ${ev.highlights || 'Sensational live melodies, orchestra, DJ Dandia Beats & Food courts.'}
                             </p>
                             <p class="text-[11px] text-slate-500 flex items-center gap-1">
-                                <span>📍</span> <span>${ev.venue || 'Trilochan Resorts, Sundarpada, BBSR'}</span>
+                                <span>📍</span> <span>${ev.venue || 'Bhubaneswar'}</span>
                             </p>
                         </div>
                     </div>
-                    <div class="p-5 sm:p-6 pt-0">
-                        <button onclick="openTicketBookingModal(${ev.id})" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition transform active:scale-95">
-                            🎟️ Book Entry Pass (₹${ev.rate})
+                    <div class="p-5 sm:p-6 pt-0 space-y-2">
+                        <button onclick="openTicketBookingModal(${ev.id})" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition transform active:scale-95 flex items-center justify-center gap-1.5">
+                            <span>🎟️ Book Entry Ticket</span>
+                            <span class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded text-[10px]">₹${ev.rate}</span>
                         </button>
                     </div>
                 </div>
@@ -1430,7 +1563,7 @@
         function openTicketBookingModal(eventId = 1, preselectedDate = "") {
             currentlyBookingEvent = activeEvents.find(e => e.id == eventId) || activeEvents[0] || {
                 id: 1,
-                title: "Dandia Night 2026 - Melody Show",
+                title: "Family Dandia Night 2026 - Melody Show",
                 rate: 299,
                 dates: "17/10/2026 TO 18/10/2026",
                 timings: "7:00 PM TO 10:00 PM"
@@ -1439,12 +1572,41 @@
             document.getElementById("modalEventTitle").textContent = currentlyBookingEvent.title;
             document.getElementById("modalEventRate").textContent = currentlyBookingEvent.rate;
             
+            // Dynamically populate dates dropdown
             const dateSelect = document.getElementById("bookTicketDate");
-            if (preselectedDate && dateSelect) {
-                for (let i = 0; i < dateSelect.options.length; i++) {
-                    if (dateSelect.options[i].value.includes(preselectedDate) || dateSelect.options[i].text.includes(preselectedDate)) {
-                        dateSelect.selectedIndex = i;
-                        break;
+            if (dateSelect) {
+                dateSelect.innerHTML = "";
+                const dStr = (currentlyBookingEvent.dates || "").trim();
+                if (dStr.toUpperCase().includes("TO") || dStr.includes("&") || dStr.includes(",")) {
+                    const parts = dStr.split(/TO|&|,/i).map(s => s.trim()).filter(Boolean);
+                    parts.forEach(p => {
+                        const opt = document.createElement("option");
+                        opt.value = p;
+                        opt.textContent = `📅 ${p} (₹${currentlyBookingEvent.rate})`;
+                        dateSelect.appendChild(opt);
+                    });
+                    const comboOpt = document.createElement("option");
+                    comboOpt.value = `Both Days / Full Ticket (${dStr})`;
+                    comboOpt.textContent = `🌟 Both Days / Full Ticket (${dStr})`;
+                    dateSelect.appendChild(comboOpt);
+                } else if (dStr) {
+                    const opt1 = document.createElement("option");
+                    opt1.value = dStr;
+                    opt1.textContent = `📅 ${dStr} - Standard Entry Ticket`;
+                    dateSelect.appendChild(opt1);
+                } else {
+                    const opt1 = document.createElement("option");
+                    opt1.value = "General Admission";
+                    opt1.textContent = "General Admission Entry Ticket";
+                    dateSelect.appendChild(opt1);
+                }
+
+                if (preselectedDate) {
+                    for (let i = 0; i < dateSelect.options.length; i++) {
+                        if (dateSelect.options[i].value.includes(preselectedDate) || dateSelect.options[i].text.includes(preselectedDate)) {
+                            dateSelect.selectedIndex = i;
+                            break;
+                        }
                     }
                 }
             }
@@ -1600,7 +1762,7 @@
                     body: JSON.stringify({
                         amount: total,
                         event_id: currentlyBookingEvent ? currentlyBookingEvent.id : 1,
-                        event_title: currentlyBookingEvent ? currentlyBookingEvent.title : "Dandia Night 2026",
+                        event_title: currentlyBookingEvent ? currentlyBookingEvent.title : "Family Dandia Night 2026",
                         service_type: "Event Ticket",
                         customer_name: customerName,
                         phone: phone,
@@ -1624,12 +1786,12 @@
                         key: keyId,
                         amount: orderData.amount,
                         currency: orderData.currency || "INR",
-                        name: "MRUNMAYA EVENTS",
-                        description: `${currentlyBookingEvent.title} (${qty} Pass${qty > 1 ? 'es' : ''})`,
+                        name: "MRUNMAYA ASSOCIATES",
+                        description: `${currentlyBookingEvent.title} (${qty} Ticket${qty > 1 ? 's' : ''})`,
                         image: "/static/logo.png",
                         order_id: orderData.order_id,
                         handler: async function (response) {
-                            btn.innerHTML = `<span>⏳ Verifying Signature & Issuing Pass...</span>`;
+                            btn.innerHTML = `<span>⏳ Verifying Signature & Issuing Ticket...</span>`;
                             await verifyAndIssueTicket({
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
@@ -1705,7 +1867,7 @@
             }
         }
 
-        // Verify Razorpay Payment and Display Generated Pass
+        // Verify Razorpay Payment and Display Generated Ticket
         async function verifyAndIssueTicket(payload) {
             try {
                 const res = await fetch("/api/razorpay/verify-payment", {
@@ -1723,11 +1885,11 @@
                 showGeneratedPass(data);
 
             } catch (err) {
-                alert(`Pass Generation Error: ${err.message}`);
+                alert(`Ticket Generation Error: ${err.message}`);
             }
         }
 
-        // Manual Shop UPI Pass Issue
+        // Manual Shop UPI Ticket Issue
         async function submitManualUpiTicket() {
             const customerName = document.getElementById("bookCustomerName").value.trim();
             const phone = document.getElementById("bookCustomerPhone").value.trim();
@@ -1782,7 +1944,7 @@
 
         function showGeneratedPass(data) {
             const ticket = data.ticket || {};
-            const passId = data.pass_id || ticket.pass_id || "Dandia/2026/001";
+            const passId = data.pass_id || ticket.pass_id || "Dandia/2026/301";
             
             document.getElementById("passIdDisplay").textContent = passId;
             document.getElementById("passNameDisplay").textContent = ticket.customer_name || "Valued Guest";
@@ -1795,9 +1957,9 @@
 
             // Set WhatsApp URL
             const waBtn = document.getElementById("btnWhatsAppPass");
-            waBtn.href = data.whatsapp_url || `https://wa.me/919938866544?text=Here%20is%20my%20confirmed%20pass:%20${encodeURIComponent(passId)}`;
+            waBtn.href = data.whatsapp_url || `https://wa.me/919938866544?text=Here%20is%20my%20confirmed%20ticket:%20${encodeURIComponent(passId)}`;
 
-            // Show pass modal
+            // Show ticket modal
             const modal = document.getElementById("ticketPassModal");
             modal.style.display = "flex";
             modal.classList.remove("hidden");
@@ -1818,12 +1980,12 @@
             const passId = input.value.trim();
 
             if (!passId) {
-                alert("Please enter a Pass ID.");
+                alert("Please enter a Ticket Sl.No or ID.");
                 return;
             }
 
             resBox.className = "p-4 rounded-xl border bg-slate-900 border-slate-700 text-xs text-slate-300";
-            resBox.innerHTML = `<span>⏳ Verifying pass with central register...</span>`;
+            resBox.innerHTML = `<span>⏳ Verifying ticket with central register...</span>`;
             resBox.classList.remove("hidden");
 
             try {
@@ -1834,9 +1996,9 @@
                     resBox.className = "p-4 rounded-xl border bg-rose-950/60 border-rose-500/60 text-xs text-rose-200";
                     resBox.innerHTML = `
                         <div class="flex items-center gap-2 font-black text-rose-400 text-sm">
-                            <span>❌ INVALID PASS ID</span>
+                            <span>❌ INVALID TICKET ID</span>
                         </div>
-                        <p class="mt-1">${data.message || 'Pass ID not found in database. Do not admit.'}</p>
+                        <p class="mt-1">${data.message || 'Ticket not found in database. Do not admit.'}</p>
                     `;
                     return;
                 }
@@ -1851,7 +2013,7 @@
                 resBox.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2 font-black text-sm ${isAdmitted ? 'text-blue-400' : 'text-emerald-400'}">
-                            <span>${isAdmitted ? '🔵 ATTENDEE ALREADY ADMITTED' : '✅ GENUINE VERIFIED PASS'}</span>
+                            <span>${isAdmitted ? '🔵 ATTENDEE ALREADY ADMITTED' : '✅ GENUINE VERIFIED TICKET'}</span>
                         </div>
                         <span class="px-2 py-0.5 rounded font-mono font-bold bg-slate-950 text-white">${t.pass_id}</span>
                     </div>
@@ -1859,14 +2021,14 @@
                         <div><strong>Attendee:</strong> ${t.customer_name}</div>
                         <div><strong>Phone:</strong> ${t.phone_masked || 'Verified'}</div>
                         <div><strong>Event Date:</strong> ${t.date_selected}</div>
-                        <div><strong>Passes:</strong> ${t.quantity} Guest(s)</div>
+                        <div><strong>Tickets:</strong> ${t.quantity} Guest(s)</div>
                         <div class="col-span-2"><strong>Event:</strong> ${t.event_title}</div>
                     </div>
                 `;
 
             } catch (err) {
                 resBox.className = "p-4 rounded-xl border bg-rose-950/60 border-rose-500/60 text-xs text-rose-200";
-                resBox.innerHTML = `<span>Error checking pass: ${err.message}</span>`;
+                resBox.innerHTML = `<span>Error checking ticket: ${err.message}</span>`;
             }
         }
 
@@ -1951,6 +2113,16 @@
             if (activeBtn) {
                 activeBtn.classList.remove("text-slate-400", "font-semibold");
                 activeBtn.classList.add("border-b-2", "border-amber-400", "text-amber-400", "font-black");
+            }
+
+            if (tabName === 'events') {
+                loadAdminEvents();
+            } else if (tabName === 'tickets') {
+                loadAdminTickets();
+            } else if (tabName === 'razorpay') {
+                loadAdminPayments();
+            } else if (tabName === 'settings') {
+                loadAdminSettings();
             }
         }
 
@@ -2048,7 +2220,7 @@
                                 </button>
                             ` : ''}
                             <a href="/api/tickets/${encodeURIComponent(t.pass_id)}/image?download=true" target="_blank" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[10px]">
-                                View Pass
+                                View Ticket
                             </a>
                             ${!isCancelled ? `
                                 <button onclick="updateTicketStatus(${t.id}, 'Cancelled')" class="px-2 py-1 rounded bg-rose-900/60 hover:bg-rose-800 text-rose-300 font-bold text-[10px]">
@@ -2077,7 +2249,7 @@
         }
 
         async function updateTicketStatus(ticketId, newStatus) {
-            if (!confirm(`Are you sure you want to mark this pass as ${newStatus}?`)) return;
+            if (!confirm(`Are you sure you want to mark this ticket as ${newStatus}?`)) return;
             try {
                 const res = await fetch(`/api/tickets/${ticketId}/status`, {
                     method: "PATCH",
@@ -2106,39 +2278,72 @@
                 const list = document.getElementById("adminEventsList");
                 if (!list) return;
 
-                const events = data.events || [];
-                if (events.length === 0) {
-                    list.innerHTML = `<p class="text-xs text-slate-500">No events found.</p>`;
+                adminEventsData = data.events || [];
+                const badge = document.getElementById("adminEventsCountBadge");
+                if (badge) badge.textContent = `${adminEventsData.length} Live Event(s)`;
+
+                if (adminEventsData.length === 0) {
+                    list.innerHTML = `
+                        <div class="p-8 text-center bg-slate-900/60 rounded-2xl border border-slate-800">
+                            <p class="text-sm text-slate-400 font-bold">No active events found in database.</p>
+                            <p class="text-xs text-slate-500 mt-1">Fill out the form below to create your first live event.</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                list.innerHTML = events.map(ev => `
-                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-3">
-                            <img src="${ev.poster_image || '/static/dandia_night_2026.jpg'}" onerror="this.src='/static/dandia_night_2026.jpg'" 
-                                 class="w-12 h-12 rounded-lg object-cover border border-slate-700">
-                            <div>
-                                <h5 class="font-bold text-white text-xs sm:text-sm">${ev.title}</h5>
-                                <p class="text-[10px] text-slate-400">${ev.dates} • ₹${ev.rate}/pass</p>
+                list.innerHTML = adminEventsData.map(ev => {
+                    const posterSrc = ev.poster_image || '/static/dandia_night_2026.jpg';
+                    return `
+                        <div class="bg-slate-900/90 p-4 sm:p-5 rounded-2xl border border-slate-800 hover:border-slate-700 transition shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-start sm:items-center gap-4">
+                                <img src="${posterSrc}" onerror="this.src='/static/dandia_night_2026.jpg'" 
+                                     class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-slate-700 shrink-0 shadow bg-slate-950">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black uppercase">
+                                            ● Live on Website
+                                        </span>
+                                        <span class="text-xs font-mono text-slate-400">ID: #${ev.id}</span>
+                                    </div>
+                                    <h5 class="font-bold text-white text-sm sm:text-base leading-snug">${ev.title}</h5>
+                                    <p class="text-xs text-amber-300 font-bold">
+                                        📅 ${ev.dates} &nbsp;•&nbsp; ⏰ ${ev.timings || '7 PM - 10 PM'} &nbsp;•&nbsp; 🎟️ ₹${ev.rate}/ticket
+                                    </p>
+                                    <p class="text-[11px] text-slate-400 flex items-center gap-1">
+                                        <span>📍</span> <span>${ev.venue || 'Bhubaneswar'}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex sm:flex-col items-center sm:items-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                                <button type="button" onclick="editEventById(${ev.id})" class="px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition shadow">
+                                    <span>✏️ Edit</span>
+                                </button>
+                                <button type="button" onclick="deleteEvent(${ev.id})" class="px-3 py-1.5 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-300 text-xs font-bold transition">
+                                    <span>🗑️ Delete</span>
+                                </button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="editEvent(${JSON.stringify(ev).replace(/"/g, '&quot;')})" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
-                                Edit
-                            </button>
-                            <button onclick="deleteEvent(${ev.id})" class="px-3 py-1.5 rounded-lg bg-rose-900/60 hover:bg-rose-800 text-rose-300 text-xs font-bold">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                `).join("");
+                    `;
+                }).join("");
 
             } catch (err) {
                 console.error("Error loading events:", err);
             }
         }
 
-        function editEvent(ev) {
+        function showCreateEventForm() {
+            resetEventForm();
+            const formCard = document.getElementById("adminEventFormCard");
+            if (formCard) formCard.scrollIntoView({ behavior: 'smooth' });
+            const titleInput = document.getElementById("eventTitleInput");
+            if (titleInput) titleInput.focus();
+        }
+
+        function editEventById(id) {
+            const ev = adminEventsData.find(e => e.id == id);
+            if (!ev) return;
+
             document.getElementById("editEventId").value = ev.id || "";
             document.getElementById("eventTitleInput").value = ev.title || "";
             document.getElementById("eventRateInput").value = ev.rate || 299;
@@ -2151,6 +2356,16 @@
             const prevImg = document.getElementById("eventPhotoPreviewImg");
             if (prevImg) prevImg.src = poster;
             document.getElementById("eventHighlightsInput").value = ev.highlights || "";
+
+            const formHeader = document.getElementById("eventFormHeader");
+            if (formHeader) {
+                formHeader.innerHTML = `<span class="text-amber-400">✏️ Editing Event #${ev.id}:</span> ${ev.title}`;
+            }
+            const submitBtn = document.getElementById("eventSaveSubmitBtn");
+            if (submitBtn) submitBtn.textContent = "Update Event Changes";
+
+            const formCard = document.getElementById("adminEventFormCard");
+            if (formCard) formCard.scrollIntoView({ behavior: 'smooth' });
         }
 
         function resetEventForm() {
@@ -2170,6 +2385,13 @@
                 statusP.className = "text-[10px] text-slate-400";
             }
             document.getElementById("eventHighlightsInput").value = "";
+
+            const formHeader = document.getElementById("eventFormHeader");
+            if (formHeader) {
+                formHeader.innerHTML = `➕ Add New Event`;
+            }
+            const submitBtn = document.getElementById("eventSaveSubmitBtn");
+            if (submitBtn) submitBtn.textContent = "Save Event";
         }
 
         async function handleEventPhotoUpload(event) {
@@ -2254,10 +2476,10 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    alert("Event saved successfully!");
+                    alert("✅ Event saved successfully and updated live on the website!");
                     resetEventForm();
-                    loadAdminEvents();
-                    fetchEvents();
+                    await loadAdminEvents();
+                    await fetchEvents();
                 } else {
                     const err = await res.json();
                     alert(err.detail || "Failed to save event");
@@ -2274,8 +2496,9 @@
                     method: "DELETE"
                 });
                 if (res.ok) {
-                    loadAdminEvents();
-                    fetchEvents();
+                    alert("Event deleted successfully.");
+                    await loadAdminEvents();
+                    await fetchEvents();
                 }
             } catch (err) {
                 alert(err.message);
