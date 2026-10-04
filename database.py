@@ -127,6 +127,16 @@ def init_db():
         cursor.execute("ALTER TABLE tickets ADD COLUMN gst_amount REAL DEFAULT 0")
     if "gst_percent" not in ticket_cols:
         cursor.execute("ALTER TABLE tickets ADD COLUMN gst_percent REAL DEFAULT 0")
+    if "cancelled_at" not in ticket_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN cancelled_at TEXT")
+
+    # Ensure phone and email exist in sponsors table
+    cursor.execute("PRAGMA table_info(sponsors)")
+    sponsor_cols = [col["name"] for col in cursor.fetchall()]
+    if "phone" not in sponsor_cols:
+        cursor.execute("ALTER TABLE sponsors ADD COLUMN phone TEXT")
+    if "email" not in sponsor_cols:
+        cursor.execute("ALTER TABLE sponsors ADD COLUMN email TEXT")
     
     # Insert default settings if not exists
     default_settings = {
@@ -342,7 +352,7 @@ def get_all_sponsors(enabled_only=False):
     conn.close()
     return sponsors
 
-def save_sponsor(name: str, category: str = "Event Partner", logo_url: str = "", website_url: str = "", display_order: int = 0, enabled: int = 1, sponsor_id: int = None):
+def save_sponsor(name: str, category: str = "Event Partner", logo_url: str = "", website_url: str = "", phone: str = "", email: str = "", display_order: int = 0, enabled: int = 1, sponsor_id: int = None):
     conn = get_db_connection()
     cursor = conn.cursor()
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -350,17 +360,19 @@ def save_sponsor(name: str, category: str = "Event Partner", logo_url: str = "",
     clean_web = website_url.strip() if website_url else ""
     clean_name = name.strip()
     clean_cat = category.strip() if category else "Event Partner"
+    clean_phone = phone.strip() if phone else ""
+    clean_email = email.strip() if email else ""
     
     if sponsor_id:
         cursor.execute("""
-        UPDATE sponsors SET name=?, category=?, logo_url=?, website_url=?, display_order=?, enabled=?
+        UPDATE sponsors SET name=?, category=?, logo_url=?, website_url=?, phone=?, email=?, display_order=?, enabled=?
         WHERE id=?
-        """, (clean_name, clean_cat, clean_logo, clean_web, display_order, enabled, sponsor_id))
+        """, (clean_name, clean_cat, clean_logo, clean_web, clean_phone, clean_email, display_order, enabled, sponsor_id))
     else:
         cursor.execute("""
-        INSERT INTO sponsors (name, category, logo_url, website_url, display_order, enabled, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (clean_name, clean_cat, clean_logo, clean_web, display_order, enabled, created_at))
+        INSERT INTO sponsors (name, category, logo_url, website_url, phone, email, display_order, enabled, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (clean_name, clean_cat, clean_logo, clean_web, clean_phone, clean_email, display_order, enabled, created_at))
         sponsor_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -566,7 +578,29 @@ def get_all_payments(search: str = None, status: str = None, mode: str = None):
     conn.close()
     return payments
 
+def purge_expired_cancelled_tickets():
+    """Delete tickets that were cancelled more than 24 hours ago (auto-cleanup)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+        DELETE FROM tickets 
+        WHERE booking_status = 'Cancelled' 
+          AND cancelled_at IS NOT NULL 
+          AND datetime(cancelled_at) <= datetime('now', '-24 hours')
+        """)
+        deleted = cursor.rowcount
+        conn.commit()
+        conn.close()
+        return deleted
+    except Exception as e:
+        print(f"Purge cancelled tickets notice: {e}")
+        return 0
+
 def get_all_tickets(search: str = None):
+    # Automatically purge tickets cancelled more than 24 hours ago
+    purge_expired_cancelled_tickets()
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     query = "SELECT * FROM tickets WHERE 1=1"
@@ -585,7 +619,11 @@ def get_all_tickets(search: str = None):
 def update_ticket_status(ticket_id: int, status: str):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE tickets SET booking_status = ? WHERE id = ?", (status, ticket_id))
+    if status.lower() == "cancelled":
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("UPDATE tickets SET booking_status = ?, cancelled_at = ? WHERE id = ?", (status, now_str, ticket_id))
+    else:
+        cursor.execute("UPDATE tickets SET booking_status = ?, cancelled_at = NULL WHERE id = ?", (status, ticket_id))
     conn.commit()
     conn.close()
     return True

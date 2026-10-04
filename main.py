@@ -31,7 +31,8 @@ from database import (
     get_all_sponsors,
     save_sponsor,
     delete_sponsor,
-    toggle_sponsor_status
+    toggle_sponsor_status,
+    purge_expired_cancelled_tickets
 )
 from razorpay_client import RazorpayClient
 
@@ -155,6 +156,8 @@ class SponsorRequest(BaseModel):
     category: Optional[str] = "Event Partner"
     logo_url: Optional[str] = ""
     website_url: Optional[str] = ""
+    phone: Optional[str] = ""
+    email: Optional[str] = ""
     display_order: Optional[int] = 0
     enabled: Optional[int] = 1
     sponsor_id: Optional[int] = None
@@ -562,6 +565,12 @@ def patch_ticket_status(ticket_id: int, req: TicketStatusUpdateRequest):
     update_ticket_status(ticket_id, req.status)
     return {"success": True, "message": f"Ticket status updated to {req.status}"}
 
+@app.delete("/api/admin/tickets/purge-cancelled")
+def purge_cancelled_tickets_endpoint(pin: str = Query(...)):
+    verify_admin_pin(pin)
+    count = purge_expired_cancelled_tickets()
+    return {"success": True, "purged_count": count, "message": f"Purged {count} expired cancelled tickets."}
+
 @app.get("/api/tickets/verify-pass/{pass_id:path}")
 def verify_pass_endpoint(pass_id: str):
     ticket = get_ticket_by_pass_id(pass_id)
@@ -736,6 +745,8 @@ def create_or_update_sponsor(req: SponsorRequest):
         category=req.category or "Event Partner",
         logo_url=req.logo_url or "",
         website_url=req.website_url or "",
+        phone=req.phone or "",
+        email=req.email or "",
         display_order=req.display_order or 0,
         enabled=req.enabled if req.enabled is not None else 1,
         sponsor_id=req.sponsor_id

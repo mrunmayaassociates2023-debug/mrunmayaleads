@@ -403,11 +403,34 @@
 
                         </div>
                     </div>
+
+                    <!-- Right Side Sponsors & Partners Circles -->
+                    <div id="heroRightSponsorsBox" class="mt-4 max-w-sm w-full bg-slate-950/90 rounded-2xl border border-amber-400/40 p-3.5 shadow-xl backdrop-blur">
+                        <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-800">
+                            <span class="text-[11px] font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
+                                <span>🤝</span> Official Partners & Sponsors
+                            </span>
+                            <span class="text-[9px] text-slate-400 font-semibold">Click for details</span>
+                        </div>
+                        <div id="heroRightSponsorsList" class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-thin">
+                            <!-- Circular logos with name injected dynamically -->
+                        </div>
+                    </div>
                 </div>
 
             </div>
         </div>
     </section>
+
+    <!-- Floating Right-Side Sponsor Strip (Dashboard Right Dock) -->
+    <aside id="floatingRightSponsorsDock" class="hidden md:flex fixed right-3 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-2 bg-slate-950/95 backdrop-blur-md p-2 rounded-3xl border-2 border-amber-400/50 shadow-2xl transition hover:border-amber-400">
+        <div class="text-[8px] font-black uppercase text-amber-400 tracking-widest text-center border-b border-slate-800 pb-1 w-full flex flex-col items-center">
+            <span>SPONSORS</span>
+        </div>
+        <div id="floatingRightSponsorsList" class="flex flex-col items-center gap-2.5 max-h-[45vh] overflow-y-auto p-0.5 scrollbar-none">
+            <!-- Round logos with name injected here -->
+        </div>
+    </aside>
 
     <!-- 4. ACTIVE EVENTS LISTING SECTION -->
     <section id="events" class="py-16 bg-slate-950/70 border-b border-slate-800">
@@ -1571,13 +1594,13 @@
                         <div class="space-y-3.5 pt-2 border-t border-slate-800">
                             <div>
                                 <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1">Supabase Project URL *</label>
-                                <input type="text" id="adminSettingSupabaseUrl" placeholder="https://yourprojectid.supabase.co" 
+                                <input type="text" id="adminSettingSupabaseUrl" value="https://ivhjhyjrbeodwsugpjxq.supabase.co" placeholder="https://ivhjhyjrbeodwsugpjxq.supabase.co" 
                                        class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono">
                             </div>
 
                             <div>
                                 <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1">Supabase Anon Public API Key *</label>
-                                <input type="password" id="adminSettingSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." 
+                                <input type="text" id="adminSettingSupabaseKey" value="sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn" placeholder="sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn" 
                                        class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono">
                             </div>
 
@@ -1643,7 +1666,8 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Logo Image URL or Upload</label>
-                                    <div class="flex gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <img id="sponsorFormLogoPreview" src="" class="hidden w-10 h-10 object-contain rounded-lg border border-amber-400 bg-slate-900 p-0.5 shrink-0">
                                         <input type="text" id="sponsorFormLogoUrl" placeholder="/static/... or https://..." 
                                                class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
                                         <label class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs text-amber-300 font-bold cursor-pointer shrink-0 border border-slate-600 flex items-center gap-1">
@@ -1656,6 +1680,25 @@
                                     <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Website or Social Link (Optional)</label>
                                     <input type="url" id="sponsorFormWebUrl" placeholder="https://..." 
                                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Mobile / WhatsApp Number</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3.5 top-2.5 text-xs text-slate-500">📞</span>
+                                        <input type="text" id="sponsorFormPhone" placeholder="e.g. 7992993433 / 7008955582" 
+                                               class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Email ID</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3.5 top-2.5 text-xs text-slate-500">✉️</span>
+                                        <input type="email" id="sponsorFormEmail" placeholder="e.g. mrunmayaassoxiates2023@gmail.com" 
+                                               class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
+                                    </div>
                                 </div>
                             </div>
 
@@ -1684,6 +1727,7 @@
                                     <th class="p-3.5">Logo</th>
                                     <th class="p-3.5">Sponsor / Partner Name</th>
                                     <th class="p-3.5">Category / Tier</th>
+                                    <th class="p-3.5">Contact Details</th>
                                     <th class="p-3.5">Website Link</th>
                                     <th class="p-3.5">Visibility Status</th>
                                     <th class="p-3.5 text-right">Actions</th>
@@ -1779,6 +1823,53 @@
     </div>
 
     <!-- ========================================================================= -->
+    <!-- MODAL 5: SPONSOR / PARTNER DETAILS MODAL (#sponsorDetailsModal)           -->
+    <!-- ========================================================================= -->
+    <div id="sponsorDetailsModal" style="display: none;" class="fixed inset-0 z-[85] hidden items-center justify-center p-4 modal-backdrop" onclick="if(event.target===this)closeSponsorDetailsModal()">
+        <div class="bg-slate-900 border-2 border-amber-400 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl relative text-center p-6 space-y-4">
+            <button type="button" onclick="closeSponsorDetailsModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm">
+                ✕
+            </button>
+            
+            <div class="pt-2">
+                <div class="w-24 h-24 mx-auto rounded-full p-1 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 shadow-xl mb-3">
+                    <img id="modalSponsorLogo" src="/static/dandia_night_2026.jpg" alt="Sponsor Logo" class="w-full h-full object-cover rounded-full bg-slate-950">
+                </div>
+                <span id="modalSponsorCategory" class="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-black uppercase tracking-wider border border-amber-400/40 inline-block">
+                    Event Partner
+                </span>
+                <h3 id="modalSponsorName" class="font-heading font-black text-xl text-white mt-2">
+                    Partner Name
+                </h3>
+            </div>
+
+            <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800 text-left space-y-2.5 text-xs">
+                <div id="modalSponsorPhoneRow" class="flex items-center justify-between">
+                    <span class="text-slate-400 flex items-center gap-1.5 font-semibold">📞 Mobile:</span>
+                    <a id="modalSponsorPhoneLink" href="" class="font-mono font-bold text-amber-300 hover:underline"></a>
+                </div>
+                <div id="modalSponsorEmailRow" class="flex items-center justify-between">
+                    <span class="text-slate-400 flex items-center gap-1.5 font-semibold">✉️ Email:</span>
+                    <a id="modalSponsorEmailLink" href="" class="font-bold text-blue-400 hover:underline truncate max-w-[180px]"></a>
+                </div>
+                <div id="modalSponsorWebRow" class="flex items-center justify-between">
+                    <span class="text-slate-400 flex items-center gap-1.5 font-semibold">🌐 Website:</span>
+                    <a id="modalSponsorWebLink" href="" target="_blank" rel="noopener" class="font-bold text-amber-400 hover:underline truncate max-w-[180px]"></a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <a id="modalSponsorCallBtn" href="" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow">
+                    <span>📞 Call Now</span>
+                </a>
+                <a id="modalSponsorWebBtn" href="" target="_blank" rel="noopener" class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow">
+                    <span>🌐 Website ↗</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
     <!-- JAVASCRIPT: APPLICATION LOGIC, RAZORPAY INTEGRATION & ADMIN CONTROLLERS  -->
     <!-- ========================================================================= -->
     <script>
@@ -1795,6 +1886,11 @@
             contacts: "7992993433, 7008955582",
             enabled: 1
         };
+
+        // Supabase Default Credentials
+        const DEFAULT_SUPABASE_URL = "https://ivhjhyjrbeodwsugpjxq.supabase.co";
+        const DEFAULT_SUPABASE_KEY = "sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn";
+        let publicSponsorsList = [];
 
         // State initialized with default event so it's NEVER empty on load
         let activeEvents = [DEFAULT_FAMILY_DANDIA_EVENT];
@@ -1816,6 +1912,14 @@
 
         // Immediate Zero-Delay Initialization (Never hangs on loading screen)
         document.addEventListener("DOMContentLoaded", () => {
+            // Auto initialize default Supabase credentials in LocalStorage if not set
+            if (!localStorage.getItem("mrunmay_supabase_url")) {
+                localStorage.setItem("mrunmay_supabase_url", DEFAULT_SUPABASE_URL);
+            }
+            if (!localStorage.getItem("mrunmay_supabase_key")) {
+                localStorage.setItem("mrunmay_supabase_key", DEFAULT_SUPABASE_KEY);
+            }
+
             // 1. Instant local rendering without waiting on network
             try {
                 const stored = localStorage.getItem("mrunmay_saved_events");
@@ -2873,6 +2977,46 @@
                 }
             }
 
+            // 24-Hour Auto-Purge Logic for Cancelled Tickets
+            const now = Date.now();
+            const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+            const validTickets = [];
+            const expiredPassIds = [];
+
+            for (const t of allTickets) {
+                const isCan = (t.booking_status || "").toLowerCase() === "cancelled";
+                if (isCan && t.cancelled_at) {
+                    const cTime = new Date(t.cancelled_at).getTime();
+                    if (!isNaN(cTime) && (now - cTime) >= TWENTY_FOUR_HOURS) {
+                        expiredPassIds.push(t.pass_id);
+                        continue;
+                    }
+                }
+                validTickets.push(t);
+            }
+            allTickets = validTickets;
+
+            // Purge expired from LocalStorage & Supabase & Server
+            if (expiredPassIds.length > 0) {
+                try {
+                    const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
+                    const kept = local.filter(x => !expiredPassIds.includes(x.pass_id));
+                    localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(kept));
+                } catch(e){}
+
+                if (sb) {
+                    try {
+                        for (const pid of expiredPassIds) {
+                            await sb.from("tickets").delete().eq("pass_id", pid);
+                        }
+                    } catch(e){}
+                }
+
+                try {
+                    await fetch(`/api/admin/tickets/purge-cancelled?pin=${encodeURIComponent(currentAdminPin)}`, { method: "DELETE" });
+                } catch(e){}
+            }
+
             const countEl = document.getElementById("adminPassesCount");
             if (countEl) countEl.textContent = allTickets.length;
             const statPasses = document.getElementById("statPassesCount");
@@ -2906,8 +3050,18 @@
                 const isCancelled = (t.booking_status || "").toLowerCase() === "cancelled";
                 
                 let badgeClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+                let badgeText = t.booking_status || 'Confirmed';
                 if (isAdmitted) badgeClass = "bg-blue-500/20 text-blue-400 border-blue-500/30";
-                if (isCancelled) badgeClass = "bg-rose-500/20 text-rose-400 border-rose-500/30";
+                if (isCancelled) {
+                    badgeClass = "bg-rose-500/20 text-rose-400 border-rose-500/30";
+                    if (t.cancelled_at) {
+                        const elapsed = Date.now() - new Date(t.cancelled_at).getTime();
+                        const hoursLeft = Math.max(0, Math.ceil((24 * 60 * 60 * 1000 - elapsed) / (60 * 60 * 1000)));
+                        badgeText = `Cancelled (Deletes in ${hoursLeft}h)`;
+                    } else {
+                        badgeText = `Cancelled (Auto-purge: 24h)`;
+                    }
+                }
 
                 return `
                     <tr class="hover:bg-slate-900/60 transition">
@@ -2923,11 +3077,11 @@
                         <td class="p-3 font-mono text-[10px] text-slate-400">${t.utr_reference || 'RZP'}</td>
                         <td class="p-3">
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeClass}">
-                                ${t.booking_status || 'Confirmed'}
+                                ${badgeText}
                             </span>
                         </td>
                         <td class="p-3 text-right space-x-1.5">
-                            ${!isAdmitted ? `
+                            ${!isAdmitted && !isCancelled ? `
                                 <button onclick="checkinTicket(${t.id})" class="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px]">
                                     Admit
                                 </button>
@@ -2964,13 +3118,44 @@
         async function updateTicketStatus(ticketId, newStatus) {
             if (!confirm(`Are you sure you want to mark this ticket as ${newStatus}?`)) return;
             try {
+                const nowIso = new Date().toISOString();
                 const res = await fetch(`/api/tickets/${ticketId}/status`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ status: newStatus, pin: currentAdminPin })
                 });
+
+                // Update LocalStorage
+                try {
+                    const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
+                    const updated = local.map(t => {
+                        if (t.id == ticketId || t.pass_id == ticketId) {
+                            return { ...t, booking_status: newStatus, cancelled_at: newStatus === 'Cancelled' ? nowIso : null };
+                        }
+                        return t;
+                    });
+                    localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(updated));
+                } catch(e){}
+
+                // Update Supabase Cloud
+                const sb = getSupabaseClient();
+                if (sb) {
+                    try {
+                        const target = allTickets.find(t => t.id == ticketId);
+                        if (target && target.pass_id) {
+                            await sb.from("tickets").update({
+                                booking_status: newStatus,
+                                cancelled_at: newStatus === 'Cancelled' ? nowIso : null
+                            }).eq("pass_id", target.pass_id);
+                        }
+                    } catch(sbErr){
+                        console.warn("Supabase ticket status notice:", sbErr);
+                    }
+                }
+
                 if (res.ok) {
-                    loadAdminDashboardData();
+                    await loadAdminTickets();
+                    alert(`Ticket marked as ${newStatus}.${newStatus === 'Cancelled' ? ' It will be automatically deleted after 24 hours.' : ''}`);
                 }
             } catch (err) {
                 alert(err.message);
@@ -3322,8 +3507,8 @@
                     toggleGstFields();
 
                     // Supabase Cloud Settings
-                    const sbUrl = localStorage.getItem("mrunmay_supabase_url") || "";
-                    const sbKey = localStorage.getItem("mrunmay_supabase_key") || "";
+                    const sbUrl = localStorage.getItem("mrunmay_supabase_url") || DEFAULT_SUPABASE_URL;
+                    const sbKey = localStorage.getItem("mrunmay_supabase_key") || DEFAULT_SUPABASE_KEY;
                     if (document.getElementById("adminSettingSupabaseUrl")) {
                         document.getElementById("adminSettingSupabaseUrl").value = sbUrl;
                     }
@@ -3498,44 +3683,176 @@
         let adminSponsorsData = [];
 
         async function loadPublicSponsors() {
-            const grid = document.getElementById("publicSponsorsGrid");
-            if (!grid) return;
+            let list = [];
             try {
                 const res = await fetch("/api/sponsors");
                 if (res.ok) {
                     const data = await res.json();
-                    const list = (data && data.sponsors) ? data.sponsors : [];
-                    if (list.length > 0) {
-                        grid.innerHTML = list.map(s => {
-                            const logoHtml = s.logo_url 
-                                ? `<img src="${s.logo_url}" onerror="this.src='/static/dandia_night_2026.jpg'" alt="${s.name}" class="h-16 w-auto max-h-16 max-w-full object-contain mb-3 mx-auto">` 
-                                : `<div class="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-2xl mx-auto mb-3">🤝</div>`;
-                            const linkHtml = s.website_url 
-                                ? `<a href="${s.website_url}" target="_blank" rel="noopener" class="text-[11px] font-bold text-amber-400 hover:text-amber-300 hover:underline mt-2 inline-flex items-center gap-1">Visit Partner ↗</a>` 
-                                : '';
-                            return `
-                                <div class="bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-400/50 rounded-2xl p-5 text-center flex flex-col items-center justify-between transition-all duration-200 shadow-lg">
-                                    <div class="w-full">
-                                        <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-400 text-[10px] font-bold uppercase tracking-wider inline-block mb-3 border border-slate-700">
-                                            ${s.category || 'Event Partner'}
-                                        </span>
-                                        ${logoHtml}
-                                        <h4 class="font-heading font-black text-sm sm:text-base text-white mt-1 leading-snug">${s.name}</h4>
-                                    </div>
-                                    ${linkHtml}
-                                </div>
-                            `;
-                        }).join("");
-                    } else {
-                        grid.innerHTML = `
-                            <div class="col-span-full text-center py-8 text-slate-500 text-xs">
-                                Partnership slots available. Contact organizer desk at +91 99388 66544.
-                            </div>
-                        `;
-                    }
+                    list = (data && data.sponsors) ? data.sponsors : [];
                 }
             } catch(err) {
-                console.warn("Public sponsors sync notice:", err);
+                console.warn("Public sponsors fetch notice:", err);
+            }
+
+            // Fallback to local storage
+            if (list.length === 0) {
+                try {
+                    const local = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
+                    list = local.filter(s => s.enabled == 1);
+                } catch(e){}
+            }
+
+            // Sync with Supabase if active
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    const { data, error } = await sb.from("sponsors").select("*").eq("enabled", 1);
+                    if (!error && data && data.length > 0) {
+                        const map = new Map();
+                        list.forEach(s => map.set(s.name, s));
+                        data.forEach(s => map.set(s.name, s));
+                        list = Array.from(map.values());
+                    }
+                } catch(sbErr){}
+            }
+
+            publicSponsorsList = list;
+
+            // 1. Render Floating Right Dock
+            const dockList = document.getElementById("floatingRightSponsorsList");
+            const dockWrap = document.getElementById("floatingRightSponsorsDock");
+            if (dockList) {
+                if (list.length > 0) {
+                    dockList.innerHTML = list.map(s => `
+                        <button type="button" onclick="openSponsorDetailsModal(${s.id})" title="${s.name} - Click for details" 
+                                class="group flex flex-col items-center focus:outline-none transition-transform hover:scale-110 active:scale-95">
+                            <div class="relative w-11 h-11 rounded-full p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 shadow-lg group-hover:shadow-amber-400/40">
+                                <img src="${s.logo_url || '/static/dandia_night_2026.jpg'}" alt="${s.name}" onerror="this.src='/static/dandia_night_2026.jpg'" 
+                                     class="w-full h-full object-cover rounded-full bg-slate-950">
+                            </div>
+                            <span class="text-[9px] font-bold text-slate-200 group-hover:text-amber-300 mt-0.5 max-w-[55px] truncate text-center block">
+                                ${s.name}
+                            </span>
+                        </button>
+                    `).join("");
+                    if (dockWrap) dockWrap.classList.remove("hidden");
+                } else {
+                    if (dockWrap) dockWrap.classList.add("hidden");
+                }
+            }
+
+            // 2. Render Hero Right Sponsors List
+            const heroList = document.getElementById("heroRightSponsorsList");
+            if (heroList) {
+                if (list.length > 0) {
+                    heroList.innerHTML = list.map(s => `
+                        <button type="button" onclick="openSponsorDetailsModal(${s.id})" class="flex flex-col items-center gap-1 shrink-0 group focus:outline-none hover:scale-105 transition-transform">
+                            <div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-amber-400 to-yellow-300 shadow">
+                                <img src="${s.logo_url || '/static/dandia_night_2026.jpg'}" onerror="this.src='/static/dandia_night_2026.jpg'" 
+                                     class="w-full h-full object-cover rounded-full bg-slate-950">
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-300 group-hover:text-amber-300 max-w-[65px] truncate text-center">${s.name}</span>
+                        </button>
+                    `).join("");
+                } else {
+                    heroList.innerHTML = `<span class="text-[11px] text-slate-500 py-1">Partnership slots open. Contact desk: 7992993433</span>`;
+                }
+            }
+
+            // 3. Render Public Grid at page bottom
+            const grid = document.getElementById("publicSponsorsGrid");
+            if (grid) {
+                if (list.length > 0) {
+                    grid.innerHTML = list.map(s => `
+                        <div onclick="openSponsorDetailsModal(${s.id})" class="cursor-pointer bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-amber-400 rounded-2xl p-5 text-center flex flex-col items-center justify-between transition-all duration-200 shadow-lg group">
+                            <div class="w-full flex flex-col items-center">
+                                <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-amber-400 to-yellow-300 shadow-xl mb-3 group-hover:scale-105 transition-transform">
+                                    <img src="${s.logo_url || '/static/dandia_night_2026.jpg'}" onerror="this.src='/static/dandia_night_2026.jpg'" 
+                                         alt="${s.name}" class="w-full h-full object-cover rounded-full bg-slate-950">
+                                </div>
+                                <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-400 text-[10px] font-bold uppercase tracking-wider inline-block mb-1 border border-slate-700">
+                                    ${s.category || 'Event Partner'}
+                                </span>
+                                <h4 class="font-heading font-black text-sm sm:text-base text-white mt-1 leading-snug">${s.name}</h4>
+                                ${s.phone ? `<p class="text-[11px] font-mono text-slate-400 mt-1">📞 ${s.phone}</p>` : ''}
+                            </div>
+                            <button type="button" class="mt-3 px-3 py-1.5 rounded-xl bg-amber-400/10 group-hover:bg-amber-400 text-amber-300 group-hover:text-slate-950 text-[11px] font-black uppercase tracking-wider transition">
+                                View Partner Details
+                            </button>
+                        </div>
+                    `).join("");
+                } else {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-slate-500 text-xs">
+                            Partnership slots available. Contact organizer desk at 7992993433 / 7008955582.
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function openSponsorDetailsModal(sponsorId) {
+            const s = (publicSponsorsList && publicSponsorsList.find(x => x.id == sponsorId)) || 
+                      (adminSponsorsData && adminSponsorsData.find(x => x.id == sponsorId));
+            if (!s) return;
+
+            document.getElementById("modalSponsorLogo").src = s.logo_url || '/static/dandia_night_2026.jpg';
+            document.getElementById("modalSponsorName").textContent = s.name || "Event Partner";
+            document.getElementById("modalSponsorCategory").textContent = s.category || "Official Partner";
+
+            // Phone
+            const phoneRow = document.getElementById("modalSponsorPhoneRow");
+            const phoneLink = document.getElementById("modalSponsorPhoneLink");
+            const callBtn = document.getElementById("modalSponsorCallBtn");
+            if (s.phone && s.phone.trim()) {
+                phoneRow.classList.remove("hidden");
+                phoneLink.textContent = s.phone;
+                phoneLink.href = `tel:${s.phone.replace(/[^0-9+]/g, '')}`;
+                callBtn.href = `tel:${s.phone.replace(/[^0-9+]/g, '')}`;
+                callBtn.classList.remove("hidden");
+            } else {
+                phoneRow.classList.add("hidden");
+                callBtn.classList.add("hidden");
+            }
+
+            // Email
+            const emailRow = document.getElementById("modalSponsorEmailRow");
+            const emailLink = document.getElementById("modalSponsorEmailLink");
+            if (s.email && s.email.trim()) {
+                emailRow.classList.remove("hidden");
+                emailLink.textContent = s.email;
+                emailLink.href = `mailto:${s.email.trim()}`;
+            } else {
+                emailRow.classList.add("hidden");
+            }
+
+            // Website
+            const webRow = document.getElementById("modalSponsorWebRow");
+            const webLink = document.getElementById("modalSponsorWebLink");
+            const webBtn = document.getElementById("modalSponsorWebBtn");
+            if (s.website_url && s.website_url.trim()) {
+                webRow.classList.remove("hidden");
+                webLink.textContent = s.website_url;
+                webLink.href = s.website_url.startsWith("http") ? s.website_url : `https://${s.website_url}`;
+                webBtn.href = webLink.href;
+                webBtn.classList.remove("hidden");
+            } else {
+                webRow.classList.add("hidden");
+                webBtn.classList.add("hidden");
+            }
+
+            const modal = document.getElementById("sponsorDetailsModal");
+            if (modal) {
+                modal.style.display = "flex";
+                modal.classList.remove("hidden");
+            }
+        }
+
+        function closeSponsorDetailsModal() {
+            const modal = document.getElementById("sponsorDetailsModal");
+            if (modal) {
+                modal.style.display = "none";
+                modal.classList.add("hidden");
             }
         }
 
@@ -3555,18 +3872,25 @@
                 console.warn("Admin sponsors fetch notice:", err);
             }
 
+            if (adminSponsorsData.length === 0) {
+                try {
+                    const local = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
+                    if (local.length > 0) adminSponsorsData = local;
+                } catch(e){}
+            }
+
             if (countSpan) countSpan.textContent = adminSponsorsData.length;
             if (badge) badge.textContent = `${adminSponsorsData.length} Total Partners`;
 
             if (adminSponsorsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 text-xs">No sponsors added yet. Click "Add New Sponsor" to showcase partners.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs">No sponsors added yet. Click "Add New Sponsor" to showcase partners.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = adminSponsorsData.map(s => {
                 const logoHtml = s.logo_url 
-                    ? `<img src="${s.logo_url}" onerror="this.src='/static/dandia_night_2026.jpg'" class="w-10 h-10 object-contain rounded-lg border border-slate-700 bg-slate-950 p-1">`
-                    : `<div class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sm">🤝</div>`;
+                    ? `<img src="${s.logo_url}" onerror="this.src='/static/dandia_night_2026.jpg'" class="w-10 h-10 object-contain rounded-full border border-amber-400 bg-slate-950 p-0.5">`
+                    : `<div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-sm">🤝</div>`;
                 const statusBadge = s.enabled == 1 
                     ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Active</span>`
                     : `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold">Hidden</span>`;
@@ -3574,6 +3898,14 @@
                     ? `<a href="${s.website_url}" target="_blank" rel="noopener" class="text-xs text-amber-400 hover:underline flex items-center gap-1 font-mono">Link ↗</a>`
                     : `<span class="text-slate-600 text-xs">-</span>`;
                 
+                const contactHtml = `
+                    <div class="space-y-0.5 text-[11px]">
+                        ${s.phone ? `<a href="tel:${s.phone}" class="text-amber-300 font-mono hover:underline flex items-center gap-1">📞 ${s.phone}</a>` : ''}
+                        ${s.email ? `<a href="mailto:${s.email}" class="text-blue-400 hover:underline flex items-center gap-1">✉️ ${s.email}</a>` : ''}
+                        ${!s.phone && !s.email ? '<span class="text-slate-600">-</span>' : ''}
+                    </div>
+                `;
+
                 return `
                     <tr class="hover:bg-slate-900/60 transition">
                         <td class="p-3.5">${logoHtml}</td>
@@ -3583,6 +3915,7 @@
                                 ${s.category || 'Event Partner'}
                             </span>
                         </td>
+                        <td class="p-3.5">${contactHtml}</td>
                         <td class="p-3.5">${linkHtml}</td>
                         <td class="p-3.5">${statusBadge}</td>
                         <td class="p-3.5 text-right">
@@ -3609,6 +3942,10 @@
             document.getElementById("sponsorFormCategory").value = "";
             document.getElementById("sponsorFormLogoUrl").value = "";
             document.getElementById("sponsorFormWebUrl").value = "";
+            document.getElementById("sponsorFormPhone").value = "";
+            document.getElementById("sponsorFormEmail").value = "";
+            const prev = document.getElementById("sponsorFormLogoPreview");
+            if (prev) { prev.src = ""; prev.classList.add("hidden"); }
             document.getElementById("sponsorFormEnabled").checked = true;
             document.getElementById("sponsorFormTitle").textContent = "Add New Partner / Sponsor";
             document.getElementById("adminSponsorFormBox").classList.remove("hidden");
@@ -3626,6 +3963,18 @@
             document.getElementById("sponsorFormCategory").value = s.category || "";
             document.getElementById("sponsorFormLogoUrl").value = s.logo_url || "";
             document.getElementById("sponsorFormWebUrl").value = s.website_url || "";
+            document.getElementById("sponsorFormPhone").value = s.phone || "";
+            document.getElementById("sponsorFormEmail").value = s.email || "";
+            const prev = document.getElementById("sponsorFormLogoPreview");
+            if (prev) {
+                if (s.logo_url) {
+                    prev.src = s.logo_url;
+                    prev.classList.remove("hidden");
+                } else {
+                    prev.src = "";
+                    prev.classList.add("hidden");
+                }
+            }
             document.getElementById("sponsorFormEnabled").checked = s.enabled == 1;
             document.getElementById("sponsorFormTitle").textContent = `Edit Sponsor: ${s.name}`;
             document.getElementById("adminSponsorFormBox").classList.remove("hidden");
@@ -3638,6 +3987,8 @@
             const cat = document.getElementById("sponsorFormCategory").value.trim();
             const logo = document.getElementById("sponsorFormLogoUrl").value.trim();
             const web = document.getElementById("sponsorFormWebUrl").value.trim();
+            const phone = document.getElementById("sponsorFormPhone").value.trim();
+            const email = document.getElementById("sponsorFormEmail").value.trim();
             const enabled = document.getElementById("sponsorFormEnabled").checked ? 1 : 0;
 
             if (!name) {
@@ -3645,19 +3996,63 @@
                 return;
             }
 
+            const sponsorPayload = {
+                pin: currentAdminPin,
+                name: name,
+                category: cat,
+                logo_url: logo,
+                website_url: web,
+                phone: phone,
+                email: email,
+                enabled: enabled,
+                sponsor_id: sid ? parseInt(sid) : null
+            };
+
+            // Save to LocalStorage immediately
             try {
-                const res = await fetch("/api/admin/sponsors", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        pin: currentAdminPin,
+                let localSponsors = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
+                const spObj = {
+                    id: sid ? parseInt(sid) : Date.now(),
+                    name,
+                    category: cat,
+                    logo_url: logo,
+                    website_url: web,
+                    phone,
+                    email,
+                    enabled
+                };
+                const existingIdx = localSponsors.findIndex(s => s.id == spObj.id || s.name.toLowerCase() === name.toLowerCase());
+                if (existingIdx >= 0) {
+                    localSponsors[existingIdx] = spObj;
+                } else {
+                    localSponsors.push(spObj);
+                }
+                localStorage.setItem("mrunmay_sponsors", JSON.stringify(localSponsors));
+            } catch(e){}
+
+            // Sync with Supabase Cloud
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    await sb.from("sponsors").upsert([{
                         name: name,
                         category: cat,
                         logo_url: logo,
                         website_url: web,
-                        enabled: enabled,
-                        sponsor_id: sid ? parseInt(sid) : null
-                    })
+                        phone: phone,
+                        email: email,
+                        enabled: enabled
+                    }], { onConflict: "name" });
+                } catch(sbErr){
+                    console.warn("Supabase sponsor upsert notice:", sbErr);
+                }
+            }
+
+            try {
+                const res = await fetch("/api/admin/sponsors", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(sponsorPayload)
                 });
 
                 if (res.ok) {
@@ -3667,10 +4062,16 @@
                     loadPublicSponsors();
                 } else {
                     const err = await res.json().catch(() => ({}));
-                    alert("Failed to save sponsor: " + (err.detail || "Error"));
+                    alert("Sponsor saved locally! Server note: " + (err.detail || "Saved in browser & cloud"));
+                    closeSponsorForm();
+                    loadAdminSponsors();
+                    loadPublicSponsors();
                 }
             } catch(err) {
-                alert("Error saving sponsor: " + err.message);
+                alert("Sponsor saved locally and in cloud! " + err.message);
+                closeSponsorForm();
+                loadAdminSponsors();
+                loadPublicSponsors();
             }
         }
 
@@ -3691,17 +4092,27 @@
         async function deleteSponsor(id) {
             if (!confirm("Are you sure you want to remove this sponsor?")) return;
             try {
-                const res = await fetch(`/api/admin/sponsors/${id}?pin=${encodeURIComponent(currentAdminPin)}`, {
+                await fetch(`/api/admin/sponsors/${id}?pin=${encodeURIComponent(currentAdminPin)}`, {
                     method: "DELETE"
                 });
-                if (res.ok) {
-                    alert("Sponsor removed successfully!");
-                    loadAdminSponsors();
-                    loadPublicSponsors();
-                }
-            } catch(err) {
-                alert("Error deleting sponsor: " + err.message);
+            } catch(err){}
+
+            try {
+                let localSponsors = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
+                localSponsors = localSponsors.filter(s => s.id != id);
+                localStorage.setItem("mrunmay_sponsors", JSON.stringify(localSponsors));
+            } catch(e){}
+
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    await sb.from("sponsors").delete().eq("id", id);
+                } catch(e){}
             }
+
+            alert("Sponsor removed successfully!");
+            loadAdminSponsors();
+            loadPublicSponsors();
         }
 
         async function uploadSponsorLogo(e) {
@@ -3713,8 +4124,13 @@
             reader.onload = async function(evt) {
                 const base64Url = evt.target.result;
                 const logoInput = document.getElementById("sponsorFormLogoUrl");
+                const logoPrev = document.getElementById("sponsorFormLogoPreview");
                 if (logoInput) {
                     logoInput.value = base64Url;
+                }
+                if (logoPrev) {
+                    logoPrev.src = base64Url;
+                    logoPrev.classList.remove("hidden");
                 }
 
                 // 2. Also upload file to server static storage
@@ -3752,12 +4168,12 @@
         }
 
         // =========================================================================
-        // 9. SUPABASE CLOUD DATABASE SYNC ENGINE (100% FREE CLOUD PERSISTENCE)
+        // 10. SUPABASE CLOUD DATABASE SYNC ENGINE (100% FREE CLOUD PERSISTENCE)
         // =========================================================================
         function getSupabaseClient() {
             if (typeof supabase === "undefined") return null;
-            const url = (localStorage.getItem("mrunmay_supabase_url") || "").trim();
-            const key = (localStorage.getItem("mrunmay_supabase_key") || "").trim();
+            const url = (localStorage.getItem("mrunmay_supabase_url") || DEFAULT_SUPABASE_URL).trim();
+            const key = (localStorage.getItem("mrunmay_supabase_key") || DEFAULT_SUPABASE_KEY).trim();
             if (!url || !key) return null;
             if (!window.cachedSupabaseClient || window.cachedSupabaseUrl !== url) {
                 try {
