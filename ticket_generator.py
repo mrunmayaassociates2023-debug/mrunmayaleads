@@ -55,12 +55,12 @@ def generate_ticket_image(
     pass_id="Dandia/2026/301",
     customer_name="Attendee",
     phone="7992993433",
-    address="Sundarpada, Bhubaneswar",
+    address="Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
     date_selected="18/10/2026 (Sunday)",
     amount=299,
     base_url="",
     event_title="FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW",
-    venue="Trilochan Resorts, Sundarpada, Bhubaneswar",
+    venue="Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
     quantity=1,
     payment_mode="Online (Razorpay)"
 ):
@@ -76,10 +76,10 @@ def generate_ticket_image(
     sl_clean = format_serial_number(pass_id)
     clean_name = str(customer_name).strip() if customer_name else "Valued Guest"
     clean_mob = str(phone).strip() if phone else "7992993433"
-    clean_addr = str(address).strip() if address else "Sundarpada, Bhubaneswar"
+    clean_addr = str(address).strip() if address else "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002"
     clean_date = str(date_selected).strip() if date_selected else "18/10/2026 (Sunday)"
     clean_title = str(event_title).strip() if event_title else "FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW"
-    clean_venue = str(venue).strip() if venue else "Trilochan Resorts, Sundarpada, Bhubaneswar"
+    clean_venue = str(venue).strip() if venue else "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002"
     
     org_phones = "7992993433 / 7008955582"
     org_email = "mrunmayaassoxiates2023@gmail.com"
@@ -164,8 +164,8 @@ def generate_ticket_image(
     draw.rectangle([margin + 16, banner_y, WIDTH - margin - 16, banner_y + banner_h], fill=(255, 251, 235), outline=GOLD_BORDER, width=1)
     
     draw.text((margin + 28, banner_y + 12), clean_title.upper(), fill=NAVY, font=f_title)
-    draw.text((margin + 28, banner_y + 50), "In Grand Collaboration with Trilochan Resorts, Sundarpada, Bhubaneswar", fill=GOLD, font=f_subtitle)
-    draw.text((margin + 28, banner_y + 76), f"Venue: {clean_venue}   |   Show Timing: 7:00 PM TO 10:00 PM", fill=NAVY_LIGHT, font=get_font(14, bold=True))
+    draw.text((margin + 28, banner_y + 50), "Venue: Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, BBSR - 751002", fill=GOLD, font=f_subtitle)
+    draw.text((margin + 28, banner_y + 76), "Show Timing: 7:00 PM TO 10:00 PM   |   Official Dandia Night Voucher", fill=NAVY_LIGHT, font=get_font(14, bold=True))
 
     # =========================================================================
     # 3. PASS SERIAL NUMBER & STATUS BAR
@@ -197,7 +197,7 @@ def generate_ticket_image(
     draw.rectangle([b1_x, qr_y, b1_x + box_w, qr_y + 36], fill=(241, 245, 249))
     draw.text((b1_x + 16, qr_y + 9), "1. VENUE LOCATION QR CODE (MAPS)", fill=NAVY, font=f_qr_title)
 
-    venue_map_url = "https://maps.google.com/?q=Trilochan+Resorts+Sundarpada+Bhubaneswar"
+    venue_map_url = "https://maps.google.com/?q=Trilochan+Resorts+Trilochan+Vihar+Sundarpada+Ebaranga+Jatni+Road+Bhubaneswar+751002"
     qr1 = qrcode.QRCode(version=1, box_size=5, border=1)
     qr1.add_data(venue_map_url)
     qr1.make(fit=True)
@@ -210,9 +210,10 @@ def generate_ticket_image(
     draw.text((b1_t_x, qr_y + 70), "Venue Name:", fill=TEXT_MUTED, font=f_label)
     draw.text((b1_t_x, qr_y + 88), "Trilochan Resorts", fill=NAVY, font=get_font(15, bold=True))
     draw.text((b1_t_x, qr_y + 110), "Address Details:", fill=TEXT_MUTED, font=f_label)
-    draw.text((b1_t_x, qr_y + 128), "Plot No.629, Ebaranga, Jatni Rd,", fill=NAVY_LIGHT, font=f_sub)
-    draw.text((b1_t_x, qr_y + 146), "Sundarpada, Bhubaneswar - 751002", fill=NAVY_LIGHT, font=f_sub)
-    draw.text((b1_t_x, qr_y + 168), "Landmark: Near Champaty Petrol Pump", fill=TEXT_MUTED, font=get_font(12, bold=False))
+    draw.text((b1_t_x, qr_y + 128), "Trilochan Vihar, Sundarpada,", fill=NAVY_LIGHT, font=f_sub)
+    draw.text((b1_t_x, qr_y + 146), "Ebaranga, Jatni Road,", fill=NAVY_LIGHT, font=f_sub)
+    draw.text((b1_t_x, qr_y + 164), "Bhubaneswar - 751002", fill=NAVY_LIGHT, font=f_sub)
+    draw.text((b1_t_x, qr_y + 184), "Landmark: Trilochan Vihar Gate", fill=TEXT_MUTED, font=get_font(11, bold=False))
     
     draw.text((b1_x + 18, qr_y + 220), "Scan with Google Lens or Camera for instant turn-by-turn navigation.", fill=TEXT_MUTED, font=get_font(11, bold=False))
     draw.text((b1_x + 18, qr_y + 244), "Direct Link: maps.google.com/?q=Trilochan+Resorts", fill=GOLD, font=get_font(11, bold=False))
@@ -234,6 +235,7 @@ def generate_ticket_image(
         f"Timing: 7:00 PM TO 10:00 PM\n"
         f"Persons: {qty_int}\n"
         f"Amount: Rs. {rate_str}/- (PAID)\n"
+        f"Venue: Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002\n"
         f"Helpline: {org_phones}\n"
         f"Gate URL: {verify_url}"
     )
@@ -327,7 +329,7 @@ def generate_ticket_image(
 
     # Left: Organizer contact desk
     draw.text((margin + 20, foot_y + 6), "MRUNMAYA ASSOCIATES | OFFICIAL ORGANIZER DESK", fill=NAVY, font=get_font(13, bold=True))
-    draw.text((margin + 20, foot_y + 24), "Plot No.629, Ebaranga, Jatni Rd, Sundarpada, Bhubaneswar, Odisha 751002", fill=TEXT_MUTED, font=f_foot)
+    draw.text((margin + 20, foot_y + 24), "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002", fill=TEXT_MUTED, font=f_foot)
     draw.text((margin + 20, foot_y + 40), f"Helpline: +91 {org_phones} | Email: {org_email}", fill=GOLD, font=f_foot)
 
     # Right: Stamp Seal Box
@@ -403,7 +405,7 @@ def generate_ticket_image(
         ("Date & Timing:", f"{clean_date}  |  7 PM - 10 PM"),
         ("Persons Allowed:", f"{qty_int} Guest(s)"),
         ("Payment Status:", f"Rs. {rate_str}/- PAID ({payment_mode})"),
-        ("Venue Location:", "Trilochan Resorts, Sundarpada, BBSR"),
+        ("Venue Location:", "Trilochan Resorts, Jatni Rd, BBSR"),
         ("Organizer Support:", f"+91 {org_phones}")
     ]
 

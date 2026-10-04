@@ -4,7 +4,7 @@ import csv
 import urllib.parse
 from fastapi import FastAPI, HTTPException, Depends, Query, Response, UploadFile, File
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
@@ -638,7 +638,7 @@ def get_ticket_image(ticket_id: str, download: bool = False):
             "pass_id": ticket_id if "Dandia" in ticket_id else f"Dandia/2026/{str(ticket_id).zfill(3)}",
             "customer_name": "Valued Guest",
             "phone": "7992993433",
-            "city": "Sundarpada, Bhubaneswar",
+            "city": "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
             "date_selected": "17/10/2026 (Saturday)",
             "total_amount": 299
         }
@@ -647,10 +647,10 @@ def get_ticket_image(ticket_id: str, download: bool = False):
         pass_id=ticket.get("pass_id", "Dandia/2026/301"),
         customer_name=ticket.get("customer_name", "Attendee"),
         phone=ticket.get("phone", "7992993433"),
-        address=ticket.get("city", "Sundarpada, Bhubaneswar"),
+        address=ticket.get("city", "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002"),
         date_selected=ticket.get("date_selected", "18/10/2026 (Sunday)"),
         amount=ticket.get("total_amount", 299),
-        event_title=ticket.get("event_title", "FAMILY DANDIA NIGHT 2026"),
+        event_title=ticket.get("event_title", "FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW"),
         quantity=ticket.get("quantity", 1)
     )
     
@@ -757,19 +757,23 @@ def toggle_sponsor(sponsor_id: int, pin: str = Query(...)):
 @app.post("/api/sponsors/upload-logo")
 async def upload_sponsor_logo_endpoint(file: UploadFile = File(...), pin: str = Query(...)):
     verify_admin_pin(pin)
-    import time
-    ext = os.path.splitext(file.filename or "")[1].lower()
-    if ext not in [".jpg", ".jpeg", ".png", ".webp", ".svg"]:
-        ext = ".png"
-    safe_name = f"sponsor_logo_{int(time.time())}{ext}"
-    dest_path = os.path.join(STATIC_DIR, safe_name)
-    content = await file.read()
-    with open(dest_path, "wb") as f:
-        f.write(content)
-    base_dest = os.path.join(BASE_DIR, safe_name)
-    with open(base_dest, "wb") as f:
-        f.write(content)
-    return {"success": True, "logo_url": f"/static/{safe_name}"}
+    try:
+        import time
+        ext = os.path.splitext(file.filename or "")[1].lower()
+        if ext not in [".jpg", ".jpeg", ".png", ".webp", ".svg"]:
+            ext = ".png"
+        safe_name = f"sponsor_logo_{int(time.time())}{ext}"
+        dest_path = os.path.join(STATIC_DIR, safe_name)
+        content = await file.read()
+        with open(dest_path, "wb") as f:
+            f.write(content)
+        base_dest = os.path.join(BASE_DIR, safe_name)
+        with open(base_dest, "wb") as f:
+            f.write(content)
+        return JSONResponse(status_code=200, content={"success": True, "logo_url": f"/static/{safe_name}"})
+    except Exception as e:
+        logger.error(f"Sponsor logo upload error: {e}")
+        return JSONResponse(status_code=500, content={"success": False, "detail": str(e)})
 
 # ================= ADMIN LEADS & SETTINGS =================
 @app.post("/api/admin/verify")

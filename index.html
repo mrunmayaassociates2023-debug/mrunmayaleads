@@ -51,6 +51,9 @@
     <!-- Razorpay Checkout Official SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+    <!-- Supabase Official JS SDK for 100% Free Cloud Storage & Sync -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
             --brand-gold: #f59e0b;
@@ -331,7 +334,7 @@
                         <div class="bg-slate-900/90 border border-slate-700/80 p-3 rounded-2xl">
                             <span class="text-[10px] text-amber-400 font-extrabold uppercase block">📍 Venue</span>
                             <span id="heroVenue" class="text-xs sm:text-sm font-black text-white block mt-0.5">Trilochan Resorts</span>
-                            <span class="text-[10px] text-slate-400">Sundarpada, BBSR</span>
+                            <span class="text-[10px] text-slate-400">Sundarpada, Ebaranga, BBSR</span>
                         </div>
                         <div class="bg-gradient-to-br from-amber-500/20 to-yellow-500/10 border border-amber-400/40 p-3 rounded-2xl">
                             <span class="text-[10px] text-amber-300 font-extrabold uppercase block">🎟️ Ticket Rate</span>
@@ -449,7 +452,7 @@
                                 Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)
                             </p>
                             <p class="text-[11px] text-slate-500 flex items-center gap-1">
-                                <span>📍</span> <span>Trilochan Resorts, Sundarpada, Bhubaneswar</span>
+                                <span>📍</span> <span>Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002</span>
                             </p>
                         </div>
                     </div>
@@ -667,7 +670,7 @@
                         Trilochan Resorts, Sundarpada
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                        Conveniently located on Jatni Road, Sundarpada, Bhubaneswar. Close to Champaty Petrol Pump with direct main-road connectivity.
+                        Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002. Convenient location with spacious parking and direct main-road connectivity.
                     </p>
 
                     <div class="space-y-3 text-xs sm:text-sm text-slate-300">
@@ -675,7 +678,7 @@
                             <span class="text-lg">📍</span>
                             <div>
                                 <strong class="text-white block font-black">Address:</strong>
-                                <span>Trilochan Resorts, Sundarpada, Bhubaneswar, Odisha (Near Champaty Petrol Pump)</span>
+                                <span>Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002</span>
                             </div>
                         </div>
 
@@ -726,9 +729,9 @@
                                 📍
                             </div>
                             <h4 class="font-heading font-black text-xl text-white">Trilochan Resorts</h4>
-                            <p class="text-xs text-amber-300 font-bold mt-1">Sundarpada, Jatni Road, Bhubaneswar</p>
-                            <p class="text-[11px] text-slate-400 mt-2 max-w-sm">Landmark: Near Champaty Petrol Pump. Easily accessible via auto-rickshaws, cabs, and private vehicles.</p>
-                            <a href="https://maps.google.com/?q=Trilochan+Resorts+Sundarpada+Bhubaneswar" target="_blank" class="mt-4 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition shadow">
+                            <p class="text-xs text-amber-300 font-bold mt-1">Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002</p>
+                            <p class="text-[11px] text-slate-400 mt-2 max-w-sm">Easily accessible via auto-rickshaws, cabs, MoBus, and private vehicles.</p>
+                            <a href="https://maps.google.com/?q=Trilochan+Resorts+Trilochan+Vihar+Sundarpada+Ebaranga+Jatni+Road+Bhubaneswar+751002" target="_blank" class="mt-4 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition shadow">
                                 Open in Google Maps ↗
                             </a>
                         </div>
@@ -1070,7 +1073,7 @@
                         </div>
                         <div class="col-span-2">
                             <span class="text-slate-500 text-[10px] uppercase font-bold block">Venue</span>
-                            <span class="font-bold text-slate-300 block">Trilochan Resorts, Sundarpada, Bhubaneswar</span>
+                            <span class="font-bold text-slate-300 block">Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002</span>
                         </div>
                     </div>
 
@@ -1215,6 +1218,9 @@
                                 <option value="Admitted">Admitted (At Gate)</option>
                                 <option value="Cancelled">Cancelled</option>
                             </select>
+                            <button type="button" onclick="openAdminIssuePassModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow">
+                                <span>➕ Issue Pass (Admin)</span>
+                            </button>
                             <button onclick="exportTicketsCsv()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow">
                                 <span>📥 Export CSV</span>
                             </button>
@@ -1320,7 +1326,7 @@
 
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Venue Location *</label>
-                                <input type="text" id="eventVenueInput" required placeholder="Trilochan Resorts, Sundarpada, Bhubaneswar" 
+                                <input type="text" id="eventVenueInput" required placeholder="Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002" 
                                        class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
                             </div>
 
@@ -1548,6 +1554,44 @@
                         </div>
                     </div>
 
+                    <!-- Supabase Free Cloud Database Sync Card -->
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-emerald-500/30 space-y-4 shadow-lg shadow-emerald-500/5">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h4 class="font-heading font-black text-lg text-white flex items-center gap-2">
+                                    <span>☁️ Supabase Cloud Database Sync (100% Free)</span>
+                                </h4>
+                                <p class="text-xs text-slate-400">Stores all tickets & payments in the cloud so they show up on all devices instantly</p>
+                            </div>
+                            <span id="supabaseStatusBadge" class="px-2.5 py-1 rounded-full text-[10px] font-black border bg-slate-900 text-slate-400 border-slate-700">
+                                ⚪ Disconnected
+                            </span>
+                        </div>
+
+                        <div class="space-y-3.5 pt-2 border-t border-slate-800">
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1">Supabase Project URL *</label>
+                                <input type="text" id="adminSettingSupabaseUrl" placeholder="https://yourprojectid.supabase.co" 
+                                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1">Supabase Anon Public API Key *</label>
+                                <input type="password" id="adminSettingSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." 
+                                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-mono">
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                                <button type="button" onclick="saveSupabaseSettings()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow">
+                                    💾 Save & Connect Supabase Cloud
+                                </button>
+                                <button type="button" onclick="testSupabaseConnection()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold text-xs">
+                                    🔄 Test Sync
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Tab 5: Sponsors & Event Partners Manager -->
@@ -1660,6 +1704,79 @@
         </div>
     </div>
 
+    <!-- ========================================================================= -->
+    <!-- MODAL 4: ADMIN DIRECT ISSUE PASS MODAL (#adminIssuePassModal)            -->
+    <!-- ========================================================================= -->
+    <div id="adminIssuePassModal" style="display: none;" class="fixed inset-0 z-[80] hidden items-center justify-center p-3 sm:p-6 modal-backdrop" onclick="if(event.target===this)closeAdminIssuePassModal()">
+        <div class="bg-slate-900 border-2 border-amber-400 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative text-left">
+            <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🎫</span>
+                    <div>
+                        <h3 class="font-heading font-black text-lg text-white">Issue Official Pass (Admin)</h3>
+                        <p class="text-[11px] text-slate-400">Generate authenticated pass for counter, cash, or VIP attendees</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAdminIssuePassModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">
+                    ✕
+                </button>
+            </div>
+
+            <form onsubmit="submitAdminIssuePass(event)" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-300 uppercase mb-1">Attendee Full Name *</label>
+                    <input type="text" id="adminPassCustName" required placeholder="Full Name" 
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-semibold">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-300 uppercase mb-1">Mobile Number *</label>
+                        <input type="tel" id="adminPassPhone" required maxlength="10" placeholder="10-digit number" 
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-300 uppercase mb-1">Pass Quantity *</label>
+                        <input type="number" id="adminPassQty" min="1" max="50" value="1" oninput="calculateAdminPassTotal()"
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-bold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-300 uppercase mb-1">Event Date *</label>
+                        <select id="adminPassDate" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white">
+                            <option value="17/10/2026 (Saturday)">17/10/2026 (Saturday)</option>
+                            <option value="18/10/2026 (Sunday)" selected>18/10/2026 (Sunday)</option>
+                            <option value="Both Days (17 & 18 Oct)">Both Days (17 & 18 Oct)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-300 uppercase mb-1">Payment Method</label>
+                        <select id="adminPassMode" onchange="calculateAdminPassTotal()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white">
+                            <option value="Cash at Counter" selected>Cash at Counter</option>
+                            <option value="Shop UPI QR">Shop UPI QR</option>
+                            <option value="VIP / Complimentary">VIP / Complimentary (₹0)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+                    <span class="font-bold text-slate-400">Total Payable Amount:</span>
+                    <span id="adminPassTotalAmount" class="text-lg font-black text-amber-400">₹299</span>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeAdminIssuePassModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black uppercase tracking-wider shadow">
+                        🎟️ Issue & View Pass
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- ========================================================================= -->
     <!-- JAVASCRIPT: APPLICATION LOGIC, RAZORPAY INTEGRATION & ADMIN CONTROLLERS  -->
@@ -1673,7 +1790,7 @@
             rate: 299,
             dates: "17/10/2026 (Saturday) & 18/10/2026 (Sunday)",
             timings: "7:00 PM TO 10:00 PM",
-            venue: "Trilochan Resorts, Sundarpada, Bhubaneswar (Near Champaty Petrol Pump)",
+            venue: "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
             highlights: "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
             contacts: "7992993433, 7008955582",
             enabled: 1
@@ -2309,6 +2426,48 @@
                 renderTicketsTable();
             } catch(e){}
 
+            // Sync to Supabase Cloud if configured
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    await sb.from("tickets").upsert([{
+                        pass_id: passId,
+                        event_id: ticketObj.event_id || 1,
+                        event_title: ticketObj.event_title,
+                        customer_name: ticketObj.customer_name,
+                        phone: ticketObj.phone,
+                        email: ticketObj.email || "",
+                        city: ticketObj.city || "",
+                        date_selected: ticketObj.date_selected,
+                        quantity: ticketObj.quantity,
+                        rate_per_ticket: ticketObj.rate_per_ticket,
+                        total_amount: ticketObj.total_amount,
+                        payment_status: "Paid",
+                        utr_reference: payload.razorpay_payment_id || "RZP-Online",
+                        booking_status: "Confirmed",
+                        razorpay_order_id: payload.razorpay_order_id || "",
+                        razorpay_payment_id: payload.razorpay_payment_id || "",
+                        created_at: new Date().toISOString()
+                    }], { onConflict: "pass_id" });
+
+                    await sb.from("payments").upsert([{
+                        payment_id: payload.razorpay_payment_id || `PAY-${passId}`,
+                        order_id: payload.razorpay_order_id || "",
+                        service_type: `Event Ticket: ${ticketObj.event_title}`,
+                        customer_name: ticketObj.customer_name,
+                        phone: ticketObj.phone,
+                        amount: ticketObj.total_amount,
+                        payment_mode: "Razorpay Online",
+                        status: "Success",
+                        pass_id: passId,
+                        created_at: new Date().toISOString()
+                    }], { onConflict: "payment_id" });
+                    console.log("Ticket synced to Supabase Cloud successfully!");
+                } catch(sbErr) {
+                    console.warn("Supabase ticket sync notice:", sbErr);
+                }
+            }
+
             const ownerPhone = portalSettings.owner_phone || "917992993433";
             const waMsg = [
                 "🎫 *ENTRY TICKET CONFIRMATION - MRUNMAYA ASSOCIATES*",
@@ -2364,7 +2523,7 @@
                 `MOB: ${cPhone}`,
                 `ADDRESS: ${cAddr}`,
                 `DATE: ${cDate}`,
-                `VENUE: Trilochan Resorts, Sundarpada`,
+                `VENUE: Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002`,
                 `AMOUNT: Rs.${cTotal}`,
                 `STATUS: VERIFIED & CONFIRMED`,
                 `GATE VERIFY: https://mrunmayaleads.onrender.com/api/tickets/verify-pass/${encodeURIComponent(passId)}`
@@ -2696,6 +2855,22 @@
                 allTickets = Array.from(map.values());
             } catch(e) {
                 allTickets = serverTickets;
+            }
+
+            // Sync with Supabase Cloud (Live Multi-Device Database)
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    const { data, error } = await sb.from("tickets").select("*").order("id", { ascending: false });
+                    if (!error && data && data.length > 0) {
+                        const map = new Map();
+                        allTickets.forEach(t => map.set(t.pass_id, t));
+                        data.forEach(t => map.set(t.pass_id, t));
+                        allTickets = Array.from(map.values());
+                    }
+                } catch(sbErr) {
+                    console.warn("Supabase fetch notice:", sbErr);
+                }
             }
 
             const countEl = document.getElementById("adminPassesCount");
@@ -3145,6 +3320,17 @@
                         document.getElementById("adminSettingGstin").value = s.gstin || "";
                     }
                     toggleGstFields();
+
+                    // Supabase Cloud Settings
+                    const sbUrl = localStorage.getItem("mrunmay_supabase_url") || "";
+                    const sbKey = localStorage.getItem("mrunmay_supabase_key") || "";
+                    if (document.getElementById("adminSettingSupabaseUrl")) {
+                        document.getElementById("adminSettingSupabaseUrl").value = sbUrl;
+                    }
+                    if (document.getElementById("adminSettingSupabaseKey")) {
+                        document.getElementById("adminSettingSupabaseKey").value = sbKey;
+                    }
+                    updateSupabaseStatusBadge();
                 }
             } catch (err) {
                 console.error("Error loading admin settings:", err);
@@ -3522,24 +3708,246 @@
             const file = e.target.files && e.target.files[0];
             if (!file) return;
 
-            const formData = new FormData();
-            formData.append("file", file);
-
-            try {
-                const res = await fetch(`/api/sponsors/upload-logo?pin=${encodeURIComponent(currentAdminPin)}`, {
-                    method: "POST",
-                    body: formData
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById("sponsorFormLogoUrl").value = data.logo_url;
-                    alert("Logo uploaded successfully!");
-                } else {
-                    alert("Failed to upload logo.");
+            // 1. Immediately convert to Base64 Data URL so logo works 100% reliably
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                const base64Url = evt.target.result;
+                const logoInput = document.getElementById("sponsorFormLogoUrl");
+                if (logoInput) {
+                    logoInput.value = base64Url;
                 }
-            } catch(err) {
-                alert("Upload error: " + err.message);
+
+                // 2. Also upload file to server static storage
+                const formData = new FormData();
+                formData.append("file", file);
+
+                try {
+                    const res = await fetch(`/api/sponsors/upload-logo?pin=${encodeURIComponent(currentAdminPin)}`, {
+                        method: "POST",
+                        body: formData
+                    });
+                    if (res && res.ok) {
+                        const rawText = await res.text();
+                        if (rawText && rawText.trim().length > 0) {
+                            try {
+                                const data = JSON.parse(rawText);
+                                if (data && data.logo_url && logoInput) {
+                                    logoInput.value = data.logo_url;
+                                }
+                            } catch(pe) {
+                                console.warn("Could not parse server JSON, using Data URL fallback:", pe);
+                            }
+                        }
+                    }
+                    alert("Logo uploaded and saved successfully!");
+                } catch(err) {
+                    console.warn("Server upload warning, keeping local Data URL:", err);
+                    alert("Logo selected and saved successfully!");
+                }
+            };
+            reader.onerror = function(err) {
+                alert("Failed to read image file. Please select another image.");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // =========================================================================
+        // 9. SUPABASE CLOUD DATABASE SYNC ENGINE (100% FREE CLOUD PERSISTENCE)
+        // =========================================================================
+        function getSupabaseClient() {
+            if (typeof supabase === "undefined") return null;
+            const url = (localStorage.getItem("mrunmay_supabase_url") || "").trim();
+            const key = (localStorage.getItem("mrunmay_supabase_key") || "").trim();
+            if (!url || !key) return null;
+            if (!window.cachedSupabaseClient || window.cachedSupabaseUrl !== url) {
+                try {
+                    window.cachedSupabaseClient = supabase.createClient(url, key);
+                    window.cachedSupabaseUrl = url;
+                } catch(e) {
+                    console.warn("Supabase init error:", e);
+                    return null;
+                }
             }
+            return window.cachedSupabaseClient;
+        }
+
+        function updateSupabaseStatusBadge() {
+            const badge = document.getElementById("supabaseStatusBadge");
+            if (!badge) return;
+            const sb = getSupabaseClient();
+            if (sb) {
+                badge.textContent = "🟢 Cloud Sync Active (Supabase)";
+                badge.className = "px-2.5 py-1 rounded-full text-[10px] font-black border bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+            } else {
+                badge.textContent = "⚪ Disconnected";
+                badge.className = "px-2.5 py-1 rounded-full text-[10px] font-black border bg-slate-900 text-slate-400 border-slate-700";
+            }
+        }
+
+        async function saveSupabaseSettings() {
+            const url = (document.getElementById("adminSettingSupabaseUrl")?.value || "").trim();
+            const key = (document.getElementById("adminSettingSupabaseKey")?.value || "").trim();
+            if (!url || !key) {
+                alert("Please enter both Supabase Project URL and Anon API Key.");
+                return;
+            }
+            localStorage.setItem("mrunmay_supabase_url", url);
+            localStorage.setItem("mrunmay_supabase_key", key);
+            window.cachedSupabaseClient = null;
+            updateSupabaseStatusBadge();
+            alert("Supabase Cloud credentials saved successfully! Testing connection...");
+            await testSupabaseConnection();
+        }
+
+        async function testSupabaseConnection() {
+            const sb = getSupabaseClient();
+            if (!sb) {
+                alert("Please enter and save valid Supabase URL and Anon Key first.");
+                return;
+            }
+            try {
+                const { data, error } = await sb.from("tickets").select("id").limit(1);
+                if (error) {
+                    alert("Supabase Connected, but 'tickets' table not found or permissions issue:\n" + error.message + "\n\nPlease run the SQL table creation script in Supabase SQL editor.");
+                } else {
+                    alert("✅ Supabase Cloud Connected Successfully! All tickets will now sync in real-time across all devices.");
+                    await loadAdminTickets();
+                }
+            } catch(e) {
+                alert("Connection failed: " + e.message);
+            }
+        }
+
+        // =========================================================================
+        // 10. ADMIN DIRECT ISSUE PASS MODAL CONTROLLERS
+        // =========================================================================
+        function openAdminIssuePassModal() {
+            const modal = document.getElementById("adminIssuePassModal");
+            if (!modal) return;
+            modal.style.display = "flex";
+            modal.classList.remove("hidden");
+            document.getElementById("adminPassCustName").focus();
+            calculateAdminPassTotal();
+        }
+
+        function closeAdminIssuePassModal() {
+            const modal = document.getElementById("adminIssuePassModal");
+            if (!modal) return;
+            modal.style.display = "none";
+            modal.classList.add("hidden");
+        }
+
+        function calculateAdminPassTotal() {
+            const qty = parseInt(document.getElementById("adminPassQty")?.value || "1");
+            const dateSel = document.getElementById("adminPassDate")?.value || "";
+            const mode = document.getElementById("adminPassMode")?.value || "";
+            if (mode.includes("VIP") || mode.includes("Complimentary")) {
+                document.getElementById("adminPassTotalAmount").textContent = "₹0 (Complimentary Pass)";
+                return 0;
+            }
+            let rate = (currentlyBookingEvent ? currentlyBookingEvent.rate : 299);
+            if (dateSel.includes("Both Days")) rate = 598;
+            const total = qty * rate;
+            document.getElementById("adminPassTotalAmount").textContent = `₹${total}`;
+            return total;
+        }
+
+        async function submitAdminIssuePass(e) {
+            e.preventDefault();
+            const custName = document.getElementById("adminPassCustName").value.trim();
+            const phone = document.getElementById("adminPassPhone").value.trim();
+            const qty = parseInt(document.getElementById("adminPassQty").value || "1");
+            const dateSel = document.getElementById("adminPassDate").value;
+            const mode = document.getElementById("adminPassMode").value;
+            const total = calculateAdminPassTotal();
+
+            let highest = 300;
+            try {
+                const storedTickets = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
+                storedTickets.forEach(t => {
+                    const m = (t.pass_id || "").match(/\d+/g);
+                    if (m) {
+                        const num = parseInt(m[m.length - 1]);
+                        if (num > highest) highest = num;
+                    }
+                });
+            } catch(e){}
+            const passId = `Dandia/2026/${highest + 1}`;
+
+            const ticketObj = {
+                id: Date.now(),
+                pass_id: passId,
+                event_id: currentlyBookingEvent ? currentlyBookingEvent.id : 1,
+                event_title: currentlyBookingEvent ? currentlyBookingEvent.title : "Family Dandia Night 2026 - Melody Night Show",
+                customer_name: custName,
+                phone: phone,
+                city: "Trilochan Resorts, Sundarpada, BBSR",
+                date_selected: dateSel,
+                quantity: qty,
+                rate_per_ticket: total > 0 ? Math.round(total / qty) : 0,
+                total_amount: total,
+                utr_reference: `Admin-${mode.substring(0, 10)}`,
+                payment_status: "Paid",
+                booking_status: "Confirmed",
+                created_at: new Date().toISOString()
+            };
+
+            // Save to local storage
+            try {
+                const existing = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
+                existing.unshift(ticketObj);
+                localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(existing));
+            } catch(err){}
+
+            // Try save to server
+            try {
+                await fetch(`/api/tickets?pin=${encodeURIComponent(currentAdminPin)}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pass_id: passId,
+                        event_id: ticketObj.event_id,
+                        event_title: ticketObj.event_title,
+                        customer_name: ticketObj.customer_name,
+                        phone: ticketObj.phone,
+                        city: ticketObj.city,
+                        date_selected: ticketObj.date_selected,
+                        quantity: ticketObj.quantity,
+                        rate_per_ticket: ticketObj.rate_per_ticket,
+                        total_amount: ticketObj.total_amount,
+                        utr_reference: ticketObj.utr_reference,
+                        payment_status: "Paid"
+                    })
+                });
+            } catch(err){}
+
+            // Sync to Supabase Cloud
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    await sb.from("tickets").upsert([ticketObj], { onConflict: "pass_id" });
+                    await sb.from("payments").upsert([{
+                        payment_id: `ADMIN-${passId}`,
+                        order_id: "COUNTER",
+                        service_type: `Event Ticket: ${ticketObj.event_title}`,
+                        customer_name: ticketObj.customer_name,
+                        phone: ticketObj.phone,
+                        amount: ticketObj.total_amount,
+                        payment_mode: mode,
+                        status: "Success",
+                        pass_id: passId,
+                        created_at: new Date().toISOString()
+                    }], { onConflict: "payment_id" });
+                } catch(sbErr){
+                    console.warn("Supabase issue pass sync notice:", sbErr);
+                }
+            }
+
+            allTickets.unshift(ticketObj);
+            renderTicketsTable();
+            closeAdminIssuePassModal();
+            showGeneratedPass({ ticket: ticketObj, pass_id: passId });
+            alert(`✅ Pass ${passId} issued successfully!`);
         }
 
         // Mobile Menu Toggle

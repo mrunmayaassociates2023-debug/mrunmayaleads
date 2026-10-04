@@ -133,7 +133,7 @@ def init_db():
         "owner_phone": "919938866544",
         "business_name": "MRUNMAYA ASSOCIATES",
         "tagline": "Citizen Services, Event Tickets & Digital Solutions",
-        "address": "Plot No.629, Ebaranga, Jatni Rd, Sundarpada, Bhubaneswar, Odisha 751002",
+        "address": "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
         "email": "mrunmay.service@gmail.com",
         "admin_pin": "1234",
         "working_hours": "08:00 AM - 09:00 PM (All 7 Days)",
@@ -152,10 +152,11 @@ def init_db():
     for key, value in default_settings.items():
         cursor.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
 
-    # Update business name, contacts, email, and default Razorpay credentials in settings table
+    # Update business name, contacts, email, address and default Razorpay credentials in settings table
     cursor.execute("UPDATE settings SET value = 'MRUNMAYA ASSOCIATES' WHERE key = 'business_name'")
     cursor.execute("UPDATE settings SET value = '917992993433' WHERE key = 'owner_phone'")
     cursor.execute("UPDATE settings SET value = 'mrunmayaassoxiates2023@gmail.com' WHERE key = 'email'")
+    cursor.execute("UPDATE settings SET value = 'Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002' WHERE key = 'address'")
     cursor.execute("UPDATE settings SET value = 'rzp_live_TjiX5CotSd0Lrk' WHERE key = 'razorpay_key_id'")
     cursor.execute("UPDATE settings SET value = 'Z67kRRLfcjLXoHcAA1ndrs37' WHERE key = 'razorpay_key_secret'")
     cursor.execute("UPDATE settings SET value = '1' WHERE key = 'razorpay_enabled'")
@@ -172,7 +173,7 @@ def init_db():
             299,
             "17/10/2026 (Saturday) & 18/10/2026 (Sunday)",
             "7:00 PM TO 10:00 PM",
-            "Trilochan Resorts, Sundarpada, Bhubaneswar (Near Champaty Petrol Pump)",
+            "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
             "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
             "7992993433, 7008955582",
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -184,7 +185,7 @@ def init_db():
             poster_image = 'dandia_night_2026.jpg',
             dates = '17/10/2026 (Saturday) & 18/10/2026 (Sunday)',
             timings = '7:00 PM TO 10:00 PM',
-            venue = 'Trilochan Resorts, Sundarpada, Bhubaneswar (Near Champaty Petrol Pump)',
+            venue = 'Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002',
             highlights = 'Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)',
             contacts = '7992993433, 7008955582'
         WHERE title LIKE '%Dandia%'
@@ -225,7 +226,7 @@ def init_db():
     cursor.execute("SELECT COUNT(*) as cnt FROM sponsors")
     if cursor.fetchone()["cnt"] == 0:
         default_sponsors = [
-            ("Trilochan Resorts", "Venue Partner", "/static/dandia_night_2026.jpg", "https://maps.google.com/?q=Trilochan+Resorts+Sundarpada+Bhubaneswar", 1),
+            ("Trilochan Resorts", "Venue Partner", "/static/dandia_night_2026.jpg", "https://maps.google.com/?q=Trilochan+Resorts+Trilochan+Vihar+Sundarpada+Ebaranga+Jatni+Road+Bhubaneswar+751002", 1),
             ("Mrunmaya Associates", "Organizing & Ticketing Desk", "/static/logo.png", "https://mrunmayaleads.onrender.com/", 2),
             ("Odisha Live Beats", "Live Sound & Entertainment Partner", "", "", 3)
         ]
