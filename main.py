@@ -27,7 +27,11 @@ from database import (
     get_ticket_by_pass_id,
     get_next_sequential_pass_info,
     save_payment,
-    get_all_payments
+    get_all_payments,
+    get_all_sponsors,
+    save_sponsor,
+    delete_sponsor,
+    toggle_sponsor_status
 )
 from razorpay_client import RazorpayClient
 
@@ -146,6 +150,16 @@ class EventRequest(BaseModel):
     event_id: Optional[int] = None
     pin: str
 
+class SponsorRequest(BaseModel):
+    name: str = Field(..., min_length=2)
+    category: Optional[str] = "Event Partner"
+    logo_url: Optional[str] = ""
+    website_url: Optional[str] = ""
+    display_order: Optional[int] = 0
+    enabled: Optional[int] = 1
+    sponsor_id: Optional[int] = None
+    pin: str
+
 def verify_admin_pin(pin: str):
     settings = get_settings()
     correct_pin = settings.get("admin_pin", "1234")
@@ -169,7 +183,7 @@ def submit_enquiry(req: EnquiryRequest):
     )
     
     settings = get_settings()
-    owner_phone = settings.get("owner_phone", "919938866544")
+    owner_phone = settings.get("owner_phone", "917992993433")
     clean_owner = "".join(filter(str.isdigit, owner_phone))
     if len(clean_owner) == 10:
         clean_owner = "91" + clean_owner
@@ -269,7 +283,7 @@ def verify_razorpay_payment_endpoint(req: RazorpayVerifyPaymentRequest):
             detail="Payment signature verification failed! No ticket issued. If money was deducted, contact support."
         )
     
-    owner_phone = settings.get("owner_phone", "919938866544")
+    owner_phone = settings.get("owner_phone", "917992993433")
     clean_owner = "".join(filter(str.isdigit, owner_phone))
     if len(clean_owner) == 10:
         clean_owner = "91" + clean_owner
@@ -407,7 +421,7 @@ def record_general_payment(req: GeneralPaymentRequest):
     )
 
     settings = get_settings()
-    owner_phone = settings.get("owner_phone", "919938866544")
+    owner_phone = settings.get("owner_phone", "917992993433")
     clean_owner = "".join(filter(str.isdigit, owner_phone))
     if len(clean_owner) == 10:
         clean_owner = "91" + clean_owner
@@ -470,7 +484,7 @@ def create_ticket(req: TicketBookingRequest, pin: Optional[str] = Query(None)):
         gst_percent=float(req.gst_percent or 0.0)
     )
 
-    owner_phone = settings.get("owner_phone", "919938866544")
+    owner_phone = settings.get("owner_phone", "917992993433")
     clean_owner = "".join(filter(str.isdigit, owner_phone))
     if len(clean_owner) == 10:
         clean_owner = "91" + clean_owner
@@ -634,18 +648,24 @@ def get_ticket_image(ticket_id: str, download: bool = False):
         customer_name=ticket.get("customer_name", "Attendee"),
         phone=ticket.get("phone", "7992993433"),
         address=ticket.get("city", "Sundarpada, Bhubaneswar"),
-        date_selected=ticket.get("date_selected", "17/10/2026 (Saturday)"),
+        date_selected=ticket.get("date_selected", "18/10/2026 (Sunday)"),
         amount=ticket.get("total_amount", 299),
-        event_title=ticket.get("event_title", "DANDIYA NIGHT 2026")
+        event_title=ticket.get("event_title", "FAMILY DANDIA NIGHT 2026"),
+        quantity=ticket.get("quantity", 1)
     )
     
     buf = io.BytesIO()
     im.save(buf, format="PNG")
     buf.seek(0)
     
-    headers = {}
+    clean_pass = str(ticket.get("pass_id", "301")).replace("/", "_")
+    headers = {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+    }
     if download:
-        headers["Content-Disposition"] = f'attachment; filename="Dandia_Night_Ticket_{ticket.get("pass_id", "0001")}.png"'
+        headers["Content-Disposition"] = f'attachment; filename="Family_Dandia_Night_A4_Ticket_{clean_pass}.png"'
         
     return Response(content=buf.getvalue(), media_type="image/png", headers=headers)
 
@@ -695,6 +715,61 @@ def remove_event(event_id: int, pin: str = Query(...)):
     verify_admin_pin(pin)
     delete_event(event_id)
     return {"success": True, "message": "Event deleted successfully"}
+
+# ================= SPONSORSHIP MANAGEMENT APIS =================
+@app.get("/api/sponsors")
+def list_public_sponsors():
+    sponsors = get_all_sponsors(enabled_only=True)
+    return {"success": True, "sponsors": sponsors}
+
+@app.get("/api/admin/sponsors")
+def list_admin_sponsors(pin: str = Query(...)):
+    verify_admin_pin(pin)
+    sponsors = get_all_sponsors(enabled_only=False)
+    return {"success": True, "sponsors": sponsors}
+
+@app.post("/api/admin/sponsors")
+def create_or_update_sponsor(req: SponsorRequest):
+    verify_admin_pin(req.pin)
+    sponsor_id = save_sponsor(
+        name=req.name,
+        category=req.category or "Event Partner",
+        logo_url=req.logo_url or "",
+        website_url=req.website_url or "",
+        display_order=req.display_order or 0,
+        enabled=req.enabled if req.enabled is not None else 1,
+        sponsor_id=req.sponsor_id
+    )
+    return {"success": True, "sponsor_id": sponsor_id, "message": "Sponsor saved successfully"}
+
+@app.delete("/api/admin/sponsors/{sponsor_id}")
+def remove_sponsor(sponsor_id: int, pin: str = Query(...)):
+    verify_admin_pin(pin)
+    delete_sponsor(sponsor_id)
+    return {"success": True, "message": "Sponsor removed successfully"}
+
+@app.patch("/api/admin/sponsors/{sponsor_id}/toggle")
+def toggle_sponsor(sponsor_id: int, pin: str = Query(...)):
+    verify_admin_pin(pin)
+    toggle_sponsor_status(sponsor_id)
+    return {"success": True, "message": "Sponsor status toggled"}
+
+@app.post("/api/sponsors/upload-logo")
+async def upload_sponsor_logo_endpoint(file: UploadFile = File(...), pin: str = Query(...)):
+    verify_admin_pin(pin)
+    import time
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in [".jpg", ".jpeg", ".png", ".webp", ".svg"]:
+        ext = ".png"
+    safe_name = f"sponsor_logo_{int(time.time())}{ext}"
+    dest_path = os.path.join(STATIC_DIR, safe_name)
+    content = await file.read()
+    with open(dest_path, "wb") as f:
+        f.write(content)
+    base_dest = os.path.join(BASE_DIR, safe_name)
+    with open(base_dest, "wb") as f:
+        f.write(content)
+    return {"success": True, "logo_url": f"/static/{safe_name}"}
 
 # ================= ADMIN LEADS & SETTINGS =================
 @app.post("/api/admin/verify")

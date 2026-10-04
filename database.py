@@ -100,6 +100,20 @@ def init_db():
     )
     """)
 
+    # Create sponsors table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sponsors (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        category TEXT DEFAULT 'Event Partner',
+        logo_url TEXT,
+        website_url TEXT,
+        display_order INTEGER DEFAULT 0,
+        enabled INTEGER DEFAULT 1,
+        created_at TEXT NOT NULL
+    )
+    """)
+
     # Ensure razorpay columns exist for existing tables
     cursor.execute("PRAGMA table_info(tickets)")
     ticket_cols = [col["name"] for col in cursor.fetchall()]
@@ -138,8 +152,10 @@ def init_db():
     for key, value in default_settings.items():
         cursor.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
 
-    # Update business name and default Razorpay credentials in settings table
+    # Update business name, contacts, email, and default Razorpay credentials in settings table
     cursor.execute("UPDATE settings SET value = 'MRUNMAYA ASSOCIATES' WHERE key = 'business_name'")
+    cursor.execute("UPDATE settings SET value = '917992993433' WHERE key = 'owner_phone'")
+    cursor.execute("UPDATE settings SET value = 'mrunmayaassoxiates2023@gmail.com' WHERE key = 'email'")
     cursor.execute("UPDATE settings SET value = 'rzp_live_TjiX5CotSd0Lrk' WHERE key = 'razorpay_key_id'")
     cursor.execute("UPDATE settings SET value = 'Z67kRRLfcjLXoHcAA1ndrs37' WHERE key = 'razorpay_key_secret'")
     cursor.execute("UPDATE settings SET value = '1' WHERE key = 'razorpay_enabled'")
@@ -158,7 +174,7 @@ def init_db():
             "7:00 PM TO 10:00 PM",
             "Trilochan Resorts, Sundarpada, Bhubaneswar (Near Champaty Petrol Pump)",
             "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
-            "7008955582, 9938866544",
+            "7992993433, 7008955582",
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ))
     else:
@@ -170,7 +186,7 @@ def init_db():
             timings = '7:00 PM TO 10:00 PM',
             venue = 'Trilochan Resorts, Sundarpada, Bhubaneswar (Near Champaty Petrol Pump)',
             highlights = 'Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)',
-            contacts = '7008955582, 9938866544'
+            contacts = '7992993433, 7008955582'
         WHERE title LIKE '%Dandia%'
         """)
 
@@ -205,6 +221,21 @@ def init_db():
     except Exception as e:
         print(f"Ticket migration to payments notice: {e}")
         
+    # Seed default sponsors if table is empty
+    cursor.execute("SELECT COUNT(*) as cnt FROM sponsors")
+    if cursor.fetchone()["cnt"] == 0:
+        default_sponsors = [
+            ("Trilochan Resorts", "Venue Partner", "/static/dandia_night_2026.jpg", "https://maps.google.com/?q=Trilochan+Resorts+Sundarpada+Bhubaneswar", 1),
+            ("Mrunmaya Associates", "Organizing & Ticketing Desk", "/static/logo.png", "https://mrunmayaleads.onrender.com/", 2),
+            ("Odisha Live Beats", "Live Sound & Entertainment Partner", "", "", 3)
+        ]
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for s_name, s_cat, s_logo, s_web, s_order in default_sponsors:
+            cursor.execute("""
+            INSERT INTO sponsors (name, category, logo_url, website_url, display_order, enabled, created_at)
+            VALUES (?, ?, ?, ?, ?, 1, ?)
+            """, (s_name, s_cat, s_logo, s_web, s_order, now_str))
+
     conn.commit()
     conn.close()
 
@@ -293,6 +324,59 @@ def delete_event(event_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+# Sponsorship Management
+def get_all_sponsors(enabled_only=False):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if enabled_only:
+        cursor.execute("SELECT * FROM sponsors WHERE enabled = 1 ORDER BY display_order ASC, id ASC")
+    else:
+        cursor.execute("SELECT * FROM sponsors ORDER BY display_order ASC, id ASC")
+    rows = cursor.fetchall()
+    sponsors = [dict(row) for row in rows]
+    conn.close()
+    return sponsors
+
+def save_sponsor(name: str, category: str = "Event Partner", logo_url: str = "", website_url: str = "", display_order: int = 0, enabled: int = 1, sponsor_id: int = None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    clean_logo = logo_url.strip() if logo_url else ""
+    clean_web = website_url.strip() if website_url else ""
+    clean_name = name.strip()
+    clean_cat = category.strip() if category else "Event Partner"
+    
+    if sponsor_id:
+        cursor.execute("""
+        UPDATE sponsors SET name=?, category=?, logo_url=?, website_url=?, display_order=?, enabled=?
+        WHERE id=?
+        """, (clean_name, clean_cat, clean_logo, clean_web, display_order, enabled, sponsor_id))
+    else:
+        cursor.execute("""
+        INSERT INTO sponsors (name, category, logo_url, website_url, display_order, enabled, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (clean_name, clean_cat, clean_logo, clean_web, display_order, enabled, created_at))
+        sponsor_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return sponsor_id
+
+def delete_sponsor(sponsor_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM sponsors WHERE id = ?", (sponsor_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+def toggle_sponsor_status(sponsor_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE sponsors SET enabled = CASE WHEN enabled = 1 THEN 0 ELSE 1 END WHERE id = ?", (sponsor_id,))
     conn.commit()
     conn.close()
     return True

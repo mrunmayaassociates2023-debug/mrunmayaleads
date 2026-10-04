@@ -75,17 +75,37 @@
         .brand-badge-glow {
             box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
         }
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 105px;
+            overflow-x: clip;
+            scrollbar-gutter: stable;
         }
-        .animate-marquee {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 25s linear infinite;
+        body {
+            overflow-x: clip;
+            width: 100%;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
-        .animate-marquee:hover {
-            animation-play-state: paused;
+        #stickyHeaderContainer {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 45;
+            transition: all 0.25s ease-in-out;
+        }
+        *, *::before, *::after {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .img-stable {
+            will-change: opacity;
+            transform: translateZ(0);
         }
         /* Custom scrollbar for admin tables */
         ::-webkit-scrollbar {
@@ -102,100 +122,131 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #f59e0b;
         }
+        /* Patakha Blast Celebration Styling */
+        @keyframes patakhaBurst {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px #f59e0b); }
+            50% { transform: scale(1.22) rotate(4deg); filter: drop-shadow(0 0 22px #ef4444) drop-shadow(0 0 38px #f59e0b); }
+        }
+        @keyframes sparkTwinkle {
+            0%, 100% { transform: scale(0.9) rotate(0deg); opacity: 0.8; }
+            50% { transform: scale(1.3) rotate(180deg); opacity: 1; filter: drop-shadow(0 0 10px #fbbf24); }
+        }
+        @keyframes blastGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5)); }
+            50% { filter: drop-shadow(0 0 25px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 45px rgba(251, 191, 36, 0.9)); }
+        }
+        .patakha-burst {
+            animation: patakhaBurst 2s infinite ease-in-out;
+            display: inline-block;
+        }
+        .patakha-spark {
+            animation: sparkTwinkle 1.6s infinite ease-in-out;
+            display: inline-block;
+        }
+        .patakha-title-blast {
+            animation: blastGlow 2.5s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-night-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
 
-    <!-- 1. LIVE MARQUEE ANNOUNCEMENT TICKER -->
-    <header class="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 py-1.5 px-3 text-xs font-black tracking-wide overflow-hidden shadow-lg border-b border-amber-400 relative z-30 flex items-center">
-        <div class="shrink-0 flex items-center gap-1.5 bg-slate-950 text-amber-300 px-2 py-0.5 rounded-full text-[10px] uppercase font-black mr-2 shadow">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>LIVE NOW</span>
-        </div>
-        <div class="overflow-hidden whitespace-nowrap flex-1">
-            <div id="liveTickerBar" class="animate-marquee font-extrabold text-xs">
-                🔥 ONLINE ENTRY TICKETS OPEN FOR FAMILY DANDIA NIGHT 2026! Date: 17th & 18th Oct 2026 @ Trilochan Resorts, Sundarpada, Bhubaneswar | Official Tickets ₹299/- | Instant Verified Ticket with Anti-Fraud Gate QR Code | Instant Booking via Razorpay (UPI, GPay, PhonePe, Cards)
+    <!-- STICKY TOP CONTAINER: ALWAYS VISIBLE IN FRONT ON SCROLL -->
+    <div id="stickyHeaderContainer" class="sticky top-0 z-40 w-full shadow-xl">
+        
+        <!-- 1. OFFICIAL ANNOUNCEMENT BAR -->
+        <header id="topAnnouncementBar" class="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 py-1.5 px-4 text-xs font-black tracking-wide border-b border-amber-400 flex items-center justify-center transition-all duration-300">
+            <div class="flex items-center gap-2.5 max-w-7xl mx-auto text-center truncate">
+                <span class="inline-flex items-center gap-1.5 bg-slate-950 text-amber-300 px-2 py-0.5 rounded-full text-[10px] uppercase font-black shrink-0 shadow">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span>
+                    <span>OFFICIAL PORTAL</span>
+                </span>
+                <span id="liveTickerBar" class="font-extrabold text-xs truncate">
+                    🔥 ONLINE TICKETS OPEN FOR FAMILY DANDIA NIGHT 2026! 17 & 18 Oct 2026 @ Trilochan Resorts, Bhubaneswar | Tickets ₹299/-
+                </span>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- 2. MAIN NAVIGATION NAVBAR -->
-    <nav class="sticky top-0 z-40 bg-night-950/90 backdrop-blur-md border-b border-slate-800/80 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                
-                <!-- Logo & Brand Header -->
-                <a href="#home" class="flex items-center gap-3 group">
-                    <div class="relative">
-                        <img src="/static/logo.png" onerror="this.src='logo.png'" alt="MRUNMAYA ASSOCIATES Logo" 
-                             class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-amber-400 p-0.5 bg-slate-900 object-cover brand-badge-glow group-hover:scale-105 transition-transform">
-                        <span class="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full border border-slate-900">
-                            LIVE
-                        </span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-heading font-black text-lg sm:text-2xl tracking-tight text-white group-hover:text-amber-400 transition-colors">
-                                MRUNMAYA <span class="text-amber-400">ASSOCIATES</span>
-                            </span>
-                            <span class="hidden md:inline-block px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 text-[10px] font-black border border-amber-400/30">
-                                OFFICIAL TICKETS
+        <!-- 2. MAIN NAVIGATION NAVBAR -->
+        <nav id="mainNavBar" class="bg-night-950/95 backdrop-blur-md border-b border-slate-800/80 shadow-md transition-all">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20 transition-all" id="navInnerRow">
+                    
+                    <!-- Logo & Brand Header -->
+                    <a href="#home" class="flex items-center gap-3 group">
+                        <div class="relative">
+                            <img src="/static/logo.png" onerror="this.src='logo.png'" alt="MRUNMAYA ASSOCIATES Logo" 
+                                 class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-amber-400 p-0.5 bg-slate-900 object-cover brand-badge-glow transition-shadow hover:shadow-amber-400/50">
+                            <span class="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full border border-slate-900">
+                                LIVE
                             </span>
                         </div>
-                        <p class="text-[11px] sm:text-xs font-semibold text-slate-400 tracking-wide flex items-center gap-1.5">
-                            <span>Family Dandia Night 2026</span>
-                            <span class="text-slate-600">•</span>
-                            <span class="text-amber-300">Sundarpada, Bhubaneswar</span>
-                        </p>
-                    </div>
-                </a>
-
-                <!-- Desktop Navigation Links -->
-                <div class="hidden lg:flex items-center gap-7 text-xs font-extrabold uppercase tracking-wider text-slate-300">
-                    <a href="#events" class="hover:text-amber-400 transition-colors">🎪 Events</a>
-                    <a href="#passes" class="hover:text-amber-400 transition-colors">🎟️ Tickets & Pricing</a>
-                    <a href="#highlights" class="hover:text-amber-400 transition-colors">✨ Highlights</a>
-                    <a href="#venue" class="hover:text-amber-400 transition-colors">📍 Venue & Directions</a>
-                    <a href="#gateVerify" class="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
-                        <span>🛡️ Verify Ticket</span>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-heading font-black text-lg sm:text-2xl tracking-tight text-white group-hover:text-amber-400 transition-colors">
+                                    MRUNMAYA <span class="text-amber-400">ASSOCIATES</span>
+                                </span>
+                                <span class="hidden md:inline-block px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 text-[10px] font-black border border-amber-400/30">
+                                    OFFICIAL TICKETS
+                                </span>
+                            </div>
+                            <p class="text-[11px] sm:text-xs font-semibold text-slate-400 tracking-wide flex items-center gap-1.5">
+                                <span>Family Dandia Night 2026</span>
+                                <span class="text-slate-600">•</span>
+                                <span class="text-amber-300">Sundarpada, Bhubaneswar</span>
+                            </p>
+                        </div>
                     </a>
+
+                    <!-- Desktop Navigation Links -->
+                    <div class="hidden lg:flex items-center gap-7 text-xs font-extrabold uppercase tracking-wider text-slate-300">
+                        <a href="#events" class="hover:text-amber-400 transition-colors">🎪 Events</a>
+                        <a href="#passes" class="hover:text-amber-400 transition-colors">🎟️ Tickets & Pricing</a>
+                        <a href="#highlights" class="hover:text-amber-400 transition-colors">✨ Highlights</a>
+                        <a href="#venue" class="hover:text-amber-400 transition-colors">📍 Venue & Directions</a>
+                        <a href="#sponsorsSection" class="hover:text-amber-400 transition-colors">🤝 Sponsors</a>
+                        <a href="#gateVerify" class="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
+                            <span>🛡️ Verify Ticket</span>
+                        </a>
+                    </div>
+
+                    <!-- Right Action Buttons -->
+                    <div class="flex items-center gap-2.5 sm:gap-4">
+                        <!-- Book Pass Primary CTA -->
+                        <button id="navBookPassesBtn" onclick="openTicketBookingModal(featuredEventId)" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 flex items-center gap-2 transition hover:brightness-105 active:opacity-90 border border-amber-300">
+                            <span>🎟️ BOOK TICKETS</span>
+                            <span id="navPassRateBadge" class="hidden sm:inline bg-slate-950 text-amber-300 text-[10px] px-1.5 py-0.5 rounded font-bold">₹299</span>
+                        </button>
+
+                        <!-- Admin Portal Trigger -->
+                        <button onclick="openAdminPortal()" title="Organizer Admin Panel" class="p-2.5 sm:px-3 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700/80 transition-all flex items-center gap-1.5 text-xs font-bold">
+                            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            <span class="hidden md:inline">Admin</span>
+                        </button>
+
+                        <!-- Mobile Menu Hamburger -->
+                        <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        </button>
+                    </div>
+
                 </div>
-
-                <!-- Right Action Buttons -->
-                <div class="flex items-center gap-2.5 sm:gap-4">
-                    <!-- Book Pass Primary CTA -->
-                    <button id="navBookPassesBtn" onclick="openTicketBookingModal(featuredEventId)" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-lg shadow-amber-500/20 flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all border border-amber-300">
-                        <span>🎟️ BOOK TICKETS</span>
-                        <span id="navPassRateBadge" class="hidden sm:inline bg-slate-950 text-amber-300 text-[10px] px-1.5 py-0.5 rounded font-bold">₹299</span>
-                    </button>
-
-                    <!-- Admin Portal Trigger -->
-                    <button onclick="openAdminPortal()" title="Organizer Admin Panel" class="p-2.5 sm:px-3 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700/80 transition-all flex items-center gap-1.5 text-xs font-bold">
-                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                        <span class="hidden md:inline">Admin</span>
-                    </button>
-
-                    <!-- Mobile Menu Hamburger -->
-                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    </button>
-                </div>
-
             </div>
-        </div>
 
-        <!-- Mobile Menu Drawer -->
-        <div id="mobileMenu" class="hidden lg:hidden bg-night-900 border-t border-slate-800 px-4 py-4 space-y-3">
-            <a href="#events" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🎪 Events</a>
-            <a href="#passes" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🎟️ Tickets & Pricing</a>
-            <a href="#highlights" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">✨ Highlights</a>
-            <a href="#venue" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">📍 Venue & Directions</a>
-            <a href="#gateVerify" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-amber-400">🛡️ Gate Ticket Verification</a>
-            <button onclick="toggleMobileMenu(); openAdminPortal()" class="w-full text-left py-2 text-sm font-bold text-slate-400 hover:text-white flex items-center gap-2">
-                <span>🔐 Organizer Admin Login</span>
-            </button>
-        </div>
-    </nav>
+            <!-- Mobile Menu Drawer -->
+            <div id="mobileMenu" class="hidden lg:hidden bg-night-900 border-t border-slate-800 px-4 py-4 space-y-3">
+                <a href="#events" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🎪 Events</a>
+                <a href="#passes" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🎟️ Tickets & Pricing</a>
+                <a href="#highlights" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">✨ Highlights</a>
+                <a href="#venue" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">📍 Venue & Directions</a>
+                <a href="#sponsorsSection" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-200 hover:text-amber-400">🤝 Sponsors & Partners</a>
+                <a href="#gateVerify" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-amber-400">🛡️ Gate Ticket Verification</a>
+                <button onclick="toggleMobileMenu(); openAdminPortal()" class="w-full text-left py-2 text-sm font-bold text-slate-400 hover:text-white flex items-center gap-2">
+                    <span>🔐 Organizer Admin Login</span>
+                </button>
+            </div>
+        </nav>
+
+    </div>
 
     <!-- 3. HERO SECTION (FESTIVE DANDIA EVENT) -->
     <section id="home" class="relative overflow-hidden py-12 lg:py-20 bg-gradient-to-b from-night-950 via-slate-900 to-night-950 border-b border-slate-800">
@@ -211,16 +262,51 @@
                 <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
                     
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-wider">
-                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span class="w-2 h-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span>
                         <span id="heroTopBadge">BHUBANESWAR'S PREMIER FAMILY DANDIA CELEBRATION 2026</span>
                     </div>
 
                     <!-- Multi-Event Switcher Pill Bar (Dynamically populated if >1 event) -->
                     <div id="heroEventSwitcher" class="hidden flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1"></div>
 
-                    <h1 id="heroTitle" class="font-heading text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08]">
-                        FAMILY DANDIA NIGHT <span class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">2026</span>
-                    </h1>
+                    <!-- PATAKHA BLAST CELEBRATION DESIGN ON TOP OF TITLE -->
+                    <div class="relative pt-2 pb-1 patakha-title-blast">
+                        <!-- Top Patakha Blast Cracker Banner -->
+                        <div class="flex items-center justify-center lg:justify-start gap-2 mb-3">
+                            <span class="patakha-burst text-2xl drop-shadow-[0_0_12px_#f59e0b]">💥</span>
+                            <div class="px-4 py-1.5 rounded-full bg-gradient-to-r from-red-600 via-amber-500 to-yellow-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 shadow-xl shadow-amber-500/40 border-2 border-yellow-300">
+                                <span class="patakha-spark text-base">🎆</span>
+                                <span class="tracking-widest">★ PATAKHA BLAST CELEBRATION ★</span>
+                                <span class="patakha-spark text-base" style="animation-delay: 0.6s">🎇</span>
+                            </div>
+                            <span class="patakha-burst text-2xl drop-shadow-[0_0_12px_#ef4444]" style="animation-delay: 0.5s">💥</span>
+                        </div>
+
+                        <div class="relative">
+                            <!-- Left & Right Floating Fireworks Decor -->
+                            <div class="hidden sm:inline-flex absolute -top-4 -right-4 lg:-right-6 items-center gap-1 patakha-burst" style="animation-delay: 0.7s">
+                                <span class="text-3xl filter drop-shadow-[0_0_15px_#f59e0b]">🎇</span>
+                                <span class="text-2xl filter drop-shadow-[0_0_12px_#ef4444]">💥</span>
+                            </div>
+                            <div class="hidden sm:inline-flex absolute -top-4 -left-4 lg:-left-6 items-center gap-1 patakha-burst" style="animation-delay: 0.3s">
+                                <span class="text-2xl filter drop-shadow-[0_0_12px_#ef4444]">💥</span>
+                                <span class="text-3xl filter drop-shadow-[0_0_15px_#f59e0b]">🎆</span>
+                            </div>
+
+                            <h1 id="heroTitle" class="font-heading text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08]">
+                                FAMILY DANDIA NIGHT <span class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">2026</span>
+                            </h1>
+
+                            <div class="mt-2.5 inline-flex items-center gap-2 px-4 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-red-500/25 to-yellow-500/20 border-2 border-amber-400/60 shadow-lg shadow-amber-500/20">
+                                <span class="text-amber-400 text-base patakha-spark">✨</span>
+                                <span id="heroMelodyBadge" class="font-heading text-xl sm:text-3xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-400">
+                                    MELODY NIGHT SHOW
+                                </span>
+                                <span class="text-amber-400 text-base patakha-spark" style="animation-delay: 0.8s">✨</span>
+                                <span class="patakha-burst text-lg">💥</span>
+                            </div>
+                        </div>
+                    </div>
 
                     <p id="heroSubtitle" class="text-base sm:text-xl font-bold text-amber-100/90 leading-snug">
                         Grand Musical Melody Show & High-Voltage Garba Beats
@@ -256,7 +342,7 @@
 
                     <!-- Hero Call to Actions -->
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-4">
-                        <button id="heroMainBookBtn" onclick="openTicketBookingModal(featuredEventId)" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 transition-all border border-amber-300">
+                        <button id="heroMainBookBtn" onclick="openTicketBookingModal(featuredEventId)" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition hover:brightness-105 active:opacity-90 border border-amber-300">
                             <span>🎟️ BOOK ENTRY TICKET NOW</span>
                             <span id="heroBtnRateBadge" class="text-xs bg-slate-950 text-amber-300 px-2 py-0.5 rounded font-black">₹299</span>
                         </button>
@@ -283,18 +369,20 @@
 
                 </div>
 
-                <!-- Right Hero Poster Card -->
+                <!-- Right Hero Poster Card (Fixed Aspect Ratio & 100% Stable) -->
                 <div class="lg:col-span-5 flex justify-center">
-                    <div class="relative group max-w-sm w-full">
-                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-3xl blur-md opacity-60 group-hover:opacity-100 transition duration-500"></div>
-                        <div class="relative bg-slate-950 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-2xl">
+                    <div class="relative max-w-sm w-full">
+                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-3xl blur-md opacity-60 transition duration-300"></div>
+                        <div class="relative bg-slate-950 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-2xl flex flex-col">
                             
-                            <img id="heroPosterImg" src="/static/dandia_night_2026.jpg" onerror="this.src='dandia_night_2026.jpg'" 
-                                 alt="Official Event Poster" 
-                                 class="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300">
+                            <div class="w-full aspect-[3/4] bg-slate-950 overflow-hidden relative">
+                                <img id="heroPosterImg" src="/static/dandia_night_2026.jpg" onerror="this.src='dandia_night_2026.jpg'" 
+                                     alt="Official Event Poster" 
+                                     class="w-full h-full object-cover rounded-t-2xl block img-stable">
+                            </div>
 
                             <!-- Overlay Ribbon -->
-                            <div class="p-4 bg-gradient-to-t from-slate-950 via-slate-900 to-transparent">
+                            <div class="p-4 bg-gradient-to-t from-slate-950 via-slate-900 to-slate-950 border-t border-slate-800">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <span class="text-[10px] font-black uppercase text-amber-400 tracking-wider">OFFICIAL TICKET</span>
@@ -305,7 +393,7 @@
                                         <span class="text-[10px] text-slate-400 block">per ticket</span>
                                     </div>
                                 </div>
-                                <button id="heroPosterBookBtn" onclick="openTicketBookingModal(featuredEventId)" class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition active:scale-95">
+                                <button id="heroPosterBookBtn" onclick="openTicketBookingModal(featuredEventId)" class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition hover:brightness-105 active:opacity-90">
                                     Instant Book via Razorpay
                                 </button>
                             </div>
@@ -340,7 +428,7 @@
                     <div>
                         <div class="relative overflow-hidden h-52 bg-slate-950">
                             <img src="/static/dandia_night_2026.jpg" onerror="this.src='dandia_night_2026.jpg'" 
-                                 alt="Family Dandia Night 2026 - Melody Night Show" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                 alt="Family Dandia Night 2026 - Melody Night Show" class="w-full h-full object-cover transition-opacity duration-300">
                             <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-amber-400/40 text-amber-300 font-black text-xs">
                                 ₹299/Ticket
                             </div>
@@ -366,7 +454,7 @@
                         </div>
                     </div>
                     <div class="p-5 sm:p-6 pt-0 space-y-2">
-                        <button onclick="openTicketBookingModal(1)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition transform active:scale-95 flex items-center justify-center gap-1.5">
+                        <button onclick="openTicketBookingModal(1)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition hover:brightness-105 active:opacity-90 flex items-center justify-center gap-1.5">
                             <span>🎟️ Book Entry Ticket</span>
                             <span class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded text-[10px]">₹299</span>
                         </button>
@@ -484,7 +572,7 @@
                         </ul>
                     </div>
 
-                    <button onclick="openTicketBookingModal(1, 'Both Days (17 & 18 Oct 2026)')" class="w-full mt-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95">
+                    <button onclick="openTicketBookingModal(1, 'Both Days (17 & 18 Oct 2026)')" class="w-full mt-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider transition hover:brightness-105 active:opacity-90 shadow-lg">
                         Book 2-Day Combo Ticket
                     </button>
                 </div>
@@ -602,18 +690,29 @@
                         <div class="flex items-start gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
                             <span class="text-lg">📞</span>
                             <div>
-                                <strong class="text-white block font-black">Helpline & Queries:</strong>
-                                <span class="font-bold text-amber-300">7008955582</span> / <span class="font-bold text-amber-300">9938866544</span>
+                                <strong class="text-white block font-black">Organizer Helpline:</strong>
+                                <span class="font-bold text-amber-300">7992993433</span> / <span class="font-bold text-amber-300">7008955582</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                            <span class="text-lg">✉️</span>
+                            <div>
+                                <strong class="text-white block font-black">Official Email ID:</strong>
+                                <span class="font-bold text-amber-300">mrunmayaassoxiates2023@gmail.com</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Call & WhatsApp Action Buttons -->
                     <div class="flex flex-wrap gap-3 pt-2">
+                        <a href="tel:7992993433" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 flex items-center gap-2">
+                            <span>📞 Call 7992993433</span>
+                        </a>
                         <a href="tel:7008955582" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 flex items-center gap-2">
                             <span>📞 Call 7008955582</span>
                         </a>
-                        <a href="https://wa.me/919938866544?text=Hello%20Mrunmaya%20Associates!%20I%20have%20an%20enquiry%20regarding%20Family%20Dandia%20Night%202026%20Tickets." target="_blank" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow">
+                        <a href="https://wa.me/917992993433?text=Hello%20Mrunmaya%20Associates!%20I%20have%20an%20enquiry%20regarding%20Family%20Dandia%20Night%202026%20Tickets." target="_blank" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow">
                             <span>💬 WhatsApp Support</span>
                         </a>
                     </div>
@@ -623,7 +722,7 @@
                     <div class="bg-slate-900 p-3 rounded-3xl border border-slate-800 shadow-2xl">
                         <!-- Embedded Google Map or Visual Location Pin -->
                         <div class="relative w-full h-[320px] rounded-2xl overflow-hidden bg-slate-950 flex flex-col items-center justify-center text-center p-6 border border-slate-800">
-                            <div class="w-16 h-16 rounded-full bg-amber-400/20 border-2 border-amber-400 flex items-center justify-center text-3xl mb-3 animate-bounce">
+                            <div class="w-16 h-16 rounded-full bg-amber-400/20 border-2 border-amber-400 flex items-center justify-center text-3xl mb-3 shadow-lg shadow-amber-500/20">
                                 📍
                             </div>
                             <h4 class="font-heading font-black text-xl text-white">Trilochan Resorts</h4>
@@ -641,7 +740,29 @@
         </div>
     </section>
 
-    <!-- 8. LIVE GATE VERIFICATION & TICKET CHECK TOOL -->
+    <!-- 8. OFFICIAL SPONSORS & EVENT PARTNERS SECTION -->
+    <section id="sponsorsSection" class="py-16 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10">
+                <span class="px-3.5 py-1 rounded-full bg-amber-400/10 text-amber-400 text-xs font-black uppercase tracking-wider border border-amber-400/30">
+                    🤝 SPONSORSHIPS & PARTNERS
+                </span>
+                <h2 class="font-heading text-2xl sm:text-3xl font-black text-white mt-2">
+                    Our Official Sponsors & Event Partners
+                </h2>
+                <p class="text-xs text-slate-400 mt-1 max-w-xl mx-auto">
+                    Powering Family Dandia Night 2026 with unmatched hospitality, sound experience and grand celebrations.
+                </p>
+            </div>
+
+            <!-- Dynamic Public Sponsors Grid -->
+            <div id="publicSponsorsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Injected dynamically via loadPublicSponsors() -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. LIVE GATE VERIFICATION & TICKET CHECK TOOL -->
     <section id="gateVerify" class="py-16 bg-slate-950 border-b border-slate-800">
         <div class="max-w-3xl mx-auto px-4 sm:px-6">
             
@@ -710,8 +831,8 @@
     <!-- ========================================================================= -->
     <!-- MODAL 1: TICKET BOOKING & RAZORPAY CHECKOUT MODAL (#ticketBookingModal)  -->
     <!-- ========================================================================= -->
-    <div id="ticketBookingModal" style="display: none;" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 modal-backdrop" onclick="if(event.target===this)closeTicketBookingModal()">
-        <div class="bg-slate-900 border-2 border-amber-400/80 rounded-3xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
+    <div id="ticketBookingModal" style="display: none;" class="fixed inset-0 z-[70] hidden items-center justify-center p-3 sm:p-4 modal-backdrop" onclick="if(event.target===this)closeTicketBookingModal()">
+        <div class="bg-slate-900 border-2 border-amber-400/80 rounded-3xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative">
             
             <!-- Modal Header -->
             <div class="px-6 py-4 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-b border-slate-800 flex items-center justify-between">
@@ -863,7 +984,7 @@
 
                         <!-- Main Razorpay Action Button -->
                         <button type="button" id="payRazorpayBtn" onclick="startRazorpayPayment()" 
-                                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition active:scale-95">
+                                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition hover:brightness-105 active:opacity-90">
                             <span>💳 Pay <span id="rzpBtnAmountText">₹299</span> via Razorpay & Get E-Ticket</span>
                         </button>
                         
@@ -883,8 +1004,8 @@
     <!-- ========================================================================= -->
     <!-- MODAL 2: TICKET GENERATED CONFIRMATION & PASS DOWNLOAD (#ticketPassModal) -->
     <!-- ========================================================================= -->
-    <div id="ticketPassModal" style="display: none;" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 modal-backdrop" onclick="if(event.target===this)closeTicketPassModal()">
-        <div class="bg-slate-900 border-2 border-emerald-400 rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-center animate-in fade-in zoom-in-95">
+    <div id="ticketPassModal" style="display: none;" class="fixed inset-0 z-[70] hidden items-center justify-center p-3 sm:p-4 modal-backdrop" onclick="if(event.target===this)closeTicketPassModal()">
+        <div class="bg-slate-900 border-2 border-emerald-400 rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-center">
             
             <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
                 <span class="text-xs font-black uppercase text-emerald-400 flex items-center gap-1.5">
@@ -939,13 +1060,17 @@
                             <span class="text-slate-500 text-[10px] uppercase font-bold block">Tickets Count</span>
                             <span id="passQtyDisplay" class="font-bold text-amber-300 block">1 Guest</span>
                         </div>
-                        <div class="col-span-2">
+                        <div>
                             <span class="text-slate-500 text-[10px] uppercase font-bold block">Event Date</span>
-                            <span id="passDateDisplay" class="font-bold text-slate-200 block">17/10/2026 (Saturday)</span>
+                            <span id="passDateDisplay" class="font-bold text-slate-200 block">18/10/2026 (Sunday)</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 text-[10px] uppercase font-bold block">Show Timing</span>
+                            <span class="font-bold text-amber-300 block">7:00 PM TO 10:00 PM</span>
                         </div>
                         <div class="col-span-2">
                             <span class="text-slate-500 text-[10px] uppercase font-bold block">Venue</span>
-                            <span class="font-bold text-slate-300 block">Trilochan Resorts, Sundarpada, BBSR</span>
+                            <span class="font-bold text-slate-300 block">Trilochan Resorts, Sundarpada, Bhubaneswar</span>
                         </div>
                     </div>
 
@@ -953,9 +1078,9 @@
                     <div class="flex items-center justify-between pt-3 border-t border-slate-800 gap-3">
                         <div class="text-[10px] text-slate-400 space-y-1">
                             <span class="text-amber-400 font-bold block text-xs flex items-center gap-1">
-                                <span>🛡️</span> <span>Official Gate Entry QR Code</span>
+                                <span>🛡️</span> <span>Dual QR Codes (Location & Gate Check)</span>
                             </span>
-                            <p>Present this dynamic QR code or physical printout at the entrance gate for instant barcode/camera scanning.</p>
+                            <p>Official A4 format contains Google Maps navigation QR and Security gate entry QR for instant scanning.</p>
                         </div>
                         <div class="shrink-0 text-center">
                             <img id="passQrPreview" 
@@ -963,7 +1088,7 @@
                                  onerror="this.src='/default_upi_qr.png'"
                                  alt="Entry QR" 
                                  class="w-20 h-20 bg-white p-1 rounded-xl border-2 border-amber-400 shadow-md">
-                            <span class="text-[9px] font-mono font-black text-amber-300 block mt-0.5">SCAN AT GATE</span>
+                            <span class="text-[9px] font-mono font-black text-amber-300 block mt-0.5">A4 PRINT READY</span>
                         </div>
                     </div>
                 </div>
@@ -971,7 +1096,10 @@
                 <!-- Action Buttons -->
                 <div class="space-y-2 pt-2">
                     <a id="btnDownloadPass" href="#" target="_blank" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow transition">
-                        <span>📥 Download Official Ticket PNG</span>
+                        <span>📥 Download Official A4 Printable Ticket</span>
+                    </a>
+                    <a id="btnViewPrintPass" href="#" target="_blank" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 border border-slate-700 transition">
+                        <span>🖨️ View / Print Full A4 Ticket</span>
                     </a>
                     <a id="btnWhatsAppPass" href="#" target="_blank" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition">
                         <span>💬 Send Ticket to WhatsApp</span>
@@ -987,7 +1115,7 @@
     <!-- ========================================================================= -->
     <!-- MODAL 3: SAME TYPE ADMIN PORTAL (#adminPortalModal)                      -->
     <!-- ========================================================================= -->
-    <div id="adminPortalModal" style="display: none;" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 modal-backdrop" onclick="if(event.target===this)closeAdminPortal()">
+    <div id="adminPortalModal" style="display: none;" class="fixed inset-0 z-[70] hidden items-center justify-center p-3 sm:p-6 modal-backdrop" onclick="if(event.target===this)closeAdminPortal()">
         <div class="bg-slate-900 border-2 border-slate-700 rounded-3xl max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden relative">
             
             <!-- Admin Top Bar -->
@@ -1038,6 +1166,9 @@
                         </button>
                         <button id="adminTabBtnRazorpay" onclick="switchAdminTab('razorpay')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
                             💳 Razorpay & Payments Ledger
+                        </button>
+                        <button id="adminTabBtnSponsors" onclick="switchAdminTab('sponsors')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
+                            🤝 Sponsors & Partners (<span id="adminSponsorsCount">0</span>)
                         </button>
                         <button id="adminTabBtnSettings" onclick="switchAdminTab('settings')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
                             ⚙️ Portal Settings
@@ -1419,6 +1550,111 @@
 
                 </div>
 
+                <!-- Tab 5: Sponsors & Event Partners Manager -->
+                <div id="adminTabSponsors" class="hidden flex-1 overflow-auto p-4 sm:p-6 space-y-6 max-w-5xl mx-auto w-full">
+                    
+                    <!-- Top Action Card -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-black uppercase">
+                                    Official Sponsors
+                                </span>
+                                <span id="adminSponsorsBadge" class="text-xs font-mono text-slate-400">0 Active Partners</span>
+                            </div>
+                            <h4 class="font-heading font-black text-lg text-white mt-1">Sponsors & Collaborations Manager</h4>
+                            <p class="text-xs text-slate-400">Add or manage sponsors, title partners, food/beverage and entertainment brands displayed on the dashboard.</p>
+                        </div>
+                        <button type="button" onclick="openAddSponsorForm()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow flex items-center gap-2">
+                            <span>➕ Add New Sponsor</span>
+                        </button>
+                    </div>
+
+                    <!-- Add / Edit Sponsor Form Card (Expandable) -->
+                    <div id="adminSponsorFormBox" class="hidden bg-slate-950 p-6 rounded-2xl border-2 border-amber-400/60 shadow-2xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h5 id="sponsorFormTitle" class="font-heading font-black text-sm text-amber-400 uppercase tracking-wider">
+                                Add New Partner / Sponsor
+                            </h5>
+                            <button type="button" onclick="closeSponsorForm()" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-900 border border-slate-700">
+                                ✕ Close
+                            </button>
+                        </div>
+                        <form onsubmit="handleSaveSponsor(event)" class="space-y-4">
+                            <input type="hidden" id="sponsorFormId" value="">
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Sponsor / Brand Name *</label>
+                                    <input type="text" id="sponsorFormName" required placeholder="e.g. Trilochan Resorts / Red Bull" 
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Category / Tier *</label>
+                                    <input type="text" id="sponsorFormCategory" required placeholder="e.g. Title Sponsor / Venue Partner / Beverage Partner" 
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Logo Image URL or Upload</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="sponsorFormLogoUrl" placeholder="/static/... or https://..." 
+                                               class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
+                                        <label class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs text-amber-300 font-bold cursor-pointer shrink-0 border border-slate-600 flex items-center gap-1">
+                                            <span>📁 Upload</span>
+                                            <input type="file" accept="image/*" class="hidden" onchange="uploadSponsorLogo(event)">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Website or Social Link (Optional)</label>
+                                    <input type="url" id="sponsorFormWebUrl" placeholder="https://..." 
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-amber-400">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                                <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 font-semibold">
+                                    <input type="checkbox" id="sponsorFormEnabled" checked class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-amber-400">
+                                    <span>Active & Visible on Public Dashboard</span>
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="closeSponsorForm()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="px-6 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black uppercase tracking-wider shadow">
+                                        Save Sponsor
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Sponsors Table -->
+                    <div class="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3.5">Logo</th>
+                                    <th class="p-3.5">Sponsor / Partner Name</th>
+                                    <th class="p-3.5">Category / Tier</th>
+                                    <th class="p-3.5">Website Link</th>
+                                    <th class="p-3.5">Visibility Status</th>
+                                    <th class="p-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminSponsorsTableBody" class="divide-y divide-slate-800 text-slate-300">
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-slate-500">Loading sponsors...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
@@ -1439,7 +1675,7 @@
             timings: "7:00 PM TO 10:00 PM",
             venue: "Trilochan Resorts, Sundarpada, Bhubaneswar (Near Champaty Petrol Pump)",
             highlights: "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
-            contacts: "7008955582, 9938866544",
+            contacts: "7992993433, 7008955582",
             enabled: 1
         };
 
@@ -1453,7 +1689,9 @@
             razorpay_key_secret: "Z67kRRLfcjLXoHcAA1ndrs37",
             razorpay_enabled: "1",
             business_name: "MRUNMAYA ASSOCIATES",
-            owner_phone: "919938866544"
+            owner_phone: "917992993433",
+            helpline: "7992993433 / 7008955582",
+            email: "mrunmayaassoxiates2023@gmail.com"
         };
         let allTickets = [];
         let allPayments = [];
@@ -1475,6 +1713,26 @@
             // 2. Non-blocking asynchronous sync with fast fail-safe timeouts
             loadPublicSettings();
             fetchEvents();
+            loadPublicSponsors();
+
+            // 3. Dynamic Scroll Behavior for sticky navbar
+            window.addEventListener("scroll", () => {
+                const headerContainer = document.getElementById("stickyHeaderContainer");
+                const navRow = document.getElementById("navInnerRow");
+                if (window.scrollY > 40) {
+                    if (headerContainer) headerContainer.classList.add("shadow-2xl", "bg-night-950/98");
+                    if (navRow) {
+                        navRow.classList.remove("h-20");
+                        navRow.classList.add("h-16");
+                    }
+                } else {
+                    if (headerContainer) headerContainer.classList.remove("shadow-2xl");
+                    if (navRow) {
+                        navRow.classList.remove("h-16");
+                        navRow.classList.add("h-20");
+                    }
+                }
+            }, { passive: true });
         });
 
         // 1. Load Public Settings with timeout safety
@@ -1554,7 +1812,15 @@
 
             // Update Hero Text & Badges
             const hTitle = document.getElementById("heroTitle");
-            if (hTitle) hTitle.innerHTML = `${ev.title}`;
+            if (hTitle) {
+                if (ev.title.includes("Melody") || ev.title.includes("Dandia")) {
+                    hTitle.innerHTML = `FAMILY DANDIA NIGHT <span class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">2026</span>`;
+                    const mBadge = document.getElementById("heroMelodyBadge");
+                    if (mBadge) mBadge.textContent = "MELODY NIGHT SHOW";
+                } else {
+                    hTitle.innerHTML = `${ev.title}`;
+                }
+            }
 
             const hDates = document.getElementById("heroDates");
             if (hDates) hDates.textContent = ev.dates || "17 & 18 Oct 2026";
@@ -1612,10 +1878,10 @@
                         ${activeEvents.map(e => {
                             const isSelected = e.id == ev.id;
                             const bg = isSelected 
-                                ? "bg-amber-400 text-slate-950 font-black shadow-lg scale-105 border-amber-300" 
+                                ? "bg-amber-400 text-slate-950 font-black shadow-lg ring-2 ring-amber-400 border-amber-300" 
                                 : "bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-700";
                             return `
-                                <button type="button" onclick="updateHeroSectionWithEvent(${e.id})" class="px-3 py-1.5 rounded-xl text-xs border transition transform active:scale-95 flex items-center gap-1.5 ${bg}">
+                                <button type="button" onclick="updateHeroSectionWithEvent(${e.id})" class="px-3 py-1.5 rounded-xl text-xs border transition hover:brightness-105 active:opacity-90 flex items-center gap-1.5 ${bg}">
                                     <span>🎪</span>
                                     <span>${e.title}</span>
                                     <span class="text-[10px] opacity-80">(₹${e.rate})</span>
@@ -1647,7 +1913,7 @@
                     <div>
                         <div class="relative overflow-hidden h-52 bg-slate-950">
                             <img src="${ev.poster_image || '/static/dandia_night_2026.jpg'}" onerror="this.src='/static/dandia_night_2026.jpg'" 
-                                 alt="${ev.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                 alt="${ev.title}" class="w-full h-full object-cover transition-opacity duration-300">
                             <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-amber-400/40 text-amber-300 font-black text-xs">
                                 ₹${ev.rate}/Ticket
                             </div>
@@ -1675,7 +1941,7 @@
                         </div>
                     </div>
                     <div class="p-5 sm:p-6 pt-0 space-y-2">
-                        <button onclick="openTicketBookingModal(${ev.id})" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition transform active:scale-95 flex items-center justify-center gap-1.5">
+                        <button onclick="openTicketBookingModal(${ev.id})" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow transition hover:brightness-105 active:opacity-90 flex items-center justify-center gap-1.5">
                             <span>🎟️ Book Entry Ticket</span>
                             <span class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded text-[10px]">₹${ev.rate}</span>
                         </button>
@@ -2043,7 +2309,7 @@
                 renderTicketsTable();
             } catch(e){}
 
-            const ownerPhone = portalSettings.owner_phone || "919938866544";
+            const ownerPhone = portalSettings.owner_phone || "917992993433";
             const waMsg = [
                 "🎫 *ENTRY TICKET CONFIRMATION - MRUNMAYA ASSOCIATES*",
                 `Event: *${ticketObj.event_title}*`,
@@ -2113,16 +2379,28 @@
                 };
             }
 
-            // Set Download URL with automated client-side Canvas fallback
+            // Set Download URL & View/Print URL for Official A4 Printable Ticket
+            const a4ImageUrl = `/api/tickets/${encodeURIComponent(passId)}/image`;
             const dlBtn = document.getElementById("btnDownloadPass");
-            dlBtn.href = `/api/tickets/${encodeURIComponent(passId)}/image?download=true`;
-            dlBtn.onclick = function(e) {
-                triggerClientTicketDownload(passId, cName, cPhone, cAddr, cDate, cTotal, cEvent, gateQrText);
-            };
+            if (dlBtn) {
+                dlBtn.href = `${a4ImageUrl}?download=true`;
+                dlBtn.onclick = function(e) {
+                    e.preventDefault();
+                    triggerClientTicketDownload(passId);
+                };
+            }
+
+            const printBtn = document.getElementById("btnViewPrintPass");
+            if (printBtn) {
+                printBtn.href = a4ImageUrl;
+                printBtn.target = "_blank";
+            }
 
             // Set WhatsApp URL
             const waBtn = document.getElementById("btnWhatsAppPass");
-            waBtn.href = data.whatsapp_url || `https://wa.me/919938866544?text=Here%20is%20my%20confirmed%20ticket:%20${encodeURIComponent(passId)}`;
+            if (waBtn) {
+                waBtn.href = data.whatsapp_url || `https://wa.me/917992993433?text=Here%20is%20my%20confirmed%20A4%20ticket:%20${encodeURIComponent(passId)}`;
+            }
 
             // Show ticket modal
             const modal = document.getElementById("ticketPassModal");
@@ -2130,69 +2408,37 @@
             modal.classList.remove("hidden");
         }
 
-        async function triggerClientTicketDownload(passId, cName, cPhone, cAddr, cDate, cTotal, cEvent, gateQrText) {
+        async function triggerClientTicketDownload(passId) {
+            const cleanId = (passId || "Dandia_2026_301").replace(/[^a-zA-Z0-9]/g, '_');
+            const targetFilename = `Family_Dandia_Night_A4_Ticket_${cleanId}.png`;
             try {
-                // If server is active, default browser download will execute from href
-                const check = await fetch(`/api/tickets/${encodeURIComponent(passId)}/image?download=true`);
-                if (check.ok) return;
-            } catch (e) {}
-
-            // Fallback: draw official ticket with QR stamped onto red box via HTML5 Canvas
-            const canvas = document.createElement("canvas");
-            canvas.width = 1042;
-            canvas.height = 362;
-            const ctx = canvas.getContext("2d");
-
-            const bg = new Image();
-            bg.crossOrigin = "anonymous";
-            bg.onload = function() {
-                ctx.drawImage(bg, 0, 0, 1042, 362);
-
-                // Serial numbers
-                ctx.fillStyle = "#c80000";
-                ctx.font = "bold 13px Arial";
-                ctx.fillText(passId, 105, 34);
-                ctx.font = "bold 11px Arial";
-                ctx.fillText(passId, 948, 43);
-
-                // Customer Details
-                ctx.fillStyle = "#0a1464";
-                ctx.font = "bold 13px Arial";
-                ctx.fillText(cName.slice(0, 24), 72, 198);
-                ctx.fillText(cAddr.slice(0, 24), 80, 252);
-                ctx.fillText(cPhone.slice(0, 15), 62, 291);
-
-                // Rs Box
-                ctx.fillStyle = "#c80000";
-                ctx.font = "bold 18px Arial";
-                ctx.fillText(`${cTotal}/-`, 80, 328);
-
-                // Red Box QR
-                const qrImg = new Image();
-                qrImg.crossOrigin = "anonymous";
-                qrImg.onload = function() {
-                    ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(877, 230, 136, 107);
-                    ctx.strokeStyle = "#000000";
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(877, 230, 136, 107);
-                    ctx.drawImage(qrImg, 894, 232, 102, 102);
-
-                    canvas.toBlob(function(blob) {
-                        const a = document.createElement("a");
-                        a.href = URL.createObjectURL(blob);
-                        a.download = `Family_Dandia_Night_Ticket_${passId.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-                        document.body.appendChild(a);
-                        a.click();
+                const res = await fetch(`/api/tickets/${encodeURIComponent(passId)}/image?download=true`, {
+                    cache: "no-store"
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = targetFilename;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
                         document.body.removeChild(a);
-                    }, "image/png");
-                };
-                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=1&data=${encodeURIComponent(gateQrText)}`;
-            };
-            bg.src = "/dandia_ticket_template_official_2026.jpg";
-            bg.onerror = function() {
-                bg.src = "dandia_ticket_template_official_2026.jpg";
-            };
+                        URL.revokeObjectURL(a.href);
+                    }, 2000);
+                    return;
+                }
+            } catch (err) {
+                console.error("Direct A4 fetch download error:", err);
+            }
+            // Fallback direct link download
+            const fallbackLink = document.createElement("a");
+            fallbackLink.href = `/api/tickets/${encodeURIComponent(passId)}/image?download=true`;
+            fallbackLink.download = targetFilename;
+            fallbackLink.target = "_blank";
+            document.body.appendChild(fallbackLink);
+            fallbackLink.click();
+            document.body.removeChild(fallbackLink);
         }
 
         function closeTicketPassModal() {
@@ -2361,7 +2607,7 @@
         }
 
         function switchAdminTab(tabName) {
-            const tabs = ['tickets', 'events', 'razorpay', 'settings'];
+            const tabs = ['tickets', 'events', 'razorpay', 'sponsors', 'settings'];
             tabs.forEach(t => {
                 const content = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 const btn = document.getElementById(`adminTabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -2386,6 +2632,8 @@
                 loadAdminTickets();
             } else if (tabName === 'razorpay') {
                 loadAdminPayments();
+            } else if (tabName === 'sponsors') {
+                loadAdminSponsors();
             } else if (tabName === 'settings') {
                 loadAdminSettings();
             }
@@ -2418,6 +2666,8 @@
             loadAdminEvents();
             // Fetch payments ledger
             loadAdminPayments();
+            // Fetch sponsors
+            loadAdminSponsors();
         }
 
         async function loadAdminTickets() {
@@ -3054,6 +3304,242 @@
 
         function exportPaymentsCsv() {
             window.open(`/api/admin/payments/export-csv?pin=${encodeURIComponent(currentAdminPin)}`, '_blank');
+        }
+
+        // =========================================================================
+        // 9. SPONSORSHIPS & PARTNERS LOGIC & CONTROLLER
+        // =========================================================================
+        let adminSponsorsData = [];
+
+        async function loadPublicSponsors() {
+            const grid = document.getElementById("publicSponsorsGrid");
+            if (!grid) return;
+            try {
+                const res = await fetch("/api/sponsors");
+                if (res.ok) {
+                    const data = await res.json();
+                    const list = (data && data.sponsors) ? data.sponsors : [];
+                    if (list.length > 0) {
+                        grid.innerHTML = list.map(s => {
+                            const logoHtml = s.logo_url 
+                                ? `<img src="${s.logo_url}" onerror="this.src='/static/dandia_night_2026.jpg'" alt="${s.name}" class="h-16 w-auto max-h-16 max-w-full object-contain mb-3 mx-auto">` 
+                                : `<div class="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-2xl mx-auto mb-3">🤝</div>`;
+                            const linkHtml = s.website_url 
+                                ? `<a href="${s.website_url}" target="_blank" rel="noopener" class="text-[11px] font-bold text-amber-400 hover:text-amber-300 hover:underline mt-2 inline-flex items-center gap-1">Visit Partner ↗</a>` 
+                                : '';
+                            return `
+                                <div class="bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-400/50 rounded-2xl p-5 text-center flex flex-col items-center justify-between transition-all duration-200 shadow-lg">
+                                    <div class="w-full">
+                                        <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-400 text-[10px] font-bold uppercase tracking-wider inline-block mb-3 border border-slate-700">
+                                            ${s.category || 'Event Partner'}
+                                        </span>
+                                        ${logoHtml}
+                                        <h4 class="font-heading font-black text-sm sm:text-base text-white mt-1 leading-snug">${s.name}</h4>
+                                    </div>
+                                    ${linkHtml}
+                                </div>
+                            `;
+                        }).join("");
+                    } else {
+                        grid.innerHTML = `
+                            <div class="col-span-full text-center py-8 text-slate-500 text-xs">
+                                Partnership slots available. Contact organizer desk at +91 99388 66544.
+                            </div>
+                        `;
+                    }
+                }
+            } catch(err) {
+                console.warn("Public sponsors sync notice:", err);
+            }
+        }
+
+        async function loadAdminSponsors() {
+            const tbody = document.getElementById("adminSponsorsTableBody");
+            const badge = document.getElementById("adminSponsorsBadge");
+            const countSpan = document.getElementById("adminSponsorsCount");
+            if (!tbody || !currentAdminPin) return;
+
+            try {
+                const res = await fetch(`/api/admin/sponsors?pin=${encodeURIComponent(currentAdminPin)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    adminSponsorsData = (data && data.sponsors) ? data.sponsors : [];
+                }
+            } catch (err) {
+                console.warn("Admin sponsors fetch notice:", err);
+            }
+
+            if (countSpan) countSpan.textContent = adminSponsorsData.length;
+            if (badge) badge.textContent = `${adminSponsorsData.length} Total Partners`;
+
+            if (adminSponsorsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 text-xs">No sponsors added yet. Click "Add New Sponsor" to showcase partners.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = adminSponsorsData.map(s => {
+                const logoHtml = s.logo_url 
+                    ? `<img src="${s.logo_url}" onerror="this.src='/static/dandia_night_2026.jpg'" class="w-10 h-10 object-contain rounded-lg border border-slate-700 bg-slate-950 p-1">`
+                    : `<div class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sm">🤝</div>`;
+                const statusBadge = s.enabled == 1 
+                    ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Active</span>`
+                    : `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold">Hidden</span>`;
+                const linkHtml = s.website_url 
+                    ? `<a href="${s.website_url}" target="_blank" rel="noopener" class="text-xs text-amber-400 hover:underline flex items-center gap-1 font-mono">Link ↗</a>`
+                    : `<span class="text-slate-600 text-xs">-</span>`;
+                
+                return `
+                    <tr class="hover:bg-slate-900/60 transition">
+                        <td class="p-3.5">${logoHtml}</td>
+                        <td class="p-3.5 font-bold text-white text-xs">${s.name}</td>
+                        <td class="p-3.5">
+                            <span class="px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/30 text-[10px] font-bold">
+                                ${s.category || 'Event Partner'}
+                            </span>
+                        </td>
+                        <td class="p-3.5">${linkHtml}</td>
+                        <td class="p-3.5">${statusBadge}</td>
+                        <td class="p-3.5 text-right">
+                            <div class="inline-flex items-center gap-2">
+                                <button type="button" onclick="toggleSponsor(${s.id})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition">
+                                    ${s.enabled == 1 ? 'Hide' : 'Show'}
+                                </button>
+                                <button type="button" onclick="editSponsorById(${s.id})" class="px-2.5 py-1 rounded-lg bg-amber-400/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950 text-[11px] font-bold transition">
+                                    Edit
+                                </button>
+                                <button type="button" onclick="deleteSponsor(${s.id})" class="px-2.5 py-1 rounded-lg bg-rose-900/40 hover:bg-rose-800 text-rose-300 text-[11px] font-bold transition">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function openAddSponsorForm() {
+            document.getElementById("sponsorFormId").value = "";
+            document.getElementById("sponsorFormName").value = "";
+            document.getElementById("sponsorFormCategory").value = "";
+            document.getElementById("sponsorFormLogoUrl").value = "";
+            document.getElementById("sponsorFormWebUrl").value = "";
+            document.getElementById("sponsorFormEnabled").checked = true;
+            document.getElementById("sponsorFormTitle").textContent = "Add New Partner / Sponsor";
+            document.getElementById("adminSponsorFormBox").classList.remove("hidden");
+        }
+
+        function closeSponsorForm() {
+            document.getElementById("adminSponsorFormBox").classList.add("hidden");
+        }
+
+        function editSponsorById(id) {
+            const s = adminSponsorsData.find(item => item.id == id);
+            if (!s) return;
+            document.getElementById("sponsorFormId").value = s.id;
+            document.getElementById("sponsorFormName").value = s.name || "";
+            document.getElementById("sponsorFormCategory").value = s.category || "";
+            document.getElementById("sponsorFormLogoUrl").value = s.logo_url || "";
+            document.getElementById("sponsorFormWebUrl").value = s.website_url || "";
+            document.getElementById("sponsorFormEnabled").checked = s.enabled == 1;
+            document.getElementById("sponsorFormTitle").textContent = `Edit Sponsor: ${s.name}`;
+            document.getElementById("adminSponsorFormBox").classList.remove("hidden");
+        }
+
+        async function handleSaveSponsor(e) {
+            e.preventDefault();
+            const sid = document.getElementById("sponsorFormId").value;
+            const name = document.getElementById("sponsorFormName").value.trim();
+            const cat = document.getElementById("sponsorFormCategory").value.trim();
+            const logo = document.getElementById("sponsorFormLogoUrl").value.trim();
+            const web = document.getElementById("sponsorFormWebUrl").value.trim();
+            const enabled = document.getElementById("sponsorFormEnabled").checked ? 1 : 0;
+
+            if (!name) {
+                alert("Please enter sponsor name");
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/admin/sponsors", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pin: currentAdminPin,
+                        name: name,
+                        category: cat,
+                        logo_url: logo,
+                        website_url: web,
+                        enabled: enabled,
+                        sponsor_id: sid ? parseInt(sid) : null
+                    })
+                });
+
+                if (res.ok) {
+                    alert("Sponsor saved successfully!");
+                    closeSponsorForm();
+                    loadAdminSponsors();
+                    loadPublicSponsors();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert("Failed to save sponsor: " + (err.detail || "Error"));
+                }
+            } catch(err) {
+                alert("Error saving sponsor: " + err.message);
+            }
+        }
+
+        async function toggleSponsor(id) {
+            try {
+                const res = await fetch(`/api/admin/sponsors/${id}/toggle?pin=${encodeURIComponent(currentAdminPin)}`, {
+                    method: "PATCH"
+                });
+                if (res.ok) {
+                    loadAdminSponsors();
+                    loadPublicSponsors();
+                }
+            } catch(err) {
+                alert("Error toggling sponsor: " + err.message);
+            }
+        }
+
+        async function deleteSponsor(id) {
+            if (!confirm("Are you sure you want to remove this sponsor?")) return;
+            try {
+                const res = await fetch(`/api/admin/sponsors/${id}?pin=${encodeURIComponent(currentAdminPin)}`, {
+                    method: "DELETE"
+                });
+                if (res.ok) {
+                    alert("Sponsor removed successfully!");
+                    loadAdminSponsors();
+                    loadPublicSponsors();
+                }
+            } catch(err) {
+                alert("Error deleting sponsor: " + err.message);
+            }
+        }
+
+        async function uploadSponsorLogo(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const res = await fetch(`/api/sponsors/upload-logo?pin=${encodeURIComponent(currentAdminPin)}`, {
+                    method: "POST",
+                    body: formData
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById("sponsorFormLogoUrl").value = data.logo_url;
+                    alert("Logo uploaded successfully!");
+                } else {
+                    alert("Failed to upload logo.");
+                }
+            } catch(err) {
+                alert("Upload error: " + err.message);
+            }
         }
 
         // Mobile Menu Toggle
