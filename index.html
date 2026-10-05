@@ -343,6 +343,18 @@
                         </div>
                     </div>
 
+                    <!-- Dynamic Booking Status & Cutoff Deadline Banner -->
+                    <div id="heroBookingNoticeBanner" class="p-3.5 rounded-2xl bg-slate-900/90 border border-emerald-500/40 text-slate-200 shadow-md flex items-center justify-between flex-wrap gap-2 transition-all">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide">Online Bookings Open</span>
+                        </div>
+                        <div id="heroBookingDeadlineDisplay" class="text-xs text-amber-300 font-bold flex items-center gap-1.5 bg-slate-950 px-3 py-1 rounded-xl border border-amber-400/30">
+                            <span>⏰ Booking Closes On:</span>
+                            <span id="heroBookingDeadlineText" class="font-mono text-white">16 Oct 2026, 11:59 PM</span>
+                        </div>
+                    </div>
+
                     <!-- Hero Call to Actions -->
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-4">
                         <button id="heroMainBookBtn" onclick="openTicketBookingModal(featuredEventId)" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition hover:brightness-105 active:opacity-90 border border-amber-300">
@@ -1265,6 +1277,9 @@
                             <button onclick="exportTicketsCsv()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow">
                                 <span>📥 Export CSV</span>
                             </button>
+                            <button type="button" onclick="restoreAllServerTickets()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-sky-400/40 shadow" title="Reload all tickets from server database">
+                                <span>🔄 Reload All Tickets</span>
+                            </button>
                         </div>
                     </div>
 
@@ -1591,6 +1606,49 @@
 
                             <button onclick="saveGstSettings()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow">
                                 Save GST Settings
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Booking Control & Cutoff Deadline Card -->
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-rose-500/40 space-y-4 shadow-lg shadow-rose-500/5">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h4 class="font-heading font-black text-lg text-white flex items-center gap-2">
+                                    <span>🛑 Ticket Booking Status & Cutoff Deadline</span>
+                                </h4>
+                                <p class="text-xs text-slate-400">Control online booking availability and set auto-close cutoff date</p>
+                            </div>
+                            <span id="bookingStatusPill" class="px-2.5 py-1 rounded-full text-[10px] font-black border bg-emerald-500/20 text-emerald-400 border-emerald-500/40">
+                                🟢 OPEN (Accepting Bookings)
+                            </span>
+                        </div>
+
+                        <div class="space-y-3.5 pt-2 border-t border-slate-800">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-rose-300 uppercase mb-1">Online Booking Availability</label>
+                                    <select id="adminSettingBookingStatus" onchange="updateBookingStatusPill()" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-amber-300 font-bold text-xs">
+                                        <option value="open">🟢 OPEN (Public can book tickets)</option>
+                                        <option value="closed">🔴 CLOSED (Stop all new bookings / Housefull)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-amber-300 uppercase mb-1">Booking Close Date & Time (Deadline)</label>
+                                    <input type="datetime-local" id="adminSettingBookingCloseDate" 
+                                           class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                                    <span class="text-[9px] text-slate-400 mt-0.5 block">When this time arrives, bookings will close automatically.</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Notice Message for Public When Closed</label>
+                                <input type="text" id="adminSettingBookingCloseMsg" placeholder="Online ticket booking is officially closed. Passes available at venue entrance counter." 
+                                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                            </div>
+
+                            <button onclick="saveBookingControlSettings()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow">
+                                💾 Save Booking Availability & Deadline
                             </button>
                         </div>
                     </div>
@@ -1990,7 +2048,10 @@
             business_name: "MRUNMAYA ASSOCIATES",
             owner_phone: "917992993433",
             helpline: "7992993433 / 7008955582",
-            email: "mrunmayaassoxiates2023@gmail.com"
+            email: "mrunmayaassoxiates2023@gmail.com",
+            booking_status: "open",
+            booking_close_date: "2026-10-16T23:59",
+            booking_close_message: "Online ticket booking is officially closed for Family Dandia Night 2026. For VIP / gate passes, please contact organizer."
         };
         let allTickets = [];
         let allPayments = [];
@@ -2016,6 +2077,7 @@
             } catch(e){}
             updateHeroSectionWithEvent(featuredEventId);
             renderEventsList();
+            applyBookingStatusToUI();
 
             // 2. Non-blocking asynchronous sync with fast fail-safe timeouts
             loadPublicSettings();
@@ -2060,6 +2122,7 @@
                             portalSettings.razorpay_key_id = "rzp_live_TjiX5CotSd0Lrk";
                         }
                         updateTicketSubtotal();
+                        applyBookingStatusToUI();
                     }
                 }
             } catch (err) {
@@ -2258,8 +2321,117 @@
             `).join("");
         }
 
+        // =========================================================================
+        // BOOKING STATUS & CUTOFF DEADLINE CONTROLLER
+        // =========================================================================
+        function isBookingClosed() {
+            if (portalSettings.booking_status === "closed") {
+                return true;
+            }
+            if (portalSettings.booking_close_date) {
+                try {
+                    const closeTime = new Date(portalSettings.booking_close_date).getTime();
+                    if (!isNaN(closeTime) && Date.now() >= closeTime) {
+                        return true;
+                    }
+                } catch(e) {}
+            }
+            return false;
+        }
+
+        function formatBookingCloseDate(dateStr) {
+            if (!dateStr) return "";
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                return d.toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true
+                });
+            } catch(e) {
+                return dateStr;
+            }
+        }
+
+        function applyBookingStatusToUI() {
+            const closed = isBookingClosed();
+            const banner = document.getElementById("heroBookingNoticeBanner");
+            const navBtn = document.getElementById("navBookPassesBtn");
+            const heroBtn = document.getElementById("heroMainBookBtn");
+            const heroPosterBtn = document.getElementById("heroPosterBookBtn");
+
+            const formattedDate = formatBookingCloseDate(portalSettings.booking_close_date);
+
+            if (banner) {
+                if (closed) {
+                    banner.className = "p-4 rounded-2xl bg-rose-950/90 border border-rose-500/70 text-white shadow-xl space-y-2 transition-all";
+                    banner.innerHTML = `
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-rose-500 animate-ping"></span>
+                                <span class="text-xs font-black text-rose-300 uppercase tracking-wider">🛑 ONLINE BOOKING CLOSED / HOUSEFULL</span>
+                            </div>
+                            ${formattedDate ? `<span class="text-[11px] font-mono bg-rose-900/80 px-2.5 py-1 rounded-lg border border-rose-600/50 text-rose-200">Cutoff: ${formattedDate}</span>` : ''}
+                        </div>
+                        <p class="text-xs text-rose-100 font-medium">${portalSettings.booking_close_message || "Online ticket booking is officially closed. Passes available at venue counter."}</p>
+                    `;
+                } else {
+                    banner.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-emerald-500/40 text-slate-200 shadow-md flex items-center justify-between flex-wrap gap-2 transition-all";
+                    banner.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide">Online Bookings Open</span>
+                        </div>
+                        <div id="heroBookingDeadlineDisplay" class="text-xs text-amber-300 font-bold flex items-center gap-1.5 bg-slate-950 px-3 py-1 rounded-xl border border-amber-400/30">
+                            <span>⏰ Booking Closes On:</span>
+                            <span id="heroBookingDeadlineText" class="font-mono text-white">${formattedDate || "16 Oct 2026, 11:59 PM"}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            if (navBtn) {
+                if (closed) {
+                    navBtn.className = "hidden sm:inline-flex px-4 py-2 rounded-xl bg-rose-950 text-rose-300 border border-rose-700/60 text-xs font-black tracking-wide shadow-md transition-all items-center gap-1.5 opacity-90";
+                    navBtn.innerHTML = `<span>🚫 Bookings Closed</span>`;
+                } else {
+                    navBtn.className = "hidden sm:inline-flex px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 text-xs font-black tracking-wide shadow-md shadow-amber-500/20 hover:brightness-105 transition-all items-center gap-1.5";
+                    navBtn.innerHTML = `<span>🎟️ Book Passes</span>`;
+                }
+            }
+
+            if (heroBtn) {
+                if (closed) {
+                    heroBtn.className = "w-full sm:w-auto px-8 py-4 rounded-2xl bg-rose-950 border border-rose-500/60 text-rose-200 font-black text-sm sm:text-base tracking-wide shadow-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-90";
+                    heroBtn.innerHTML = `<span>🚫 ONLINE BOOKINGS CLOSED</span>`;
+                } else {
+                    heroBtn.className = "w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base tracking-wide shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition hover:brightness-105 active:opacity-90 border border-amber-300";
+                    heroBtn.innerHTML = `<span>🎟️ BOOK ENTRY TICKET NOW</span><span id="heroBtnRateBadge" class="text-xs bg-slate-950 text-amber-300 px-2 py-0.5 rounded font-black">₹299</span>`;
+                }
+            }
+
+            if (heroPosterBtn) {
+                if (closed) {
+                    heroPosterBtn.innerHTML = `<span>🚫 Closed</span>`;
+                    heroPosterBtn.className = "px-4 py-2 rounded-xl bg-rose-950 text-rose-300 border border-rose-600/50 text-xs font-black";
+                } else {
+                    heroPosterBtn.innerHTML = `<span>🎟️ Book Now</span>`;
+                    heroPosterBtn.className = "px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:brightness-105 text-slate-950 text-xs font-black tracking-wide shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition";
+                }
+            }
+        }
+
         // 3. Ticket Booking Modal Handlers
         function openTicketBookingModal(eventId = 1, preselectedDate = "") {
+            if (isBookingClosed()) {
+                alert(portalSettings.booking_close_message || "Online ticket booking is officially closed for Family Dandia Night 2026. For VIP / gate passes, please contact organizer.");
+                return;
+            }
+
             currentlyBookingEvent = activeEvents.find(e => e.id == eventId) || activeEvents[0] || {
                 id: 1,
                 title: "Family Dandia Night 2026 - Melody Show",
@@ -3103,10 +3275,22 @@
             loadAdminSponsors();
         }
 
+        async function restoreAllServerTickets() {
+            if (!confirm("🔄 Do you want to reload all tickets from the database server? This will restore all confirmed tickets.")) {
+                return;
+            }
+            try {
+                localStorage.removeItem("mrunmay_deleted_passes");
+            } catch(e){}
+            await loadAdminTickets();
+            alert("✅ All server tickets reloaded and restored successfully!");
+        }
+
         async function loadAdminTickets() {
             let serverTickets = [];
             try {
-                const res = await fetch(`/api/tickets?pin=${encodeURIComponent(currentAdminPin)}`);
+                const pin = currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234';
+                const res = await fetch(`/api/tickets?pin=${encodeURIComponent(pin)}`);
                 if (res.ok) {
                     const text = await res.text().catch(() => "");
                     if (text && text.trim()) {
@@ -3120,47 +3304,33 @@
                 console.warn("Error loading tickets from server:", err);
             }
 
-            // Tombstone set for tickets that were permanently deleted (prevents resurrection)
-            const tombstoneList = JSON.parse(localStorage.getItem("mrunmay_deleted_passes") || "[]");
-            const tombstoneSet = new Set(tombstoneList.map(x => String(x).toLowerCase()));
+            const map = new Map();
+            // 1. Populate all server tickets (ground truth from SQLite)
+            serverTickets.forEach(t => {
+                if (t.pass_id) map.set(t.pass_id, t);
+            });
 
-            // Filter server tickets against tombstones
-            serverTickets = serverTickets.filter(t => !tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id)));
-
-            // Sync with LocalStorage
+            // 2. Also merge any locally booked tickets that are not yet on server
             try {
                 const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
-                const map = new Map();
                 local.forEach(t => {
-                    if (!tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id))) {
+                    if (t.pass_id && !map.has(t.pass_id)) {
                         map.set(t.pass_id, t);
                     }
                 });
-                serverTickets.forEach(t => {
-                    if (!tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id))) {
-                        map.set(t.pass_id, t);
-                    }
-                });
-                allTickets = Array.from(map.values());
-            } catch(e) {
-                allTickets = serverTickets;
-            }
+            } catch(e){}
 
-            // Sync with Supabase Cloud (Live Multi-Device Database)
+            allTickets = Array.from(map.values());
+
+            // 3. Sync with Supabase Cloud
             const sb = getSupabaseClient();
             if (sb) {
                 try {
                     const { data, error } = await sb.from("tickets").select("*").order("id", { ascending: false });
                     if (!error && data && data.length > 0) {
-                        const map = new Map();
-                        allTickets.forEach(t => map.set(t.pass_id, t));
                         data.forEach(t => {
-                            if (!tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id))) {
+                            if (t.pass_id && !map.has(t.pass_id)) {
                                 map.set(t.pass_id, t);
-                            } else {
-                                // Background purge on Supabase if tombstoned
-                                sb.from("tickets").delete().eq("pass_id", t.pass_id).then(()=>{});
-                                sb.from("payments").delete().eq("pass_id", t.pass_id).then(()=>{});
                             }
                         });
                         allTickets = Array.from(map.values());
@@ -3170,7 +3340,7 @@
                 }
             }
 
-            // 24-Hour Auto-Purge Logic for Cancelled Tickets
+            // 4. 24-Hour Auto-Purge Logic for Cancelled Tickets
             const now = Date.now();
             const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
             const validTickets = [];
@@ -3206,7 +3376,8 @@
                 }
 
                 try {
-                    await fetch(`/api/admin/tickets/purge-cancelled?pin=${encodeURIComponent(currentAdminPin)}`, { method: "DELETE" });
+                    const pin = currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234';
+                    await fetch(`/api/admin/tickets/purge-cancelled?pin=${encodeURIComponent(pin)}`, { method: "DELETE" });
                 } catch(e){}
             }
 
@@ -3234,7 +3405,7 @@
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500">No tickets found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500">No tickets found. <button onclick="restoreAllServerTickets()" class="text-amber-400 font-bold underline ml-1 cursor-pointer">Click to Reload All Tickets</button></td></tr>`;
                 return;
             }
 
@@ -3301,7 +3472,7 @@
 
         async function deleteTicketPermanently(ticketId, passId) {
             const displayLabel = passId || (`#` + ticketId);
-            if (!confirm(`⚠️ Are you sure you want to PERMANENTLY DELETE Ticket ${displayLabel}?\n\nThis will completely erase the ticket from memory, database, and cloud. This action CANNOT be undone.`)) {
+            if (!confirm(`⚠️ Are you sure you want to PERMANENTLY DELETE Ticket ${displayLabel}?\n\nThis will remove ONLY this ticket from database and cloud. This action CANNOT be undone.`)) {
                 return;
             }
 
@@ -3309,61 +3480,54 @@
                 const targetIdent = passId || ticketId;
                 const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
 
-                // 1. Delete from Backend FastAPI / SQLite
+                // 1. Delete from Backend FastAPI / SQLite (exact match only)
                 try {
                     await fetch(`/api/admin/tickets/${encodeURIComponent(targetIdent)}?pin=${encodeURIComponent(pin)}`, {
                         method: "DELETE"
                     });
-                    if (ticketId && passId) {
-                        fetch(`/api/admin/tickets/${ticketId}?pin=${encodeURIComponent(pin)}`, { method: "DELETE" }).catch(()=>{});
-                    }
                 } catch (netErr) {
                     console.warn("Backend API delete warning:", netErr);
                 }
 
-                // 2. Add to LocalStorage Tombstones (Prevents ever resurrecting)
-                try {
-                    const deletedPasses = JSON.parse(localStorage.getItem("mrunmay_deleted_passes") || "[]");
-                    if (passId && !deletedPasses.includes(passId)) deletedPasses.push(passId);
-                    if (ticketId && !deletedPasses.includes(ticketId.toString())) deletedPasses.push(ticketId.toString());
-                    localStorage.setItem("mrunmay_deleted_passes", JSON.stringify(deletedPasses));
-                } catch(e){}
-
-                // 3. Delete from LocalStorage booked tickets
+                // 2. Delete from LocalStorage booked tickets (ONLY this specific ticket)
                 try {
                     const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
-                    const updated = local.filter(t => t.id != ticketId && t.pass_id != passId);
+                    const updated = local.filter(t => {
+                        if (passId && t.pass_id === passId) return false;
+                        if (ticketId && ticketId !== 'undefined' && String(t.id) === String(ticketId)) return false;
+                        return true;
+                    });
                     localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(updated));
                 } catch(lsErr) {
                     console.warn("LocalStorage delete error:", lsErr);
                 }
 
-                // 4. Delete from Supabase Cloud
+                // 3. Delete from Supabase Cloud
                 const sb = getSupabaseClient();
-                if (sb) {
+                if (sb && passId) {
                     try {
-                        if (passId) {
-                            await sb.from("tickets").delete().eq("pass_id", passId);
-                            await sb.from("payments").delete().eq("pass_id", passId);
-                        }
-                        if (ticketId) {
-                            await sb.from("tickets").delete().eq("id", ticketId);
-                        }
+                        await sb.from("tickets").delete().eq("pass_id", passId);
+                        await sb.from("payments").delete().eq("pass_id", passId);
                     } catch(sbErr) {
                         console.warn("Supabase ticket delete notice:", sbErr);
                     }
                 }
 
-                // 5. Update in-memory ticket list & UI
-                allTickets = allTickets.filter(t => t.id != ticketId && t.pass_id != passId);
+                // 4. Update in-memory ticket list & UI (ONLY remove this specific ticket)
+                allTickets = allTickets.filter(t => {
+                    if (passId && t.pass_id === passId) return false;
+                    if (ticketId && ticketId !== 'undefined' && String(t.id) === String(ticketId)) return false;
+                    return true;
+                });
+
                 const badge = document.getElementById("adminTicketsCountBadge");
                 if (badge) badge.textContent = `${allTickets.length} Registered`;
+                const statPasses = document.getElementById("statPassesCount");
+                if (statPasses) statPasses.textContent = allTickets.length;
+                const adminCount = document.getElementById("adminPassesCount");
+                if (adminCount) adminCount.textContent = allTickets.length;
                 
                 renderTicketsTable();
-
-                if (typeof loadAdminDashboardData === 'function') {
-                    loadAdminDashboardData();
-                }
 
                 alert(`✅ Ticket ${displayLabel} has been permanently deleted.`);
             } catch (err) {
@@ -3860,9 +4024,76 @@
                         document.getElementById("adminSettingSupabaseKey").value = sbKey;
                     }
                     updateSupabaseStatusBadge();
+
+                    // Booking Control Settings
+                    const bookingStatus = s.booking_status || "open";
+                    const bookingCloseDate = s.booking_close_date || "2026-10-16T23:59";
+                    const bookingCloseMsg = s.booking_close_message || "Online ticket booking is officially closed for Family Dandia Night 2026. For VIP / gate passes, please contact organizer.";
+
+                    if (document.getElementById("adminSettingBookingStatus")) {
+                        document.getElementById("adminSettingBookingStatus").value = bookingStatus;
+                    }
+                    if (document.getElementById("adminSettingBookingCloseDate")) {
+                        document.getElementById("adminSettingBookingCloseDate").value = bookingCloseDate;
+                    }
+                    if (document.getElementById("adminSettingBookingCloseMsg")) {
+                        document.getElementById("adminSettingBookingCloseMsg").value = bookingCloseMsg;
+                    }
+                    updateBookingStatusPill();
                 }
             } catch (err) {
                 console.error("Error loading admin settings:", err);
+            }
+        }
+
+        function updateBookingStatusPill() {
+            const sel = document.getElementById("adminSettingBookingStatus");
+            const pill = document.getElementById("bookingStatusPill");
+            if (!sel || !pill) return;
+            const isClosed = sel.value === "closed";
+            if (isClosed) {
+                pill.className = "px-2.5 py-1 rounded-full text-[10px] font-black border bg-rose-500/20 text-rose-400 border-rose-500/40";
+                pill.innerHTML = "🚫 CLOSED (Bookings Blocked)";
+            } else {
+                pill.className = "px-2.5 py-1 rounded-full text-[10px] font-black border bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+                pill.innerHTML = "🟢 OPEN (Accepting Bookings)";
+            }
+        }
+
+        async function saveBookingControlSettings() {
+            const status = document.getElementById("adminSettingBookingStatus")?.value || "open";
+            const closeDate = document.getElementById("adminSettingBookingCloseDate")?.value || "";
+            const closeMsg = document.getElementById("adminSettingBookingCloseMsg")?.value.trim() || "";
+
+            try {
+                const res = await fetch("/api/settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pin: currentAdminPin,
+                        settings: {
+                            booking_status: status,
+                            booking_close_date: closeDate,
+                            booking_close_message: closeMsg
+                        }
+                    })
+                });
+
+                if (res.ok) {
+                    alert("✅ Ticket Booking availability & cutoff deadline saved successfully! Changes are live on public dashboard.");
+                    portalSettings.booking_status = status;
+                    portalSettings.booking_close_date = closeDate;
+                    portalSettings.booking_close_message = closeMsg;
+                    updateBookingStatusPill();
+                    applyBookingStatusToUI();
+                    loadAdminSettings();
+                    loadPublicSettings();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert("Failed to save booking settings: " + (err.detail || "Error"));
+                }
+            } catch (err) {
+                alert("Network error: " + err.message);
             }
         }
 

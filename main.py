@@ -224,12 +224,36 @@ def submit_enquiry(req: EnquiryRequest):
         "whatsapp_url": whatsapp_url
     }
 
+def check_booking_allowed():
+    settings = get_settings()
+    b_status = (settings.get("booking_status") or "open").strip().lower()
+    if b_status == "closed":
+        msg = settings.get("booking_close_message") or "Online ticket booking is officially closed by the organizer."
+        raise HTTPException(status_code=403, detail=msg)
+    
+    b_close_date = (settings.get("booking_close_date") or "").strip()
+    if b_close_date:
+        try:
+            clean_date = b_close_date.replace(" ", "T")
+            if len(clean_date) == 10:
+                clean_date += "T23:59:59"
+            close_dt = datetime.fromisoformat(clean_date)
+            if datetime.now() >= close_dt:
+                msg = settings.get("booking_close_message") or "The booking deadline has passed. Online ticket booking is officially closed."
+                raise HTTPException(status_code=403, detail=msg)
+        except Exception:
+            pass
+
 # ================= RAZORPAY PAYMENT GATEWAY APIS =================
 @app.post("/api/razorpay/create-order")
 def create_razorpay_order_endpoint(req: RazorpayOrderCreateRequest):
     clean_phone = "".join(filter(str.isdigit, req.phone))
     if len(clean_phone) < 10:
         raise HTTPException(status_code=400, detail="Please enter a valid 10-digit mobile number.")
+    
+    is_ticket = (req.event_id is not None and req.event_id > 0) or ("ticket" in (req.service_type or "").lower()) or ("dandia" in (req.event_title or "").lower())
+    if is_ticket:
+        check_booking_allowed()
     
     settings = get_settings()
     key_id = (settings.get("razorpay_key_id") or "rzp_live_TjiX5CotSd0Lrk").strip()
@@ -295,6 +319,7 @@ def verify_razorpay_payment_endpoint(req: RazorpayVerifyPaymentRequest):
     is_ticket = (req.event_id is not None and req.event_id > 0) or ("ticket" in (req.service_type or "").lower()) or ("dandia" in (req.event_title or "").lower())
 
     if is_ticket:
+        check_booking_allowed()
         # Signature is Verified Genuine -> Save Confirmed Ticket in Database (auto-logs to payments table)
         ticket_id, official_pass_id, created_at, allocated_pass_ids = save_ticket(
             pass_id=None,
@@ -476,6 +501,9 @@ def create_ticket(req: TicketBookingRequest, pin: Optional[str] = Query(None)):
             status_code=403, 
             detail="Direct manual booking is disabled. Entry tickets can only be generated through verified Razorpay online payment."
         )
+
+    if not pin or pin != correct_pin:
+        check_booking_allowed()
 
     ticket_id, official_pass_id, created_at, allocated_pass_ids = save_ticket(
         pass_id=req.pass_id,
@@ -904,7 +932,8 @@ def save_settings(req: SettingsUpdateRequest):
         "owner_phone", "business_name", "tagline", "address", "email", 
         "working_hours", "site_config", "upi_id", "payee_name", "qr_image",
         "razorpay_key_id", "razorpay_key_secret", "razorpay_enabled", "payment_enabled",
-        "gst_enabled", "gst_percent", "gstin", "gst_type"
+        "gst_enabled", "gst_percent", "gstin", "gst_type",
+        "booking_status", "booking_close_date", "booking_close_message"
     ]
     updates = {k: v for k, v in req.settings.items() if k in safe_keys}
     if "admin_pin" in req.settings and req.settings["admin_pin"].strip():

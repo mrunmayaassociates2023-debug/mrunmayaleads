@@ -156,7 +156,10 @@ def init_db():
         "gst_enabled": "0",
         "gst_percent": "18",
         "gst_type": "exclusive",
-        "gstin": ""
+        "gstin": "",
+        "booking_status": "open",
+        "booking_close_date": "2026-10-16T23:59",
+        "booking_close_message": "Online ticket booking is officially closed for Family Dandia Night 2026. For VIP / gate passes, please contact organizer."
     }
     
     for key, value in default_settings.items():
@@ -788,14 +791,13 @@ def delete_ticket(ticket_identifier):
     )
     """)
     
-    # Check if identifier matches id or pass_id
+    # Check if identifier matches id or pass_id (EXACT match only)
     cursor.execute("""
         SELECT id, pass_id FROM tickets 
         WHERE id = ? 
            OR pass_id = ? 
            OR LOWER(pass_id) = LOWER(?)
-           OR pass_id LIKE ?
-    """, (int(clean_id) if clean_id.isdigit() else -1, clean_id, clean_id, f"%{clean_id}%"))
+    """, (int(clean_id) if clean_id.isdigit() else -1, clean_id, clean_id))
     rows = cursor.fetchall()
     
     deleted_passes = set()
