@@ -628,6 +628,20 @@ def update_ticket_status(ticket_id: int, status: str):
     conn.close()
     return True
 
+def delete_ticket(ticket_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT pass_id FROM tickets WHERE id = ?", (ticket_id,))
+    row = cursor.fetchone()
+    pass_id = row["pass_id"] if row else None
+    
+    cursor.execute("DELETE FROM tickets WHERE id = ?", (ticket_id,))
+    if pass_id:
+        cursor.execute("DELETE FROM payments WHERE pass_id = ? OR payment_id LIKE ?", (pass_id, f"%{pass_id}%"))
+    conn.commit()
+    conn.close()
+    return True
+
 def get_ticket_by_pass_id(pass_id: str):
     clean = str(pass_id or "").strip()
     if not clean:

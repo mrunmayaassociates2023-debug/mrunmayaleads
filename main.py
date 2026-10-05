@@ -32,7 +32,8 @@ from database import (
     save_sponsor,
     delete_sponsor,
     toggle_sponsor_status,
-    purge_expired_cancelled_tickets
+    purge_expired_cancelled_tickets,
+    delete_ticket
 )
 from razorpay_client import RazorpayClient
 
@@ -570,6 +571,12 @@ def purge_cancelled_tickets_endpoint(pin: str = Query(...)):
     verify_admin_pin(pin)
     count = purge_expired_cancelled_tickets()
     return {"success": True, "purged_count": count, "message": f"Purged {count} expired cancelled tickets."}
+
+@app.delete("/api/admin/tickets/{ticket_id}")
+def remove_ticket_endpoint(ticket_id: int, pin: str = Query(...)):
+    verify_admin_pin(pin)
+    delete_ticket(ticket_id)
+    return {"success": True, "message": "Ticket deleted successfully"}
 
 @app.get("/api/tickets/verify-pass/{pass_id:path}")
 def verify_pass_endpoint(pass_id: str):
