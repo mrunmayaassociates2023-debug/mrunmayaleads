@@ -301,7 +301,7 @@ def generate_ticket_image(
     inc_y = tbl_b_y + tbl_h + 10
     draw.rectangle([margin + 16, inc_y, WIDTH - margin - 16, inc_y + 54], fill=GOLD_LIGHT, outline=GOLD_BORDER, width=1)
     draw.text((margin + 28, inc_y + 8), "PASS INCLUSIONS & FESTIVE HIGHLIGHTS:", fill=GOLD, font=get_font(13, bold=True))
-    draw.text((margin + 28, inc_y + 29), "[+] Live DJ Dandia Arena   |   [+] Free Dandia Sticks at Gate   |   [+] Mega Lucky Draw Coupon   |   [+] Kids & Family Zone", fill=NAVY_LIGHT, font=get_font(12, bold=False))
+    draw.text((margin + 28, inc_y + 29), "[+] Live DJ Dandia Arena   |   [+] Dandia Sticks Available (Paid)   |   [+] Mega Lucky Draw Coupon   |   [+] Kids & Family Zone", fill=NAVY_LIGHT, font=get_font(12, bold=False))
 
     # =========================================================================
     # 7. IMPORTANT INSTRUCTIONS FOR ENTRY
@@ -315,7 +315,7 @@ def generate_ticket_image(
         "1. Please carry this printed A4 ticket (or digital voucher) along with a valid Govt ID proof at the entrance gate.",
         "2. Each pass has a unique QR code. Once scanned at admission desk, it cannot be reused by another guest.",
         "3. Entry gates open strictly at 06:30 PM. Show timings are 7:00 PM TO 10:00 PM.",
-        "4. Traditional Dandia / Ethnic attire warmly encouraged. Dandia sticks will be issued at the gate admission counters.",
+        "4. Traditional Dandia / Ethnic attire warmly encouraged. Dandia sticks are available for purchase at venue counters (Paid).",
         f"5. Organizers Helpline: +91 {org_phones} | Email: {org_email}"
     ]
     for r_idx, rule in enumerate(rules):
@@ -460,7 +460,7 @@ def generate_ticket_image(
 
     draw.text((colC_x + 12, box_m_y + 8), "[ ✓ ] TICKET VERIFIED & ALLOWED", fill=GREEN, font=get_font(12, bold=True))
     draw.text((colC_x + 12, box_m_y + 28), "Admitted Guests: ______ Person(s)", fill=NAVY_LIGHT, font=get_font(12, bold=False))
-    draw.text((colC_x + 12, box_m_y + 48), "Dandia Sticks Issued: [ YES / NO ]", fill=NAVY_LIGHT, font=get_font(12, bold=False))
+    draw.text((colC_x + 12, box_m_y + 48), "Dandia Sticks (Paid Counter): [ ISSUED / N/A ]", fill=NAVY_LIGHT, font=get_font(12, bold=False))
     draw.text((colC_x + 12, box_m_y + 68), "Admission Time: ______ : ______ PM", fill=NAVY_LIGHT, font=get_font(12, bold=False))
     draw.text((colC_x + 12, box_m_y + 90), "Security Officer Sign / Gate Stamp:", fill=TEXT_MUTED, font=get_font(11, bold=False))
     

@@ -1064,6 +1064,18 @@
                         </div>
                     </div>
 
+                    <!-- Multi-Pass Badges (If customer booked multiple tickets) -->
+                    <div id="multiPassBadgesContainer" class="hidden p-3 rounded-xl bg-slate-900 border border-amber-400/30 space-y-2">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="font-bold text-amber-300 flex items-center gap-1.5">
+                                <span>🎟️</span> <span>All Allocated Tickets (Lucky Draw Numbers):</span>
+                            </span>
+                            <span class="text-[10px] text-emerald-400 font-mono font-bold" id="multiPassBadgeCount">3 Passes</span>
+                        </div>
+                        <div id="multiPassBadges" class="flex flex-wrap gap-1.5"></div>
+                        <p class="text-[10px] text-slate-400">Click any ticket number above to switch, preview or download that individual lucky draw ticket.</p>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div>
                             <span class="text-slate-500 text-[10px] uppercase font-bold block">Attendee Name</span>
@@ -1170,18 +1182,19 @@
                 
                 <!-- Admin Tabs Header -->
                 <div class="px-6 pt-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between overflow-x-auto">
-                    <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-4 sm:gap-6">
                         <button id="adminTabBtnTickets" onclick="switchAdminTab('tickets')" class="pb-3 text-xs sm:text-sm font-black border-b-2 border-amber-400 text-amber-400 shrink-0">
                             🎟️ Booked Tickets (<span id="adminPassesCount">0</span>)
+                        </button>
+                        <button id="adminTabBtnSponsors" onclick="switchAdminTab('sponsors')" class="pb-3 text-xs sm:text-sm font-bold text-amber-300 hover:text-amber-400 shrink-0 flex items-center gap-1.5 transition">
+                            <span>🤝 Sponsors & Partners</span>
+                            <span id="adminSponsorsCount" class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black border border-amber-400/30">4</span>
                         </button>
                         <button id="adminTabBtnEvents" onclick="switchAdminTab('events')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
                             🎪 Events Manager
                         </button>
                         <button id="adminTabBtnRazorpay" onclick="switchAdminTab('razorpay')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
                             💳 Razorpay & Payments Ledger
-                        </button>
-                        <button id="adminTabBtnSponsors" onclick="switchAdminTab('sponsors')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
-                            🤝 Sponsors & Partners (<span id="adminSponsorsCount">0</span>)
                         </button>
                         <button id="adminTabBtnSettings" onclick="switchAdminTab('settings')" class="pb-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white shrink-0">
                             ⚙️ Portal Settings
@@ -1192,8 +1205,8 @@
                     </button>
                 </div>
 
-                <!-- Top 4 Metrics Summary Cards -->
-                <div class="p-4 sm:p-6 bg-slate-900 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
+                <!-- Top 5 Metrics Summary Cards -->
+                <div class="p-4 sm:p-6 bg-slate-900 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-5 gap-3 shrink-0">
                     <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
                         <span class="text-[10px] uppercase font-bold text-amber-400 block">Total Tickets Booked</span>
                         <span id="statPassesCount" class="text-2xl font-black text-white mt-0.5 block">0</span>
@@ -1210,6 +1223,18 @@
                         <span class="text-[10px] uppercase font-bold text-purple-400 block">Gate Admitted</span>
                         <span id="statAdmittedCount" class="text-2xl font-black text-purple-400 mt-0.5 block">0</span>
                     </div>
+                    <div class="bg-slate-950 p-3.5 rounded-2xl border border-amber-500/40 hover:border-amber-400 transition cursor-pointer group shadow" onclick="switchAdminTab('sponsors')">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] uppercase font-bold text-amber-400 block">Sponsors & Partners</span>
+                            <span class="text-[10px] font-bold text-amber-300 underline group-hover:text-yellow-200">Manage ↗</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <span id="statSponsorsCount" class="text-2xl font-black text-amber-400">4</span>
+                            <button type="button" onclick="event.stopPropagation(); openAddSponsorForm();" class="px-2 py-0.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[10px] shadow transition">
+                                ➕ Add
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tab 1: Booked Tickets & Attendees Manager -->
@@ -1221,7 +1246,7 @@
                             <input type="text" id="adminTicketSearch" oninput="renderTicketsTable()" placeholder="Search by Attendee Name, Mobile, Ticket Sl.No..." 
                                    class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400">
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <select id="adminTicketStatusFilter" onchange="renderTicketsTable()" class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-300">
                                 <option value="">All Statuses</option>
                                 <option value="Confirmed">Confirmed</option>
@@ -1230,6 +1255,12 @@
                             </select>
                             <button type="button" onclick="openAdminIssuePassModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow">
                                 <span>➕ Issue Pass (Admin)</span>
+                            </button>
+                            <button type="button" onclick="switchAdminTab('sponsors')" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-amber-400/40 shadow">
+                                <span>🤝 Manage Sponsors</span>
+                            </button>
+                            <button type="button" onclick="openAdminLuckyDrawModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-purple-900/40 border border-purple-400/40">
+                                <span>🎲 Run Lucky Draw</span>
                             </button>
                             <button onclick="exportTicketsCsv()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow">
                                 <span>📥 Export CSV</span>
@@ -1707,7 +1738,7 @@
                     </div>
 
                     <!-- Sponsors Table -->
-                    <div class="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
+                    <div class="rounded-2xl border border-slate-800 bg-slate-950 overflow-x-auto shadow-xl">
                         <table class="w-full text-left text-xs whitespace-nowrap">
                             <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
                                 <tr>
@@ -1722,7 +1753,7 @@
                             </thead>
                             <tbody id="adminSponsorsTableBody" class="divide-y divide-slate-800 text-slate-300">
                                 <tr>
-                                    <td colspan="6" class="p-8 text-center text-slate-500">Loading sponsors...</td>
+                                    <td colspan="7" class="p-8 text-center text-slate-500">Loading sponsors...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1857,6 +1888,75 @@
     </div>
 
     <!-- ========================================================================= -->
+    <!-- MODAL 6: ADMIN MEGA LUCKY DRAW SPINNER MODAL (#adminLuckyDrawModal)        -->
+    <!-- ========================================================================= -->
+    <div id="adminLuckyDrawModal" style="display: none;" class="fixed inset-0 z-[90] hidden items-center justify-center p-3 sm:p-6 modal-backdrop" onclick="if(event.target===this)closeAdminLuckyDrawModal()">
+        <div class="bg-slate-900 border-2 border-purple-500 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative text-left">
+            <div class="px-6 py-4 bg-gradient-to-r from-purple-950 via-slate-950 to-indigo-950 border-b border-purple-500/30 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl animate-bounce">🎲</span>
+                    <div>
+                        <h3 class="font-heading font-black text-lg text-white flex items-center gap-2">
+                            <span>Mega Lucky Draw Selector</span>
+                            <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-400/30">Official Draw</span>
+                        </h3>
+                        <p class="text-[11px] text-purple-200">1 Unique Entry per ticket number & guest</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAdminLuckyDrawModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">
+                    ✕
+                </button>
+            </div>
+
+            <div class="p-6 space-y-5 text-xs text-slate-200">
+                <!-- Prize Selector -->
+                <div>
+                    <label class="block font-bold text-slate-300 uppercase mb-1.5 text-[11px]">Select Bumper Prize for this Draw:</label>
+                    <select id="luckyDrawPrizeSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-purple-500/40 text-amber-300 font-bold text-sm">
+                        <option value="Smart LED TV (32 Inch)">🏆 1st Prize: Smart LED TV (32 Inch)</option>
+                        <option value="Microwave Oven">🥈 2nd Prize: Microwave Oven</option>
+                        <option value="Induction Cooktop">🥉 3rd Prize: Induction Cooktop</option>
+                        <option value="Surprise Festive Gift Hamper">🎁 Special Prize: Surprise Festive Gift Hamper</option>
+                    </select>
+                </div>
+
+                <!-- Drum Status -->
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] text-slate-400">Total Eligible Tickets in Drum:</div>
+                        <div id="luckyDrawTotalPoolCount" class="text-xl font-mono font-black text-purple-400">0 Tickets</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[11px] text-slate-400">Event Show:</div>
+                        <div class="font-bold text-amber-300">Family Dandia Night 2026</div>
+                    </div>
+                </div>
+
+                <!-- Animated Spin Display Screen -->
+                <div class="bg-gradient-to-b from-slate-950 to-slate-900 border-2 border-dashed border-purple-400/60 rounded-2xl p-6 text-center shadow-inner relative overflow-hidden">
+                    <div class="text-[10px] font-black uppercase tracking-wider text-purple-300 mb-2">Lucky Draw Digital Tumbler</div>
+                    <div id="luckyDrawSpinnerDisplay" class="font-mono text-3xl sm:text-4xl font-black text-amber-400 tracking-wider py-2">
+                        READY TO SPIN
+                    </div>
+                    <div id="luckyDrawWinnerName" class="text-sm font-bold text-white mt-1 h-5">
+                        Click the button below to start draw
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeAdminLuckyDrawModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">
+                        Close
+                    </button>
+                    <button type="button" id="startLuckyDrawBtn" onclick="runLuckyDrawSpin()" class="flex-2 py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white font-black uppercase tracking-wider shadow-lg shadow-purple-900/50 flex items-center justify-center gap-2 text-sm">
+                        <span>🎰 SPIN & DRAW WINNER</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
     <!-- JAVASCRIPT: APPLICATION LOGIC, RAZORPAY INTEGRATION & ADMIN CONTROLLERS  -->
     <!-- ========================================================================= -->
     <script>
@@ -1877,7 +1977,6 @@
         // Supabase Default Credentials
         const DEFAULT_SUPABASE_URL = "https://ivhjhyjrbeodwsugpjxq.supabase.co";
         const DEFAULT_SUPABASE_KEY = "sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn";
-        let publicSponsorsList = [];
 
         // State initialized with default event so it's NEVER empty on load
         let activeEvents = [DEFAULT_FAMILY_DANDIA_EVENT];
@@ -1922,6 +2021,7 @@
             loadPublicSettings();
             fetchEvents();
             loadPublicSponsors();
+            loadAdminSponsors();
 
             // 3. Dynamic Scroll Behavior for sticky navbar
             window.addEventListener("scroll", () => {
@@ -2440,9 +2540,13 @@
             }
         }
 
+        let currentModalPassIds = [];
+        let currentModalTicketData = null;
+
         // Verify Razorpay Payment and Display Generated Ticket (Bulletproof)
         async function verifyAndIssueTicket(payload) {
             let passId = "";
+            let passIds = [];
             let serverSuccess = false;
             let responseData = null;
 
@@ -2465,6 +2569,9 @@
                             serverSuccess = true;
                             responseData = parsed;
                             passId = parsed.pass_id;
+                            if (parsed.pass_ids && Array.isArray(parsed.pass_ids) && parsed.pass_ids.length > 0) {
+                                passIds = parsed.pass_ids;
+                            }
                         }
                     } catch(jsonErr){
                         console.warn("JSON parse notice:", jsonErr);
@@ -2473,6 +2580,8 @@
             } catch (err) {
                 console.warn("Backend verification network notice:", err);
             }
+
+            const requestedQty = Math.max(1, parseInt(payload.quantity || 1));
 
             if (!serverSuccess || !passId) {
                 let highest = 300;
@@ -2486,92 +2595,116 @@
                         }
                     });
                 } catch(e){}
-                passId = `Dandia/2026/${highest + 1}`;
+
+                passIds = [];
+                for (let k = 1; k <= requestedQty; k++) {
+                    passIds.push(`Dandia/2026/${highest + k}`);
+                }
+                passId = passIds[0];
+            } else if (passIds.length === 0) {
+                passIds = [passId];
             }
 
-            const ticketObj = (responseData && responseData.ticket) ? responseData.ticket : {
-                id: Date.now(),
-                pass_id: passId,
-                event_id: payload.event_id || 1,
-                event_title: payload.event_title || "Family Dandia Night 2026",
-                customer_name: payload.customer_name || "Valued Guest",
-                phone: payload.phone || "9938866544",
-                city: payload.city || "Sundarpada, BBSR",
-                date_selected: payload.date_selected || "17/10/2026 (Saturday)",
-                quantity: payload.quantity || 1,
-                rate_per_ticket: payload.rate_per_ticket || 299,
-                total_amount: payload.total_amount || 299,
-                utr_reference: payload.razorpay_payment_id || "RZP-Online",
-                payment_status: "Paid",
-                booking_status: "Confirmed",
-                created_at: new Date().toISOString()
-            };
+            const perTicketAmt = Math.round((payload.total_amount || (payload.rate_per_ticket || 299) * requestedQty) / requestedQty);
+            const generatedTickets = [];
 
+            passIds.forEach((pid, idx) => {
+                const singleObj = {
+                    id: Date.now() + idx,
+                    pass_id: pid,
+                    pass_ids: passIds,
+                    event_id: payload.event_id || 1,
+                    event_title: payload.event_title || "Family Dandia Night 2026",
+                    customer_name: payload.customer_name || "Valued Guest",
+                    phone: payload.phone || "9938866544",
+                    city: payload.city || "Sundarpada, BBSR",
+                    date_selected: payload.date_selected || "17/10/2026 (Saturday)",
+                    quantity: 1,
+                    ticket_index: idx + 1,
+                    total_tickets_in_booking: requestedQty,
+                    rate_per_ticket: payload.rate_per_ticket || 299,
+                    total_amount: perTicketAmt,
+                    utr_reference: requestedQty > 1 ? `${payload.razorpay_payment_id || "RZP-Online"} [Pass ${idx+1}/${requestedQty}]` : (payload.razorpay_payment_id || "RZP-Online"),
+                    payment_status: "Paid",
+                    booking_status: "Confirmed",
+                    created_at: new Date().toISOString()
+                };
+                generatedTickets.push(singleObj);
+            });
+
+            // Store each ticket in local storage and allTickets
             try {
                 const existing = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
-                if (!existing.some(t => t.pass_id === passId)) {
-                    existing.unshift(ticketObj);
-                    localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(existing));
-                }
-                allTickets.unshift(ticketObj);
+                generatedTickets.forEach(singleObj => {
+                    if (!existing.some(t => t.pass_id === singleObj.pass_id)) {
+                        existing.unshift(singleObj);
+                    }
+                    if (!allTickets.some(t => t.pass_id === singleObj.pass_id)) {
+                        allTickets.unshift(singleObj);
+                    }
+                });
+                localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(existing));
                 renderTicketsTable();
             } catch(e){}
 
-            // Sync to Supabase Cloud if configured
+            // Sync all generated passes to Supabase Cloud
             const sb = getSupabaseClient();
             if (sb) {
                 try {
-                    await sb.from("tickets").upsert([{
-                        pass_id: passId,
-                        event_id: ticketObj.event_id || 1,
-                        event_title: ticketObj.event_title,
-                        customer_name: ticketObj.customer_name,
-                        phone: ticketObj.phone,
-                        email: ticketObj.email || "",
-                        city: ticketObj.city || "",
-                        date_selected: ticketObj.date_selected,
-                        quantity: ticketObj.quantity,
-                        rate_per_ticket: ticketObj.rate_per_ticket,
-                        total_amount: ticketObj.total_amount,
+                    const sbRows = generatedTickets.map(singleObj => ({
+                        pass_id: singleObj.pass_id,
+                        event_id: singleObj.event_id || 1,
+                        event_title: singleObj.event_title,
+                        customer_name: singleObj.customer_name,
+                        phone: singleObj.phone,
+                        email: payload.email || "",
+                        city: singleObj.city || "",
+                        date_selected: singleObj.date_selected,
+                        quantity: 1,
+                        rate_per_ticket: singleObj.rate_per_ticket,
+                        total_amount: singleObj.total_amount,
                         payment_status: "Paid",
-                        utr_reference: payload.razorpay_payment_id || "RZP-Online",
+                        utr_reference: singleObj.utr_reference,
                         booking_status: "Confirmed",
                         razorpay_order_id: payload.razorpay_order_id || "",
                         razorpay_payment_id: payload.razorpay_payment_id || "",
                         created_at: new Date().toISOString()
-                    }], { onConflict: "pass_id" });
+                    }));
+                    await sb.from("tickets").upsert(sbRows, { onConflict: "pass_id" });
 
                     await sb.from("payments").upsert([{
                         payment_id: payload.razorpay_payment_id || `PAY-${passId}`,
                         order_id: payload.razorpay_order_id || "",
-                        service_type: `Event Ticket: ${ticketObj.event_title}`,
-                        customer_name: ticketObj.customer_name,
-                        phone: ticketObj.phone,
-                        amount: ticketObj.total_amount,
+                        service_type: `Event Ticket: ${payload.event_title || "Family Dandia Night 2026"}`,
+                        customer_name: payload.customer_name || "Valued Guest",
+                        phone: payload.phone || "9938866544",
+                        amount: payload.total_amount || (perTicketAmt * requestedQty),
                         payment_mode: "Razorpay Online",
                         status: "Success",
-                        pass_id: passId,
+                        pass_id: passIds.join(", "),
                         created_at: new Date().toISOString()
                     }], { onConflict: "payment_id" });
-                    console.log("Ticket synced to Supabase Cloud successfully!");
+                    console.log("All tickets synced to Supabase Cloud successfully!");
                 } catch(sbErr) {
                     console.warn("Supabase ticket sync notice:", sbErr);
                 }
             }
 
+            const primaryTicket = generatedTickets[0];
+            const passesDisplayStr = passIds.join(", ");
             const ownerPhone = portalSettings.owner_phone || "917992993433";
             const waMsg = [
                 "🎫 *ENTRY TICKET CONFIRMATION - MRUNMAYA ASSOCIATES*",
-                `Event: *${ticketObj.event_title}*`,
-                `Ticket Sl.No: *${passId}*`,
-                `Name: *${ticketObj.customer_name}*`,
-                `Phone: ${ticketObj.phone}`,
-                `Tickets: *${ticketObj.quantity} Person(s)*`,
-                `Date: ${ticketObj.date_selected}`,
-                `Amount Paid: ₹${ticketObj.total_amount}`,
+                `Event: *${primaryTicket.event_title}*`,
+                `Ticket Sl.No(s): *${passesDisplayStr}*`,
+                `Name: *${primaryTicket.customer_name}*`,
+                `Phone: ${primaryTicket.phone}`,
+                `Tickets: *${requestedQty} Person(s) / Lucky Draw Entries*`,
+                `Date: ${primaryTicket.date_selected}`,
+                `Amount Paid: ₹${payload.total_amount || (perTicketAmt * requestedQty)}`,
                 `Payment ID: ${payload.razorpay_payment_id}`,
                 "",
-                "✅ Verified Online Payment. Please present your digital ticket or printout at the entrance gate. Enjoy the show!"
+                "✅ Verified Online Payment. Each pass has its own Lucky Draw serial number. Please present your digital ticket or printout at the entrance gate. Enjoy the show!"
             ].join("\n");
             const waUrl = `https://wa.me/${ownerPhone}?text=${encodeURIComponent(waMsg)}`;
 
@@ -2579,7 +2712,9 @@
             showGeneratedPass({
                 success: true,
                 pass_id: passId,
-                ticket: ticketObj,
+                pass_ids: passIds,
+                ticket: primaryTicket,
+                all_generated_tickets: generatedTickets,
                 whatsapp_url: (responseData && responseData.whatsapp_url) ? responseData.whatsapp_url : waUrl
             });
         }
@@ -2587,18 +2722,45 @@
         function showGeneratedPass(data) {
             const ticket = data.ticket || {};
             const passId = data.pass_id || ticket.pass_id || "Dandia/2026/301";
+            const passIds = (data.pass_ids && Array.isArray(data.pass_ids) && data.pass_ids.length > 0) 
+                ? data.pass_ids 
+                : (ticket.pass_ids && Array.isArray(ticket.pass_ids) ? ticket.pass_ids : [passId]);
+
+            currentModalPassIds = passIds;
+            currentModalTicketData = ticket;
+
             const cName = ticket.customer_name || "Valued Guest";
             const cPhone = ticket.phone || "9938866544";
             const cAddr = ticket.city || "Sundarpada, BBSR";
             const cDate = ticket.date_selected || "17/10/2026 (Saturday)";
-            const cQty = ticket.quantity || 1;
+            const cQty = passIds.length > 1 ? passIds.length : (ticket.quantity || 1);
             const cRate = ticket.rate_per_ticket || 299;
             const cTotal = ticket.total_amount || (cQty * cRate);
             const cEvent = ticket.event_title || (currentlyBookingEvent ? currentlyBookingEvent.title : "Family Dandia Night 2026");
 
-            document.getElementById("passIdDisplay").textContent = passId;
+            // Multi-pass Badges
+            const multiContainer = document.getElementById("multiPassBadgesContainer");
+            const multiBadges = document.getElementById("multiPassBadges");
+            const badgeCount = document.getElementById("multiPassBadgeCount");
+
+            if (passIds.length > 1 && multiContainer && multiBadges) {
+                multiContainer.classList.remove("hidden");
+                if (badgeCount) badgeCount.textContent = `${passIds.length} Passes Issued`;
+                multiBadges.innerHTML = passIds.map((pid, idx) => `
+                    <button type="button" 
+                            data-pass-id="${pid}"
+                            onclick="switchActivePassPreview('${pid}', '${cName.replace(/'/g, "\\'")}', '${cDate}', '${cTotal}', '${cPhone.replace(/'/g, "\\'")}', '${cAddr.replace(/'/g, "\\'")}', '${cEvent.replace(/'/g, "\\'")}')" 
+                            class="pass-selector-badge px-2.5 py-1 rounded-lg text-xs font-mono font-bold ${pid === passId ? 'bg-amber-400 text-slate-950 shadow border border-amber-300' : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700'} transition cursor-pointer">
+                        🎫 ${pid} [Draw #${idx+1}]
+                    </button>
+                `).join("");
+            } else if (multiContainer) {
+                multiContainer.classList.add("hidden");
+            }
+
+            document.getElementById("passIdDisplay").textContent = passIds.length > 1 ? `${passId} (1 of ${passIds.length})` : passId;
             document.getElementById("passNameDisplay").textContent = cName;
-            document.getElementById("passQtyDisplay").textContent = `${cQty} Guest(s)`;
+            document.getElementById("passQtyDisplay").textContent = `${cQty} Guest(s) [${passIds.length} Lucky Draw Tickets]`;
             document.getElementById("passDateDisplay").textContent = cDate;
 
             const bannerImg = document.getElementById("passPosterBanner");
@@ -2606,13 +2768,46 @@
                 bannerImg.src = (currentlyBookingEvent && currentlyBookingEvent.poster_image) ? currentlyBookingEvent.poster_image : "/static/dandia_night_2026.jpg";
             }
 
-            // Generate Full Dynamic Gate Entry QR Data
+            // Set up active pass preview
+            switchActivePassPreview(passId, cName, cDate, cTotal, cPhone, cAddr, cEvent);
+
+            // Set WhatsApp URL
+            const waBtn = document.getElementById("btnWhatsAppPass");
+            if (waBtn) {
+                const passesStr = passIds.join(", ");
+                waBtn.href = data.whatsapp_url || `https://wa.me/917992993433?text=Here%20are%20my%20confirmed%20A4%20tickets:%20${encodeURIComponent(passesStr)}`;
+            }
+
+            // Show ticket modal
+            const modal = document.getElementById("ticketPassModal");
+            modal.style.display = "flex";
+            modal.classList.remove("hidden");
+        }
+
+        function switchActivePassPreview(passId, cName, cDate, cTotal, cPhone, cAddr, cEvent) {
+            const displayEl = document.getElementById("passIdDisplay");
+            if (displayEl) {
+                const isMulti = currentModalPassIds && currentModalPassIds.length > 1;
+                const idx = currentModalPassIds ? currentModalPassIds.indexOf(passId) : -1;
+                displayEl.textContent = (isMulti && idx >= 0) ? `${passId} (${idx+1} of ${currentModalPassIds.length})` : passId;
+            }
+
+            const badges = document.querySelectorAll(".pass-selector-badge");
+            badges.forEach(b => {
+                if (b.dataset.passId === passId) {
+                    b.className = "pass-selector-badge px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-amber-400 text-slate-950 shadow border border-amber-300 cursor-pointer";
+                } else {
+                    b.className = "pass-selector-badge px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 cursor-pointer";
+                }
+            });
+
+            // Update QR Code Image
             const gateQrText = [
-                `MRUNMAYA ASSOCIATES | ${cEvent.toUpperCase()}`,
+                `MRUNMAYA ASSOCIATES | ${cEvent ? cEvent.toUpperCase() : 'FAMILY DANDIA NIGHT 2026'}`,
                 `TICKET NO: ${passId}`,
                 `NAME: ${cName}`,
-                `MOB: ${cPhone}`,
-                `ADDRESS: ${cAddr}`,
+                `MOB: ${cPhone || ''}`,
+                `ADDRESS: ${cAddr || ''}`,
                 `DATE: ${cDate}`,
                 `VENUE: Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002`,
                 `AMOUNT: Rs.${cTotal}`,
@@ -2620,7 +2815,6 @@
                 `GATE VERIFY: https://mrunmayaleads.onrender.com/api/tickets/verify-pass/${encodeURIComponent(passId)}`
             ].join("\n");
 
-            // Update QR Code Image element
             const qrImg = document.getElementById("passQrPreview");
             if (qrImg) {
                 qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=2&data=${encodeURIComponent(gateQrText)}`;
@@ -2629,7 +2823,7 @@
                 };
             }
 
-            // Set Download URL & View/Print URL for Official A4 Printable Ticket
+            // Set Download URL & View/Print URL for this specific pass
             const a4ImageUrl = `/api/tickets/${encodeURIComponent(passId)}/image`;
             const dlBtn = document.getElementById("btnDownloadPass");
             if (dlBtn) {
@@ -2645,17 +2839,6 @@
                 printBtn.href = a4ImageUrl;
                 printBtn.target = "_blank";
             }
-
-            // Set WhatsApp URL
-            const waBtn = document.getElementById("btnWhatsAppPass");
-            if (waBtn) {
-                waBtn.href = data.whatsapp_url || `https://wa.me/917992993433?text=Here%20is%20my%20confirmed%20A4%20ticket:%20${encodeURIComponent(passId)}`;
-            }
-
-            // Show ticket modal
-            const modal = document.getElementById("ticketPassModal");
-            modal.style.display = "flex";
-            modal.classList.remove("hidden");
         }
 
         async function triggerClientTicketDownload(passId) {
@@ -2937,12 +3120,27 @@
                 console.warn("Error loading tickets from server:", err);
             }
 
+            // Tombstone set for tickets that were permanently deleted (prevents resurrection)
+            const tombstoneList = JSON.parse(localStorage.getItem("mrunmay_deleted_passes") || "[]");
+            const tombstoneSet = new Set(tombstoneList.map(x => String(x).toLowerCase()));
+
+            // Filter server tickets against tombstones
+            serverTickets = serverTickets.filter(t => !tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id)));
+
             // Sync with LocalStorage
             try {
                 const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
                 const map = new Map();
-                local.forEach(t => map.set(t.pass_id, t));
-                serverTickets.forEach(t => map.set(t.pass_id, t));
+                local.forEach(t => {
+                    if (!tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id))) {
+                        map.set(t.pass_id, t);
+                    }
+                });
+                serverTickets.forEach(t => {
+                    if (!tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id))) {
+                        map.set(t.pass_id, t);
+                    }
+                });
                 allTickets = Array.from(map.values());
             } catch(e) {
                 allTickets = serverTickets;
@@ -2956,7 +3154,15 @@
                     if (!error && data && data.length > 0) {
                         const map = new Map();
                         allTickets.forEach(t => map.set(t.pass_id, t));
-                        data.forEach(t => map.set(t.pass_id, t));
+                        data.forEach(t => {
+                            if (!tombstoneSet.has(String(t.pass_id).toLowerCase()) && !tombstoneSet.has(String(t.id))) {
+                                map.set(t.pass_id, t);
+                            } else {
+                                // Background purge on Supabase if tombstoned
+                                sb.from("tickets").delete().eq("pass_id", t.pass_id).then(()=>{});
+                                sb.from("payments").delete().eq("pass_id", t.pass_id).then(()=>{});
+                            }
+                        });
                         allTickets = Array.from(map.values());
                     }
                 } catch(sbErr) {
@@ -3052,11 +3258,14 @@
 
                 return `
                     <tr class="hover:bg-slate-900/60 transition">
-                        <td class="p-3 font-mono font-black text-amber-400">${t.pass_id}</td>
+                        <td class="p-3 font-mono font-black text-amber-400 flex items-center gap-1.5">
+                            <span>${t.pass_id}</span>
+                            <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30" title="Lucky Draw Entry Coupon">🎲 Draw</span>
+                        </td>
                         <td class="p-3 font-bold text-white">${t.customer_name}</td>
                         <td class="p-3 font-mono text-slate-300">${t.phone}</td>
                         <td class="p-3 text-slate-300">${t.date_selected}</td>
-                        <td class="p-3 font-bold text-center">${t.quantity}</td>
+                        <td class="p-3 font-bold text-center">${t.quantity || 1}</td>
                         <td class="p-3 font-black text-amber-300">
                             ₹${t.total_amount}
                             ${t.gst_amount ? `<span class="block text-[9px] text-slate-400 font-normal">GST: ₹${t.gst_amount} (${t.gst_percent}%)</span>` : ''}
@@ -3081,7 +3290,7 @@
                                     Cancel
                                 </button>
                             ` : ''}
-                            <button onclick="deleteTicketPermanently(${t.id}, '${t.pass_id}')" class="px-2 py-1 rounded bg-red-900/80 hover:bg-red-700 text-red-200 hover:text-white font-bold text-[10px] border border-red-500/40" title="Delete Ticket Permanently">
+                            <button onclick="deleteTicketPermanently('${t.id}', '${t.pass_id}')" class="px-2 py-1 rounded bg-red-900/80 hover:bg-red-700 text-red-200 hover:text-white font-bold text-[10px] border border-red-500/40" title="Delete Ticket Permanently">
                                 🗑️ Delete
                             </button>
                         </td>
@@ -3092,28 +3301,35 @@
 
         async function deleteTicketPermanently(ticketId, passId) {
             const displayLabel = passId || (`#` + ticketId);
-            if (!confirm(`⚠️ Are you sure you want to PERMANENTLY DELETE Ticket ${displayLabel}?\n\nThis will completely erase the ticket from the system, database, and cloud. This action CANNOT be undone.`)) {
+            if (!confirm(`⚠️ Are you sure you want to PERMANENTLY DELETE Ticket ${displayLabel}?\n\nThis will completely erase the ticket from memory, database, and cloud. This action CANNOT be undone.`)) {
                 return;
             }
 
             try {
+                const targetIdent = passId || ticketId;
+                const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
+
                 // 1. Delete from Backend FastAPI / SQLite
-                let apiSuccess = false;
                 try {
-                    const res = await fetch(`/api/admin/tickets/${ticketId}?pin=${encodeURIComponent(currentAdminPin)}`, {
+                    await fetch(`/api/admin/tickets/${encodeURIComponent(targetIdent)}?pin=${encodeURIComponent(pin)}`, {
                         method: "DELETE"
                     });
-                    if (res.ok) {
-                        apiSuccess = true;
-                    } else {
-                        const errData = await res.json().catch(() => ({}));
-                        console.warn("Backend delete response not ok:", errData);
+                    if (ticketId && passId) {
+                        fetch(`/api/admin/tickets/${ticketId}?pin=${encodeURIComponent(pin)}`, { method: "DELETE" }).catch(()=>{});
                     }
                 } catch (netErr) {
                     console.warn("Backend API delete warning:", netErr);
                 }
 
-                // 2. Delete from LocalStorage
+                // 2. Add to LocalStorage Tombstones (Prevents ever resurrecting)
+                try {
+                    const deletedPasses = JSON.parse(localStorage.getItem("mrunmay_deleted_passes") || "[]");
+                    if (passId && !deletedPasses.includes(passId)) deletedPasses.push(passId);
+                    if (ticketId && !deletedPasses.includes(ticketId.toString())) deletedPasses.push(ticketId.toString());
+                    localStorage.setItem("mrunmay_deleted_passes", JSON.stringify(deletedPasses));
+                } catch(e){}
+
+                // 3. Delete from LocalStorage booked tickets
                 try {
                     const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
                     const updated = local.filter(t => t.id != ticketId && t.pass_id != passId);
@@ -3122,18 +3338,23 @@
                     console.warn("LocalStorage delete error:", lsErr);
                 }
 
-                // 3. Delete from Supabase Cloud
+                // 4. Delete from Supabase Cloud
                 const sb = getSupabaseClient();
-                if (sb && passId) {
+                if (sb) {
                     try {
-                        await sb.from("tickets").delete().eq("pass_id", passId);
-                        await sb.from("payments").delete().eq("pass_id", passId);
+                        if (passId) {
+                            await sb.from("tickets").delete().eq("pass_id", passId);
+                            await sb.from("payments").delete().eq("pass_id", passId);
+                        }
+                        if (ticketId) {
+                            await sb.from("tickets").delete().eq("id", ticketId);
+                        }
                     } catch(sbErr) {
                         console.warn("Supabase ticket delete notice:", sbErr);
                     }
                 }
 
-                // 4. Update in-memory ticket list & UI
+                // 5. Update in-memory ticket list & UI
                 allTickets = allTickets.filter(t => t.id != ticketId && t.pass_id != passId);
                 const badge = document.getElementById("adminTicketsCountBadge");
                 if (badge) badge.textContent = `${allTickets.length} Registered`;
@@ -3148,6 +3369,79 @@
             } catch (err) {
                 alert("Failed to delete ticket: " + err.message);
             }
+        }
+
+        // =========================================================================
+        // LUCKY DRAW CONTROLLER ENGINE
+        // =========================================================================
+        let isLuckyDrawSpinning = false;
+        function openAdminLuckyDrawModal() {
+            const modal = document.getElementById("adminLuckyDrawModal");
+            if (!modal) return;
+            modal.style.display = "flex";
+            modal.classList.remove("hidden");
+            
+            // Filter all confirmed, non-cancelled tickets
+            const eligible = allTickets.filter(t => (t.booking_status || "").toLowerCase() !== "cancelled");
+            const countEl = document.getElementById("luckyDrawTotalPoolCount");
+            if (countEl) countEl.textContent = `${eligible.length} Tickets`;
+            
+            const display = document.getElementById("luckyDrawSpinnerDisplay");
+            if (display) {
+                display.textContent = "READY TO SPIN";
+                display.classList.remove("text-emerald-400", "scale-110");
+            }
+            const nameEl = document.getElementById("luckyDrawWinnerName");
+            if (nameEl) nameEl.textContent = `${eligible.length} confirmed entries ready in lucky draw pool`;
+        }
+
+        function closeAdminLuckyDrawModal() {
+            const modal = document.getElementById("adminLuckyDrawModal");
+            if (!modal) return;
+            modal.style.display = "none";
+            modal.classList.add("hidden");
+        }
+
+        function runLuckyDrawSpin() {
+            if (isLuckyDrawSpinning) return;
+            const eligible = allTickets.filter(t => (t.booking_status || "").toLowerCase() !== "cancelled");
+            if (eligible.length === 0) {
+                alert("No confirmed tickets available in the lucky draw pool.");
+                return;
+            }
+            
+            isLuckyDrawSpinning = true;
+            const btn = document.getElementById("startLuckyDrawBtn");
+            const display = document.getElementById("luckyDrawSpinnerDisplay");
+            const nameEl = document.getElementById("luckyDrawWinnerName");
+            const prize = document.getElementById("luckyDrawPrizeSelect")?.value || "1st Prize";
+            
+            if (btn) btn.disabled = true;
+            display.classList.remove("text-emerald-400", "scale-110");
+            
+            let counter = 0;
+            const totalFlips = 35;
+            const interval = setInterval(() => {
+                const rand = eligible[Math.floor(Math.random() * eligible.length)];
+                display.textContent = rand.pass_id;
+                nameEl.textContent = `Spinning... ${rand.customer_name}`;
+                counter++;
+                
+                if (counter >= totalFlips) {
+                    clearInterval(interval);
+                    const winner = eligible[Math.floor(Math.random() * eligible.length)];
+                    display.textContent = winner.pass_id;
+                    display.classList.add("text-emerald-400", "scale-110");
+                    nameEl.innerHTML = `🎉 <span class="font-black text-amber-300 text-base">${winner.customer_name}</span> (Phone: ${winner.phone})<br><span class="text-purple-300 font-bold">${prize} Winner!</span>`;
+                    
+                    if (btn) btn.disabled = false;
+                    isLuckyDrawSpinning = false;
+                    
+                    setTimeout(() => {
+                        alert(`🎊 CONGRATULATIONS TO THE LUCKY DRAW WINNER!\n\n🏆 Prize: ${prize}\n🎟️ Ticket No: ${winner.pass_id}\n👤 Winner Name: ${winner.customer_name}\n📞 Phone: ${winner.phone}\n📅 Date: ${winner.date_selected}`);
+                    }, 400);
+                }
+            }, 80);
         }
 
         async function checkinTicket(ticketId) {
@@ -3730,43 +4024,110 @@
         // =========================================================================
         // 9. SPONSORSHIPS & PARTNERS LOGIC & CONTROLLER
         // =========================================================================
+        const DEFAULT_SPONSORS_LIST = [
+            {
+                id: 1,
+                name: "Trilochan Resorts",
+                category: "Venue Partner",
+                logo_url: "/static/dandia_night_2026.jpg",
+                website_url: "https://maps.google.com/?q=Trilochan+Resorts+Sundarpada+Bhubaneswar",
+                phone: "7992993433",
+                email: "mrunmayaassoxiates2023@gmail.com",
+                display_order: 1,
+                enabled: 1
+            },
+            {
+                id: 2,
+                name: "Mrunmaya Associates",
+                category: "Organizing & Ticketing Desk",
+                logo_url: "/static/logo.png",
+                website_url: "https://mrunmayaleads.onrender.com/",
+                phone: "7992993433 / 7008955582",
+                email: "mrunmayaassoxiates2023@gmail.com",
+                display_order: 2,
+                enabled: 1
+            },
+            {
+                id: 3,
+                name: "Odisha Live Beats",
+                category: "Live Sound & Entertainment Partner",
+                logo_url: "/static/dandia_night_2026.jpg",
+                website_url: "",
+                phone: "7008955582",
+                email: "mrunmayaassoxiates2023@gmail.com",
+                display_order: 3,
+                enabled: 1
+            },
+            {
+                id: 4,
+                name: "jagannath dash",
+                category: "Partner",
+                logo_url: "/static/sponsor_logo_1791110441.jpg",
+                website_url: "",
+                phone: "7992993433",
+                email: "mrunmayaassoxiates2023@gmail.com",
+                display_order: 4,
+                enabled: 1
+            }
+        ];
+
+        let publicSponsorsList = [];
         let adminSponsorsData = [];
 
         async function loadPublicSponsors() {
             let list = [];
+            
+            // 1. Backend SQLite
             try {
                 const res = await fetch("/api/sponsors");
                 if (res.ok) {
                     const data = await res.json();
-                    list = (data && data.sponsors) ? data.sponsors : [];
+                    if (data && Array.isArray(data.sponsors) && data.sponsors.length > 0) {
+                        list = data.sponsors;
+                    }
                 }
             } catch(err) {
                 console.warn("Public sponsors fetch notice:", err);
             }
 
-            // Fallback to local storage
-            if (list.length === 0) {
-                try {
-                    const local = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
-                    list = local.filter(s => s.enabled == 1);
-                } catch(e){}
-            }
-
-            // Sync with Supabase if active
+            // 2. Supabase Cloud Sync
             const sb = getSupabaseClient();
             if (sb) {
                 try {
                     const { data, error } = await sb.from("sponsors").select("*").eq("enabled", 1);
-                    if (!error && data && data.length > 0) {
+                    if (!error && Array.isArray(data) && data.length > 0) {
                         const map = new Map();
-                        list.forEach(s => map.set(s.name, s));
-                        data.forEach(s => map.set(s.name, s));
+                        list.forEach(s => map.set(s.id || s.name, s));
+                        data.forEach(s => map.set(s.id || s.name, s));
                         list = Array.from(map.values());
                     }
                 } catch(sbErr){}
             }
 
+            // 3. LocalStorage Fallback
+            if (list.length === 0) {
+                try {
+                    const local = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
+                    if (Array.isArray(local) && local.length > 0) {
+                        list = local.filter(s => s.enabled == 1);
+                    }
+                } catch(e){}
+            }
+
+            // 4. Default Seed Fallback
+            if (list.length === 0) {
+                list = JSON.parse(JSON.stringify(DEFAULT_SPONSORS_LIST));
+                try {
+                    localStorage.setItem("mrunmay_sponsors", JSON.stringify(list));
+                } catch(e){}
+            }
+
             publicSponsorsList = list;
+            renderPublicSponsorsViews();
+        }
+
+        function renderPublicSponsorsViews() {
+            const list = publicSponsorsList.filter(s => s.enabled == 1);
 
             // 1. Render Floating Right Dock
             const dockList = document.getElementById("floatingRightSponsorsList");
@@ -3791,25 +4152,7 @@
                 }
             }
 
-            // 2. Render Hero Right Sponsors List
-            const heroList = document.getElementById("heroRightSponsorsList");
-            if (heroList) {
-                if (list.length > 0) {
-                    heroList.innerHTML = list.map(s => `
-                        <button type="button" onclick="openSponsorDetailsModal(${s.id})" class="flex flex-col items-center gap-1 shrink-0 group focus:outline-none hover:scale-105 transition-transform">
-                            <div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-amber-400 to-yellow-300 shadow">
-                                <img src="${s.logo_url || '/static/dandia_night_2026.jpg'}" onerror="this.src='/static/dandia_night_2026.jpg'" 
-                                     class="w-full h-full object-cover rounded-full bg-slate-950">
-                            </div>
-                            <span class="text-[10px] font-bold text-slate-300 group-hover:text-amber-300 max-w-[65px] truncate text-center">${s.name}</span>
-                        </button>
-                    `).join("");
-                } else {
-                    heroList.innerHTML = `<span class="text-[11px] text-slate-500 py-1">Partnership slots open. Contact desk: 7992993433</span>`;
-                }
-            }
-
-            // 3. Render Public Grid at page bottom
+            // 2. Render Public Grid at page bottom
             const grid = document.getElementById("publicSponsorsGrid");
             if (grid) {
                 if (list.length > 0) {
@@ -3908,32 +4251,85 @@
 
         async function loadAdminSponsors() {
             const tbody = document.getElementById("adminSponsorsTableBody");
-            const badge = document.getElementById("adminSponsorsBadge");
-            const countSpan = document.getElementById("adminSponsorsCount");
-            if (!tbody || !currentAdminPin) return;
+            if (!tbody) return;
 
+            let sponsors = [];
+            const pin = currentAdminPin || localStorage.getItem("admin_custom_pin") || "1234";
+
+            // 1. Fetch from FastAPI Backend
             try {
-                const res = await fetch(`/api/admin/sponsors?pin=${encodeURIComponent(currentAdminPin)}`);
+                const res = await fetch(`/api/admin/sponsors?pin=${encodeURIComponent(pin)}`);
                 if (res.ok) {
                     const data = await res.json();
-                    adminSponsorsData = (data && data.sponsors) ? data.sponsors : [];
+                    if (data && Array.isArray(data.sponsors) && data.sponsors.length > 0) {
+                        sponsors = data.sponsors;
+                    }
                 }
             } catch (err) {
-                console.warn("Admin sponsors fetch notice:", err);
+                console.warn("Admin sponsors API fetch note:", err);
             }
 
-            if (adminSponsorsData.length === 0) {
+            // 2. Fetch from Supabase Cloud
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    const { data, error } = await sb.from("sponsors").select("*").order("id", { ascending: true });
+                    if (!error && Array.isArray(data) && data.length > 0) {
+                        const map = new Map();
+                        sponsors.forEach(s => map.set(s.id || s.name, s));
+                        data.forEach(s => map.set(s.id || s.name, s));
+                        sponsors = Array.from(map.values());
+                    }
+                } catch(sbErr) {
+                    console.warn("Supabase loadAdminSponsors notice:", sbErr);
+                }
+            }
+
+            // 3. Fallback to LocalStorage
+            if (sponsors.length === 0) {
                 try {
                     const local = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
-                    if (local.length > 0) adminSponsorsData = local;
+                    if (Array.isArray(local) && local.length > 0) {
+                        sponsors = local;
+                    }
                 } catch(e){}
             }
 
+            // 4. Fallback to Default Curated Sponsors
+            if (sponsors.length === 0) {
+                sponsors = JSON.parse(JSON.stringify(DEFAULT_SPONSORS_LIST));
+                try {
+                    localStorage.setItem("mrunmay_sponsors", JSON.stringify(sponsors));
+                } catch(e){}
+            }
+
+            adminSponsorsData = sponsors;
+            renderAdminSponsorsTable();
+        }
+
+        function renderAdminSponsorsTable() {
+            const tbody = document.getElementById("adminSponsorsTableBody");
+            const badge = document.getElementById("adminSponsorsBadge");
+            const countSpan = document.getElementById("adminSponsorsCount");
+            const statCount = document.getElementById("statSponsorsCount");
+
             if (countSpan) countSpan.textContent = adminSponsorsData.length;
             if (badge) badge.textContent = `${adminSponsorsData.length} Total Partners`;
+            if (statCount) statCount.textContent = adminSponsorsData.length;
+
+            if (!tbody) return;
 
             if (adminSponsorsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs">No sponsors added yet. Click "Add New Sponsor" to showcase partners.</td></tr>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="p-8 text-center text-slate-400 text-xs">
+                            No sponsors added yet. 
+                            <button type="button" onclick="openAddSponsorForm()" class="text-amber-400 font-bold underline hover:text-amber-300 ml-1">
+                                Click here to Add New Sponsor
+                            </button>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
@@ -3959,7 +4355,18 @@
                 return `
                     <tr class="hover:bg-slate-900/60 transition">
                         <td class="p-3.5">${logoHtml}</td>
-                        <td class="p-3.5 font-bold text-white text-xs">${s.name}</td>
+                        <td class="p-3.5">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-bold text-white text-xs">${s.name}</span>
+                                <button type="button" onclick="editSponsorById(${s.id})" class="px-2.5 py-0.5 rounded-md bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black shadow flex items-center gap-1 transition active:scale-95 cursor-pointer" title="Edit Partner Details">
+                                    ✏️ Edit
+                                </button>
+                                <button type="button" onclick="deleteSponsor(${s.id})" class="px-2 py-0.5 rounded-md bg-rose-900/60 hover:bg-rose-700 text-rose-200 text-[10px] font-bold border border-rose-500/40 cursor-pointer" title="Delete Sponsor">
+                                    🗑️
+                                </button>
+                            </div>
+                            <span class="text-[10px] text-amber-300/80 font-medium">${s.category || 'Event Partner'}</span>
+                        </td>
                         <td class="p-3.5">
                             <span class="px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/30 text-[10px] font-bold">
                                 ${s.category || 'Event Partner'}
@@ -3968,16 +4375,16 @@
                         <td class="p-3.5">${contactHtml}</td>
                         <td class="p-3.5">${linkHtml}</td>
                         <td class="p-3.5">${statusBadge}</td>
-                        <td class="p-3.5 text-right">
+                        <td class="p-3.5 text-right whitespace-nowrap">
                             <div class="inline-flex items-center gap-2">
-                                <button type="button" onclick="toggleSponsor(${s.id})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition">
+                                <button type="button" onclick="editSponsorById(${s.id})" class="px-3 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition shadow flex items-center gap-1 cursor-pointer">
+                                    ✏️ Edit
+                                </button>
+                                <button type="button" onclick="deleteSponsor(${s.id})" class="px-3 py-1 rounded-lg bg-rose-900/60 hover:bg-rose-700 text-rose-200 hover:text-white text-xs font-bold transition border border-rose-600/40 cursor-pointer">
+                                    🗑️ Delete
+                                </button>
+                                <button type="button" onclick="toggleSponsor(${s.id})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
                                     ${s.enabled == 1 ? 'Hide' : 'Show'}
-                                </button>
-                                <button type="button" onclick="editSponsorById(${s.id})" class="px-2.5 py-1 rounded-lg bg-amber-400/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950 text-[11px] font-bold transition">
-                                    Edit
-                                </button>
-                                <button type="button" onclick="deleteSponsor(${s.id})" class="px-2.5 py-1 rounded-lg bg-rose-900/40 hover:bg-rose-800 text-rose-300 text-[11px] font-bold transition">
-                                    Delete
                                 </button>
                             </div>
                         </td>
@@ -3987,6 +4394,7 @@
         }
 
         function openAddSponsorForm() {
+            switchAdminTab('sponsors');
             document.getElementById("sponsorFormId").value = "";
             document.getElementById("sponsorFormName").value = "";
             document.getElementById("sponsorFormCategory").value = "";
@@ -3997,15 +4405,26 @@
             const prev = document.getElementById("sponsorFormLogoPreview");
             if (prev) { prev.src = ""; prev.classList.add("hidden"); }
             document.getElementById("sponsorFormEnabled").checked = true;
-            document.getElementById("sponsorFormTitle").textContent = "Add New Partner / Sponsor";
-            document.getElementById("adminSponsorFormBox").classList.remove("hidden");
+            document.getElementById("sponsorFormTitle").textContent = "➕ Add New Partner / Sponsor";
+            
+            const formBox = document.getElementById("adminSponsorFormBox");
+            if (formBox) {
+                formBox.classList.remove("hidden");
+                formBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            setTimeout(() => {
+                const nameInp = document.getElementById("sponsorFormName");
+                if (nameInp) nameInp.focus();
+            }, 100);
         }
 
         function closeSponsorForm() {
-            document.getElementById("adminSponsorFormBox").classList.add("hidden");
+            const formBox = document.getElementById("adminSponsorFormBox");
+            if (formBox) formBox.classList.add("hidden");
         }
 
         function editSponsorById(id) {
+            switchAdminTab('sponsors');
             const s = adminSponsorsData.find(item => item.id == id);
             if (!s) return;
             document.getElementById("sponsorFormId").value = s.id;
@@ -4026,15 +4445,24 @@
                 }
             }
             document.getElementById("sponsorFormEnabled").checked = s.enabled == 1;
-            document.getElementById("sponsorFormTitle").textContent = `Edit Sponsor: ${s.name}`;
-            document.getElementById("adminSponsorFormBox").classList.remove("hidden");
+            document.getElementById("sponsorFormTitle").textContent = `✏️ Edit Sponsor: ${s.name}`;
+            
+            const formBox = document.getElementById("adminSponsorFormBox");
+            if (formBox) {
+                formBox.classList.remove("hidden");
+                formBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            setTimeout(() => {
+                const nameInp = document.getElementById("sponsorFormName");
+                if (nameInp) nameInp.focus();
+            }, 100);
         }
 
         async function handleSaveSponsor(e) {
             e.preventDefault();
             const sid = document.getElementById("sponsorFormId").value;
             const name = document.getElementById("sponsorFormName").value.trim();
-            const cat = document.getElementById("sponsorFormCategory").value.trim();
+            const cat = document.getElementById("sponsorFormCategory").value.trim() || "Event Partner";
             const logo = document.getElementById("sponsorFormLogoUrl").value.trim();
             const web = document.getElementById("sponsorFormWebUrl").value.trim();
             const phone = document.getElementById("sponsorFormPhone").value.trim();
@@ -4046,8 +4474,11 @@
                 return;
             }
 
-            const sponsorPayload = {
-                pin: currentAdminPin,
+            const pin = currentAdminPin || localStorage.getItem("admin_custom_pin") || "1234";
+            const spId = sid ? parseInt(sid) : Date.now();
+
+            const spObj = {
+                id: spId,
                 name: name,
                 category: cat,
                 logo_url: logo,
@@ -4055,22 +4486,21 @@
                 phone: phone,
                 email: email,
                 enabled: enabled,
-                sponsor_id: sid ? parseInt(sid) : null
+                display_order: 1
             };
 
-            // Save to LocalStorage immediately
+            // 1. Immediately update in memory & UI
+            const idx = adminSponsorsData.findIndex(s => s.id == spId || s.name.toLowerCase() === name.toLowerCase());
+            if (idx >= 0) {
+                adminSponsorsData[idx] = spObj;
+            } else {
+                adminSponsorsData.push(spObj);
+            }
+            renderAdminSponsorsTable();
+
+            // 2. Save to LocalStorage immediately
             try {
                 let localSponsors = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
-                const spObj = {
-                    id: sid ? parseInt(sid) : Date.now(),
-                    name,
-                    category: cat,
-                    logo_url: logo,
-                    website_url: web,
-                    phone,
-                    email,
-                    enabled
-                };
                 const existingIdx = localSponsors.findIndex(s => s.id == spObj.id || s.name.toLowerCase() === name.toLowerCase());
                 if (existingIdx >= 0) {
                     localSponsors[existingIdx] = spObj;
@@ -4080,87 +4510,131 @@
                 localStorage.setItem("mrunmay_sponsors", JSON.stringify(localSponsors));
             } catch(e){}
 
-            // Sync with Supabase Cloud
+            // 3. Sync with Supabase Cloud
             const sb = getSupabaseClient();
             if (sb) {
                 try {
                     await sb.from("sponsors").upsert([{
+                        id: spId,
                         name: name,
                         category: cat,
                         logo_url: logo,
                         website_url: web,
                         phone: phone,
                         email: email,
-                        enabled: enabled
-                    }], { onConflict: "name" });
+                        enabled: enabled,
+                        display_order: 1
+                    }], { onConflict: "id" });
                 } catch(sbErr){
                     console.warn("Supabase sponsor upsert notice:", sbErr);
                 }
             }
 
+            // 4. Sync with Backend FastAPI / SQLite
             try {
-                const res = await fetch("/api/admin/sponsors", {
+                await fetch("/api/admin/sponsors", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(sponsorPayload)
+                    body: JSON.stringify({
+                        pin: pin,
+                        name: name,
+                        category: cat,
+                        logo_url: logo,
+                        website_url: web,
+                        phone: phone,
+                        email: email,
+                        enabled: enabled,
+                        sponsor_id: sid ? parseInt(sid) : null
+                    })
                 });
-
-                if (res.ok) {
-                    alert("Sponsor saved successfully!");
-                    closeSponsorForm();
-                    loadAdminSponsors();
-                    loadPublicSponsors();
-                } else {
-                    const err = await res.json().catch(() => ({}));
-                    alert("Sponsor saved locally! Server note: " + (err.detail || "Saved in browser & cloud"));
-                    closeSponsorForm();
-                    loadAdminSponsors();
-                    loadPublicSponsors();
-                }
             } catch(err) {
-                alert("Sponsor saved locally and in cloud! " + err.message);
-                closeSponsorForm();
-                loadAdminSponsors();
-                loadPublicSponsors();
+                console.warn("Backend save sponsor notice:", err);
             }
+
+            alert(`✅ Sponsor "${name}" saved successfully!`);
+            closeSponsorForm();
+            loadAdminSponsors();
+            loadPublicSponsors();
         }
 
         async function toggleSponsor(id) {
+            const pin = currentAdminPin || localStorage.getItem("admin_custom_pin") || "1234";
+            
+            // Invert in memory immediately
+            const s = adminSponsorsData.find(item => item.id == id);
+            if (s) {
+                s.enabled = s.enabled == 1 ? 0 : 1;
+                renderAdminSponsorsTable();
+            }
+
             try {
-                const res = await fetch(`/api/admin/sponsors/${id}/toggle?pin=${encodeURIComponent(currentAdminPin)}`, {
+                const res = await fetch(`/api/admin/sponsors/${id}/toggle?pin=${encodeURIComponent(pin)}`, {
                     method: "PATCH"
                 });
-                if (res.ok) {
-                    loadAdminSponsors();
-                    loadPublicSponsors();
-                }
             } catch(err) {
-                alert("Error toggling sponsor: " + err.message);
+                console.warn("Error toggling sponsor:", err);
             }
-        }
-
-        async function deleteSponsor(id) {
-            if (!confirm("Are you sure you want to remove this sponsor?")) return;
-            try {
-                await fetch(`/api/admin/sponsors/${id}?pin=${encodeURIComponent(currentAdminPin)}`, {
-                    method: "DELETE"
-                });
-            } catch(err){}
 
             try {
                 let localSponsors = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
-                localSponsors = localSponsors.filter(s => s.id != id);
+                const item = localSponsors.find(x => x.id == id);
+                if (item) item.enabled = item.enabled == 1 ? 0 : 1;
                 localStorage.setItem("mrunmay_sponsors", JSON.stringify(localSponsors));
             } catch(e){}
 
             const sb = getSupabaseClient();
-            if (sb) {
+            if (sb && s) {
                 try {
-                    await sb.from("sponsors").delete().eq("id", id);
+                    await sb.from("sponsors").update({ enabled: s.enabled }).eq("id", id);
                 } catch(e){}
             }
 
-            alert("Sponsor removed successfully!");
+            loadAdminSponsors();
+            loadPublicSponsors();
+        }
+
+        async function deleteSponsor(id) {
+            const s = adminSponsorsData.find(item => item.id == id);
+            const sName = s ? s.name : `Sponsor #${id}`;
+            if (!confirm(`⚠️ Are you sure you want to PERMANENTLY DELETE Sponsor "${sName}"?\n\nThis will remove the sponsor from the admin portal, public dashboard, database, and Supabase cloud. This action CANNOT be undone.`)) {
+                return;
+            }
+
+            // 1. Immediately remove from memory and UI
+            adminSponsorsData = adminSponsorsData.filter(item => item.id != id);
+            publicSponsorsList = publicSponsorsList.filter(item => item.id != id);
+            renderAdminSponsorsTable();
+            renderPublicSponsorsViews();
+
+            const pin = currentAdminPin || localStorage.getItem("admin_custom_pin") || "1234";
+
+            // 2. Call backend API
+            try {
+                await fetch(`/api/admin/sponsors/${id}?pin=${encodeURIComponent(pin)}`, {
+                    method: "DELETE"
+                });
+            } catch(err){
+                console.warn("Backend delete sponsor notice:", err);
+            }
+
+            // 3. Delete from LocalStorage
+            try {
+                let localSponsors = JSON.parse(localStorage.getItem("mrunmay_sponsors") || "[]");
+                localSponsors = localSponsors.filter(item => item.id != id);
+                localStorage.setItem("mrunmay_sponsors", JSON.stringify(localSponsors));
+            } catch(e){}
+
+            // 4. Delete from Supabase Cloud
+            const sb = getSupabaseClient();
+            if (sb) {
+                try {
+                    await sb.from("sponsors").delete().eq("id", id);
+                } catch(e){
+                    console.warn("Supabase delete sponsor notice:", e);
+                }
+            }
+
+            alert(`✅ Sponsor "${sName}" permanently deleted successfully!`);
             loadAdminSponsors();
             loadPublicSponsors();
         }
@@ -4327,81 +4801,116 @@
             const mode = document.getElementById("adminPassMode").value;
             const total = calculateAdminPassTotal();
 
-            let highest = 300;
-            try {
-                const storedTickets = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
-                storedTickets.forEach(t => {
-                    const m = (t.pass_id || "").match(/\d+/g);
-                    if (m) {
-                        const num = parseInt(m[m.length - 1]);
-                        if (num > highest) highest = num;
-                    }
-                });
-            } catch(e){}
-            const passId = `Dandia/2026/${highest + 1}`;
+            let passIds = [];
+            let serverSuccess = false;
+            let responseData = null;
 
-            const ticketObj = {
-                id: Date.now(),
-                pass_id: passId,
-                event_id: currentlyBookingEvent ? currentlyBookingEvent.id : 1,
-                event_title: currentlyBookingEvent ? currentlyBookingEvent.title : "Family Dandia Night 2026 - Melody Night Show",
-                customer_name: custName,
-                phone: phone,
-                city: "Trilochan Resorts, Sundarpada, BBSR",
-                date_selected: dateSel,
-                quantity: qty,
-                rate_per_ticket: total > 0 ? Math.round(total / qty) : 0,
-                total_amount: total,
-                utr_reference: `Admin-${mode.substring(0, 10)}`,
-                payment_status: "Paid",
-                booking_status: "Confirmed",
-                created_at: new Date().toISOString()
-            };
-
-            // Save to local storage
+            // 1. Call Backend API
             try {
-                const existing = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
-                existing.unshift(ticketObj);
-                localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(existing));
-            } catch(err){}
-
-            // Try save to server
-            try {
-                await fetch(`/api/tickets?pin=${encodeURIComponent(currentAdminPin)}`, {
+                const res = await fetch(`/api/tickets?pin=${encodeURIComponent(currentAdminPin)}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        pass_id: passId,
-                        event_id: ticketObj.event_id,
-                        event_title: ticketObj.event_title,
-                        customer_name: ticketObj.customer_name,
-                        phone: ticketObj.phone,
-                        city: ticketObj.city,
-                        date_selected: ticketObj.date_selected,
-                        quantity: ticketObj.quantity,
-                        rate_per_ticket: ticketObj.rate_per_ticket,
-                        total_amount: ticketObj.total_amount,
-                        utr_reference: ticketObj.utr_reference,
+                        event_id: currentlyBookingEvent ? currentlyBookingEvent.id : 1,
+                        event_title: currentlyBookingEvent ? currentlyBookingEvent.title : "Family Dandia Night 2026 - Melody Night Show",
+                        customer_name: custName,
+                        phone: phone,
+                        city: "Trilochan Resorts, Sundarpada, BBSR",
+                        date_selected: dateSel,
+                        quantity: qty,
+                        rate_per_ticket: total > 0 ? Math.round(total / qty) : 0,
+                        total_amount: total,
+                        utr_reference: `Admin-${mode.substring(0, 10)}`,
                         payment_status: "Paid"
                     })
                 });
+                if (res.ok) {
+                    const parsed = await res.json();
+                    if (parsed && parsed.success) {
+                        serverSuccess = true;
+                        responseData = parsed;
+                        if (parsed.pass_ids && Array.isArray(parsed.pass_ids) && parsed.pass_ids.length > 0) {
+                            passIds = parsed.pass_ids;
+                        } else if (parsed.pass_id) {
+                            passIds = [parsed.pass_id];
+                        }
+                    }
+                }
+            } catch(err){
+                console.warn("Admin issue pass server error:", err);
+            }
+
+            // Fallback generation if offline
+            if (!serverSuccess || passIds.length === 0) {
+                let highest = 300;
+                try {
+                    const storedTickets = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
+                    storedTickets.forEach(t => {
+                        const m = (t.pass_id || "").match(/\d+/g);
+                        if (m) {
+                            const num = parseInt(m[m.length - 1]);
+                            if (num > highest) highest = num;
+                        }
+                    });
+                } catch(e){}
+                passIds = [];
+                for (let k = 1; k <= qty; k++) {
+                    passIds.push(`Dandia/2026/${highest + k}`);
+                }
+            }
+
+            const perTicketAmt = qty > 0 ? Math.round(total / qty) : 0;
+            const generatedTickets = [];
+
+            passIds.forEach((pid, idx) => {
+                const ticketObj = {
+                    id: Date.now() + idx,
+                    pass_id: pid,
+                    pass_ids: passIds,
+                    event_id: currentlyBookingEvent ? currentlyBookingEvent.id : 1,
+                    event_title: currentlyBookingEvent ? currentlyBookingEvent.title : "Family Dandia Night 2026 - Melody Night Show",
+                    customer_name: custName,
+                    phone: phone,
+                    city: "Trilochan Resorts, Sundarpada, BBSR",
+                    date_selected: dateSel,
+                    quantity: 1,
+                    ticket_index: idx + 1,
+                    total_tickets_in_booking: qty,
+                    rate_per_ticket: perTicketAmt,
+                    total_amount: perTicketAmt,
+                    utr_reference: qty > 1 ? `Admin-${mode.substring(0, 10)} [Pass ${idx+1}/${qty}]` : `Admin-${mode.substring(0, 10)}`,
+                    payment_status: "Paid",
+                    booking_status: "Confirmed",
+                    created_at: new Date().toISOString()
+                };
+                generatedTickets.push(ticketObj);
+            });
+
+            // Save to local storage & memory
+            try {
+                const existing = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
+                generatedTickets.forEach(tObj => {
+                    existing.unshift(tObj);
+                    allTickets.unshift(tObj);
+                });
+                localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(existing));
             } catch(err){}
 
-            // Sync to Supabase Cloud
+            // Sync all generated passes to Supabase Cloud
             const sb = getSupabaseClient();
             if (sb) {
                 try {
-                    await sb.from("tickets").upsert([ticketObj], { onConflict: "pass_id" });
+                    await sb.from("tickets").upsert(generatedTickets, { onConflict: "pass_id" });
                     await sb.from("payments").upsert([{
-                        payment_id: `ADMIN-${passId}`,
+                        payment_id: `ADMIN-${passIds[0]}`,
                         order_id: "COUNTER",
-                        service_type: `Event Ticket: ${ticketObj.event_title}`,
-                        customer_name: ticketObj.customer_name,
-                        phone: ticketObj.phone,
-                        amount: ticketObj.total_amount,
+                        service_type: `Event Ticket: Family Dandia Night 2026`,
+                        customer_name: custName,
+                        phone: phone,
+                        amount: total,
                         payment_mode: mode,
                         status: "Success",
-                        pass_id: passId,
+                        pass_id: passIds.join(", "),
                         created_at: new Date().toISOString()
                     }], { onConflict: "payment_id" });
                 } catch(sbErr){
@@ -4409,11 +4918,15 @@
                 }
             }
 
-            allTickets.unshift(ticketObj);
             renderTicketsTable();
             closeAdminIssuePassModal();
-            showGeneratedPass({ ticket: ticketObj, pass_id: passId });
-            alert(`✅ Pass ${passId} issued successfully!`);
+            showGeneratedPass({
+                ticket: generatedTickets[0],
+                pass_id: passIds[0],
+                pass_ids: passIds,
+                all_generated_tickets: generatedTickets
+            });
+            alert(`✅ ${passIds.length} Pass(es) [${passIds.join(", ")}] issued successfully!`);
         }
 
         // Mobile Menu Toggle

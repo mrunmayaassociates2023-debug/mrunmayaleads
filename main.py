@@ -296,7 +296,7 @@ def verify_razorpay_payment_endpoint(req: RazorpayVerifyPaymentRequest):
 
     if is_ticket:
         # Signature is Verified Genuine -> Save Confirmed Ticket in Database (auto-logs to payments table)
-        ticket_id, official_pass_id, created_at = save_ticket(
+        ticket_id, official_pass_id, created_at, allocated_pass_ids = save_ticket(
             pass_id=None,
             event_id=req.event_id or 1,
             event_title=req.event_title or "Family Dandia Night 2026 - Melody Show",
@@ -317,18 +317,20 @@ def verify_razorpay_payment_endpoint(req: RazorpayVerifyPaymentRequest):
             gst_percent=float(req.gst_percent or 0.0)
         )
 
+        passes_text = ", ".join(allocated_pass_ids) if len(allocated_pass_ids) > 1 else official_pass_id
+
         msg_lines = [
             f"🎫 *ENTRY TICKET CONFIRMATION - MRUNMAYA ASSOCIATES*",
             f"Event: *{req.event_title or 'Family Dandia Night 2026'}*",
-            f"Ticket Sl.No: *{official_pass_id}*",
+            f"Ticket Sl.No(s): *{passes_text}*",
             f"Name: *{req.customer_name}*",
             f"Phone: {clean_phone}",
-            f"Tickets: *{req.quantity or 1} Person(s)*",
+            f"Tickets: *{len(allocated_pass_ids)} Person(s) / Lucky Draw Entries*",
             f"Date: {req.date_selected or '17/10/2026 (Saturday)'}",
             f"Amount Paid: ₹{req.total_amount}",
             f"Payment ID: {req.razorpay_payment_id}",
             "",
-            "✅ Verified Online Payment. Please present your digital ticket or printout at the entrance gate. Enjoy the show!"
+            "✅ Verified Online Payment. Each pass has its own Lucky Draw serial number. Please present your digital ticket or printout at the entrance gate. Enjoy the show!"
         ]
         encoded_msg = urllib.parse.quote("\n".join(msg_lines))
         whatsapp_url = f"https://wa.me/{clean_owner}?text={encoded_msg}"
@@ -336,13 +338,15 @@ def verify_razorpay_payment_endpoint(req: RazorpayVerifyPaymentRequest):
         ticket_obj = {
             "id": ticket_id,
             "pass_id": official_pass_id,
+            "pass_ids": allocated_pass_ids,
+            "passes_display": passes_text,
             "event_id": req.event_id or 1,
             "event_title": req.event_title or "Family Dandia Night 2026",
             "customer_name": req.customer_name,
             "phone": clean_phone,
             "city": req.city or "Bhubaneswar",
             "date_selected": req.date_selected or "17/10/2026 (Saturday)",
-            "quantity": req.quantity or 1,
+            "quantity": len(allocated_pass_ids),
             "rate_per_ticket": req.rate_per_ticket or 299,
             "total_amount": req.total_amount,
             "utr_reference": f"RZP: {req.razorpay_payment_id}",
@@ -355,6 +359,9 @@ def verify_razorpay_payment_endpoint(req: RazorpayVerifyPaymentRequest):
             "success": True,
             "ticket_id": ticket_id,
             "pass_id": official_pass_id,
+            "pass_ids": allocated_pass_ids,
+            "passes_display": passes_text,
+            "quantity": len(allocated_pass_ids),
             "created_at": created_at,
             "whatsapp_url": whatsapp_url,
             "ticket": ticket_obj
@@ -470,7 +477,7 @@ def create_ticket(req: TicketBookingRequest, pin: Optional[str] = Query(None)):
             detail="Direct manual booking is disabled. Entry tickets can only be generated through verified Razorpay online payment."
         )
 
-    ticket_id, official_pass_id, created_at = save_ticket(
+    ticket_id, official_pass_id, created_at, allocated_pass_ids = save_ticket(
         pass_id=req.pass_id,
         event_id=req.event_id,
         event_title=req.event_title,
@@ -488,6 +495,8 @@ def create_ticket(req: TicketBookingRequest, pin: Optional[str] = Query(None)):
         gst_percent=float(req.gst_percent or 0.0)
     )
 
+    passes_text = ", ".join(allocated_pass_ids) if len(allocated_pass_ids) > 1 else official_pass_id
+
     owner_phone = settings.get("owner_phone", "917992993433")
     clean_owner = "".join(filter(str.isdigit, owner_phone))
     if len(clean_owner) == 10:
@@ -496,13 +505,13 @@ def create_ticket(req: TicketBookingRequest, pin: Optional[str] = Query(None)):
     msg_lines = [
         f"🎫 *ENTRY TICKET CONFIRMATION - MRUNMAYA ASSOCIATES*",
         f"Event: *{req.event_title}*",
-        f"Ticket Sl.No: *{official_pass_id}*",
+        f"Ticket Sl.No(s): *{passes_text}*",
         f"Name: *{req.customer_name}*",
         f"Phone: {clean_phone}",
-        f"Tickets: *{req.quantity} Person(s)*",
+        f"Tickets: *{len(allocated_pass_ids)} Person(s) / Lucky Draw Entries*",
         f"Date: {req.date_selected or '18-19 Oct 2026'}",
         f"Amount Paid: ₹{req.total_amount}",
-        f"UTR Ref: {req.utr_reference or 'Online UPI'}",
+        f"UTR Ref: {req.utr_reference or 'Manual Admin Issue'}",
         "",
         "Please present your digital ticket or printout at the entrance gate. Enjoy the show!"
     ]
@@ -513,6 +522,9 @@ def create_ticket(req: TicketBookingRequest, pin: Optional[str] = Query(None)):
         "success": True,
         "ticket_id": ticket_id,
         "pass_id": official_pass_id,
+        "pass_ids": allocated_pass_ids,
+        "passes_display": passes_text,
+        "quantity": len(allocated_pass_ids),
         "created_at": created_at,
         "whatsapp_url": whatsapp_url
     }
@@ -572,11 +584,11 @@ def purge_cancelled_tickets_endpoint(pin: str = Query(...)):
     count = purge_expired_cancelled_tickets()
     return {"success": True, "purged_count": count, "message": f"Purged {count} expired cancelled tickets."}
 
-@app.delete("/api/admin/tickets/{ticket_id}")
-def remove_ticket_endpoint(ticket_id: int, pin: str = Query(...)):
+@app.delete("/api/admin/tickets/{ticket_identifier:path}")
+def remove_ticket_endpoint(ticket_identifier: str, pin: str = Query(...)):
     verify_admin_pin(pin)
-    delete_ticket(ticket_id)
-    return {"success": True, "message": "Ticket deleted successfully"}
+    delete_ticket(ticket_identifier)
+    return {"success": True, "message": f"Ticket {ticket_identifier} permanently deleted from database and cloud."}
 
 @app.get("/api/tickets/verify-pass/{pass_id:path}")
 def verify_pass_endpoint(pass_id: str):
@@ -947,14 +959,28 @@ def get_index_file():
 def read_root():
     index_path = get_index_file()
     if index_path:
-        return FileResponse(index_path)
+        return FileResponse(
+            index_path,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return {"message": "MRUNMAYA ASSOCIATES API is Running."}
 
 @app.get("/admin")
 def read_admin():
     index_path = get_index_file()
     if index_path:
-        return FileResponse(index_path)
+        return FileResponse(
+            index_path,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return {"message": "Admin portal loading..."}
 
 @app.get("/download-zip")
@@ -973,7 +999,14 @@ def read_root_file(filename: str):
     for d in [BASE_DIR, STATIC_DIR]:
         fpath = os.path.join(d, filename)
         if os.path.isfile(fpath):
-            return FileResponse(fpath)
+            headers = {}
+            if filename.endswith(('.html', '.js', '.json')):
+                headers = {
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
+            return FileResponse(fpath, headers=headers)
     raise HTTPException(status_code=404, detail="File not found")
 
 if __name__ == "__main__":
