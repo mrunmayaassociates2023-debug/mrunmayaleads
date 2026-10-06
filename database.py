@@ -129,6 +129,10 @@ def init_db():
         cursor.execute("ALTER TABLE tickets ADD COLUMN gst_percent REAL DEFAULT 0")
     if "cancelled_at" not in ticket_cols:
         cursor.execute("ALTER TABLE tickets ADD COLUMN cancelled_at TEXT")
+    if "is_deleted" not in ticket_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN is_deleted INTEGER DEFAULT 0")
+    if "deleted_at" not in ticket_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN deleted_at TEXT")
 
     # Ensure phone and email exist in sponsors table
     cursor.execute("PRAGMA table_info(sponsors)")
@@ -737,31 +741,68 @@ def purge_expired_cancelled_tickets():
         print(f"Purge cancelled tickets notice: {e}")
         return 0
 
-def get_all_tickets(search: str = None):
+def auto_backup_tickets():
+    """Auto-backs up all tickets to tickets_backup_archive.json and jsonl"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM tickets ORDER BY id ASC")
+        rows = cursor.fetchall()
+        all_data = [dict(r) for r in rows]
+        conn.close()
+        
+        backup_path = os.path.join(os.path.dirname(__file__), "tickets_backup_archive.json")
+        with open(backup_path, "w", encoding="utf-8") as f:
+            json.dump(all_data, f, indent=2, ensure_ascii=False)
+            
+        backup_jsonl = os.path.join(os.path.dirname(__file__), "tickets_backup_archive.jsonl")
+        with open(backup_jsonl, "w", encoding="utf-8") as f:
+            for item in all_data:
+                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        return True
+    except Exception as e:
+        print(f"Auto-backup tickets warning: {e}")
+        return False
+
+def get_all_tickets(search: str = None, include_deleted: bool = False):
     # Automatically purge tickets cancelled more than 24 hours ago
     purge_expired_cancelled_tickets()
     
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Ensure tombstone table exists and clean up any resurrection
+    # Ensure tombstone table exists
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS deleted_pass_ids (
         pass_id TEXT PRIMARY KEY,
         deleted_at TEXT NOT NULL
     )
     """)
-    cursor.execute("DELETE FROM tickets WHERE pass_id IN (SELECT pass_id FROM deleted_pass_ids)")
-    conn.commit()
-
-    query = "SELECT * FROM tickets WHERE pass_id NOT IN (SELECT pass_id FROM deleted_pass_ids)"
+    
+    conds = []
     params = []
+    if not include_deleted:
+        conds.append("(is_deleted = 0 OR is_deleted IS NULL)")
+        conds.append("pass_id NOT IN (SELECT pass_id FROM deleted_pass_ids)")
+        
     if search:
-        query += " AND (pass_id LIKE ? OR customer_name LIKE ? OR phone LIKE ? OR event_title LIKE ?)"
+        conds.append("(pass_id LIKE ? OR customer_name LIKE ? OR phone LIKE ? OR event_title LIKE ?)")
         term = f"%{search}%"
         params.extend([term, term, term, term])
-    query += " ORDER BY id DESC"
+        
+    where_clause = ("WHERE " + " AND ".join(conds)) if conds else ""
+    query = f"SELECT * FROM tickets {where_clause} ORDER BY id DESC"
     cursor.execute(query, params)
+    rows = cursor.fetchall()
+    tickets = [dict(row) for row in rows]
+    conn.close()
+    return tickets
+
+def get_recycle_bin_tickets():
+    """Retrieve all tickets currently stored in the Recycle Bin"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tickets WHERE is_deleted = 1 ORDER BY deleted_at DESC, id DESC")
     rows = cursor.fetchall()
     tickets = [dict(row) for row in rows]
     conn.close()
@@ -777,21 +818,19 @@ def update_ticket_status(ticket_id: int, status: str):
         cursor.execute("UPDATE tickets SET booking_status = ?, cancelled_at = NULL WHERE id = ?", (status, ticket_id))
     conn.commit()
     conn.close()
+    auto_backup_tickets()
     return True
 
-def delete_ticket(ticket_identifier):
+def delete_ticket(ticket_identifier, permanent: bool = False):
+    """
+    If permanent=False: Moves ticket to Recycle Bin (Trash) with deleted_at timestamp.
+    If permanent=True: Completely purges ticket from DB, payments, and Supabase.
+    """
     clean_id = str(ticket_identifier).strip()
     conn = get_db_connection()
     cursor = conn.cursor()
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS deleted_pass_ids (
-        pass_id TEXT PRIMARY KEY,
-        deleted_at TEXT NOT NULL
-    )
-    """)
-    
-    # Check if identifier matches id or pass_id (EXACT match only)
     cursor.execute("""
         SELECT id, pass_id FROM tickets 
         WHERE id = ? 
@@ -799,10 +838,28 @@ def delete_ticket(ticket_identifier):
            OR LOWER(pass_id) = LOWER(?)
     """, (int(clean_id) if clean_id.isdigit() else -1, clean_id, clean_id))
     rows = cursor.fetchall()
-    
+
+    if not rows and ("dandia" in clean_id.lower() or "/" in clean_id):
+        cursor.execute("SELECT id, pass_id FROM tickets WHERE pass_id = ? OR LOWER(pass_id) = LOWER(?)", (clean_id, clean_id))
+        rows = cursor.fetchall()
+
+    if not permanent:
+        # Move to Recycle Bin (soft delete)
+        for r in rows:
+            cursor.execute("UPDATE tickets SET is_deleted = 1, deleted_at = ? WHERE id = ?", (now_str, r["id"]))
+        conn.commit()
+        conn.close()
+        auto_backup_tickets()
+        return True
+
+    # Permanent delete
     deleted_passes = set()
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS deleted_pass_ids (
+        pass_id TEXT PRIMARY KEY,
+        deleted_at TEXT NOT NULL
+    )
+    """)
     for r in rows:
         pid = r["pass_id"]
         if pid:
@@ -810,23 +867,104 @@ def delete_ticket(ticket_identifier):
             cursor.execute("INSERT OR REPLACE INTO deleted_pass_ids (pass_id, deleted_at) VALUES (?, ?)", (pid, now_str))
             cursor.execute("DELETE FROM payments WHERE pass_id = ? OR payment_id LIKE ? OR details LIKE ?", (pid, f"%{pid}%", f"%{pid}%"))
         cursor.execute("DELETE FROM tickets WHERE id = ?", (r["id"],))
-        
-    if not rows and ("dandia" in clean_id.lower() or "/" in clean_id):
-        deleted_passes.add(clean_id)
-        cursor.execute("INSERT OR REPLACE INTO deleted_pass_ids (pass_id, deleted_at) VALUES (?, ?)", (clean_id, now_str))
-        cursor.execute("DELETE FROM tickets WHERE pass_id = ? OR LOWER(pass_id) = LOWER(?)", (clean_id, clean_id))
-        cursor.execute("DELETE FROM payments WHERE pass_id = ? OR payment_id LIKE ?", (clean_id, f"%{clean_id}%"))
 
     conn.commit()
     conn.close()
-    
-    # Delete permanently from Supabase Cloud as well
+
+    # Permanently delete from Supabase Cloud as well
     for pid in deleted_passes:
         sync_supabase_delete("tickets", "pass_id", pid)
         sync_supabase_delete("payments", "pass_id", pid)
     if clean_id.isdigit():
         sync_supabase_delete("tickets", "id", clean_id)
         
+    auto_backup_tickets()
+    return True
+
+def restore_ticket_from_recycle_bin(ticket_identifier):
+    """Restore a deleted ticket from Recycle Bin back to active status"""
+    clean_id = str(ticket_identifier).strip()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT id, pass_id, event_id, event_title, customer_name, phone, email, city, date_selected, quantity, rate_per_ticket, total_amount, payment_status, utr_reference, booking_status, razorpay_order_id, razorpay_payment_id, created_at 
+        FROM tickets 
+        WHERE id = ? 
+           OR pass_id = ? 
+           OR LOWER(pass_id) = LOWER(?)
+    """, (int(clean_id) if clean_id.isdigit() else -1, clean_id, clean_id))
+    rows = cursor.fetchall()
+    
+    restored_list = []
+    for r in rows:
+        cursor.execute("UPDATE tickets SET is_deleted = 0, deleted_at = NULL WHERE id = ?", (r["id"],))
+        pid = r["pass_id"]
+        if pid:
+            cursor.execute("DELETE FROM deleted_pass_ids WHERE pass_id = ? OR LOWER(pass_id) = LOWER(?)", (pid, pid))
+            restored_list.append(dict(r))
+            
+    conn.commit()
+    conn.close()
+    
+    # Re-sync to Supabase Cloud
+    for t in restored_list:
+        sync_supabase_upsert("tickets", {
+            "pass_id": t["pass_id"],
+            "event_id": t["event_id"],
+            "event_title": t["event_title"],
+            "customer_name": t["customer_name"],
+            "phone": t["phone"],
+            "email": t["email"],
+            "city": t["city"],
+            "date_selected": t["date_selected"],
+            "quantity": t["quantity"],
+            "rate_per_ticket": t["rate_per_ticket"],
+            "total_amount": t["total_amount"],
+            "payment_status": t["payment_status"],
+            "utr_reference": t["utr_reference"],
+            "booking_status": "Confirmed",
+            "razorpay_order_id": t.get("razorpay_order_id") or "",
+            "razorpay_payment_id": t.get("razorpay_payment_id") or "",
+            "created_at": t.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+        
+    auto_backup_tickets()
+    return True
+
+def restore_all_recycle_bin_tickets():
+    """Restore all tickets in Recycle Bin back to active status"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tickets SET is_deleted = 0, deleted_at = NULL WHERE is_deleted = 1")
+    cursor.execute("DELETE FROM deleted_pass_ids")
+    conn.commit()
+    conn.close()
+    auto_backup_tickets()
+    return True
+
+def empty_recycle_bin():
+    """Permanently delete all tickets currently in Recycle Bin"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, pass_id FROM tickets WHERE is_deleted = 1")
+    rows = cursor.fetchall()
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    deleted_passes = []
+    for r in rows:
+        pid = r["pass_id"]
+        if pid:
+            deleted_passes.append(pid)
+            cursor.execute("INSERT OR REPLACE INTO deleted_pass_ids (pass_id, deleted_at) VALUES (?, ?)", (pid, now_str))
+        cursor.execute("DELETE FROM tickets WHERE id = ?", (r["id"],))
+    conn.commit()
+    conn.close()
+    
+    for pid in deleted_passes:
+        sync_supabase_delete("tickets", "pass_id", pid)
+        sync_supabase_delete("payments", "pass_id", pid)
+        
+    auto_backup_tickets()
     return True
 
 def get_ticket_by_pass_id(pass_id: str):

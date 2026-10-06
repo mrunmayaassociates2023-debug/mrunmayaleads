@@ -122,7 +122,7 @@ def generate_ticket_image(
     f_title = get_font(30, bold=True)
     f_subtitle = get_font(16, bold=True)
     f_h2 = get_font(18, bold=True)
-    f_pass_id = get_font(30, bold=True)
+    f_pass_id = get_font(38, bold=True)
     f_label = get_font(13, bold=False)
     f_val = get_font(16, bold=True)
     f_qr_title = get_font(15, bold=True)
@@ -168,21 +168,26 @@ def generate_ticket_image(
     draw.text((margin + 28, banner_y + 76), "Show Timing: 7:00 PM TO 10:00 PM   |   Official Dandia Night Voucher", fill=NAVY_LIGHT, font=get_font(14, bold=True))
 
     # =========================================================================
-    # 3. PASS SERIAL NUMBER & STATUS BAR
+    # 3. PASS SERIAL NUMBER & STATUS BAR (HUGE, BOLD, HIGH-CONTRAST BADGE)
     # =========================================================================
     bar_y = banner_y + banner_h + 12
-    bar_h = 56
+    bar_h = 72
     draw.rectangle([margin + 16, bar_y, WIDTH - margin - 16, bar_y + bar_h], fill=NAVY)
 
-    draw.text((margin + 30, bar_y + 12), "PASS SERIAL NO:", fill=(203, 213, 225), font=get_font(13, bold=False))
-    draw.text((margin + 165, bar_y + 9), sl_clean, fill=(254, 240, 138), font=f_pass_id)
+    draw.text((margin + 28, bar_y + 25), "PASS SERIAL NO:", fill=(203, 213, 225), font=get_font(14, bold=True))
+
+    # Bright Gold / Amber Highlight Container for Pass ID
+    pass_badge_x = margin + 175
+    pass_badge_w = 460
+    draw.rectangle([pass_badge_x, bar_y + 8, pass_badge_x + pass_badge_w, bar_y + bar_h - 8], fill=(254, 243, 199), outline=GOLD_BORDER, width=2)
+    draw.text((pass_badge_x + 18, bar_y + 10), sl_clean, fill=NAVY, font=get_font(38, bold=True))
 
     # Status Pill (Confirmed & Paid)
-    stat_w, stat_h = 230, 36
-    stat_x = WIDTH - margin - stat_w - 30
-    stat_y = bar_y + 10
-    draw.rectangle([stat_x, stat_y, stat_x + stat_w, stat_y + stat_h], fill=GREEN_BG, outline=GREEN_BORDER, width=1)
-    draw.text((stat_x + 16, stat_y + 8), "STATUS: CONFIRMED", fill=GREEN, font=get_font(15, bold=True))
+    stat_w, stat_h = 240, 44
+    stat_x = WIDTH - margin - stat_w - 28
+    stat_y = bar_y + 14
+    draw.rectangle([stat_x, stat_y, stat_x + stat_w, stat_y + stat_h], fill=GREEN_BG, outline=GREEN_BORDER, width=2)
+    draw.text((stat_x + 18, stat_y + 11), "STATUS: CONFIRMED", fill=GREEN, font=get_font(16, bold=True))
 
     # =========================================================================
     # 4. DUAL QR CODE BLOCKS (GPS MAPS NAVIGATION + GATE ENTRY DETAILS)
@@ -249,8 +254,8 @@ def generate_ticket_image(
     b2_t_x = b2_x + 185
     draw.text((b2_t_x, qr_y + 48), "SCAN AT GATE ADMISSION", fill=GREEN, font=get_font(13, bold=True))
     draw.text((b2_t_x, qr_y + 70), "Pass ID / Ref:", fill=TEXT_MUTED, font=f_label)
-    draw.text((b2_t_x, qr_y + 88), sl_clean, fill=NAVY, font=get_font(15, bold=True))
-    draw.text((b2_t_x, qr_y + 110), "Primary Attendee:", fill=TEXT_MUTED, font=f_label)
+    draw.text((b2_t_x, qr_y + 86), sl_clean, fill=NAVY, font=get_font(22, bold=True))
+    draw.text((b2_t_x, qr_y + 112), "Primary Attendee:", fill=TEXT_MUTED, font=f_label)
     draw.text((b2_t_x, qr_y + 128), f"{clean_name[:22]}", fill=NAVY_LIGHT, font=get_font(14, bold=True))
     draw.text((b2_t_x, qr_y + 148), f"Persons Allowed: {qty_int} Guest(s)", fill=NAVY_LIGHT, font=f_sub)
     draw.text((b2_t_x, qr_y + 168), f"Amount Paid: Rs.{rate_str}/- (PAID)", fill=GREEN, font=get_font(13, bold=True))
@@ -392,10 +397,10 @@ def generate_ticket_image(
     colA_x = token_x + 16
     colA_y = token_y + th_h + 10
     
-    # Token Pass ID Highlight Box
-    draw.rectangle([colA_x, colA_y, colA_x + 430, colA_y + 42], fill=GOLD_LIGHT, outline=GOLD_BORDER, width=1)
-    draw.text((colA_x + 12, colA_y + 10), "TOKEN PASS NO:", fill=GOLD, font=get_font(12, bold=True))
-    draw.text((colA_x + 135, colA_y + 8), sl_clean, fill=NAVY, font=get_font(20, bold=True))
+    # Token Pass ID Highlight Box (Big & Bold for Lucky Draw & Gate Entry)
+    draw.rectangle([colA_x, colA_y, colA_x + 440, colA_y + 54], fill=GOLD_LIGHT, outline=GOLD_BORDER, width=2)
+    draw.text((colA_x + 14, colA_y + 17), "TOKEN NO:", fill=GOLD, font=get_font(13, bold=True))
+    draw.text((colA_x + 115, colA_y + 7), sl_clean, fill=NAVY, font=get_font(34, bold=True))
 
     # Token Key Fields
     token_fields = [
@@ -410,7 +415,7 @@ def generate_ticket_image(
     ]
 
     for f_idx, (f_lbl, f_val_text) in enumerate(token_fields):
-        line_y = colA_y + 50 + f_idx * 21
+        line_y = colA_y + 60 + f_idx * 20
         draw.text((colA_x, line_y), f_lbl, fill=TEXT_MUTED, font=get_font(12, bold=False))
         v_col = GREEN if "PAID" in f_val_text else NAVY
         draw.text((colA_x + 125, line_y), f_val_text, fill=v_col, font=get_font(12, bold=True))

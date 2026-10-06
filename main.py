@@ -33,7 +33,12 @@ from database import (
     delete_sponsor,
     toggle_sponsor_status,
     purge_expired_cancelled_tickets,
-    delete_ticket
+    delete_ticket,
+    get_recycle_bin_tickets,
+    restore_ticket_from_recycle_bin,
+    restore_all_recycle_bin_tickets,
+    empty_recycle_bin,
+    auto_backup_tickets
 )
 from razorpay_client import RazorpayClient
 
@@ -613,10 +618,45 @@ def purge_cancelled_tickets_endpoint(pin: str = Query(...)):
     return {"success": True, "purged_count": count, "message": f"Purged {count} expired cancelled tickets."}
 
 @app.delete("/api/admin/tickets/{ticket_identifier:path}")
-def remove_ticket_endpoint(ticket_identifier: str, pin: str = Query(...)):
+def remove_ticket_endpoint(ticket_identifier: str, pin: str = Query(...), permanent: bool = False):
     verify_admin_pin(pin)
-    delete_ticket(ticket_identifier)
-    return {"success": True, "message": f"Ticket {ticket_identifier} permanently deleted from database and cloud."}
+    delete_ticket(ticket_identifier, permanent=permanent)
+    msg = f"Ticket {ticket_identifier} permanently deleted." if permanent else f"Ticket {ticket_identifier} moved to Recycle Bin (Trash)."
+    return {"success": True, "message": msg}
+
+@app.get("/api/admin/recycle-bin")
+def get_recycle_bin_endpoint(pin: str = Query(...)):
+    verify_admin_pin(pin)
+    items = get_recycle_bin_tickets()
+    return {"success": True, "recycle_bin": items, "tickets": items, "count": len(items)}
+
+@app.post("/api/admin/recycle-bin/{ticket_identifier:path}/restore")
+def restore_ticket_endpoint(ticket_identifier: str, pin: str = Query(...)):
+    verify_admin_pin(pin)
+    restore_ticket_from_recycle_bin(ticket_identifier)
+    return {"success": True, "message": f"Ticket {ticket_identifier} restored successfully to active tickets!"}
+
+@app.post("/api/admin/recycle-bin/restore-all")
+def restore_all_recycle_bin_endpoint(pin: str = Query(...)):
+    verify_admin_pin(pin)
+    restore_all_recycle_bin_tickets()
+    return {"success": True, "message": "All tickets in Recycle Bin restored successfully!"}
+
+@app.delete("/api/admin/recycle-bin/empty")
+def empty_recycle_bin_endpoint(pin: str = Query(...)):
+    verify_admin_pin(pin)
+    empty_recycle_bin()
+    return {"success": True, "message": "Recycle Bin emptied. All deleted tickets permanently purged."}
+
+@app.get("/api/admin/tickets/download-backup")
+def download_backup_endpoint(pin: str = Query(...)):
+    verify_admin_pin(pin)
+    auto_backup_tickets()
+    from datetime import datetime
+    backup_path = os.path.join(os.path.dirname(__file__), "tickets_backup_archive.json")
+    if os.path.exists(backup_path):
+        return FileResponse(backup_path, filename=f"mrunmaya_tickets_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json", media_type="application/json")
+    raise HTTPException(status_code=404, detail="Backup file not found")
 
 @app.get("/api/tickets/verify-pass/{pass_id:path}")
 def verify_pass_endpoint(pass_id: str):

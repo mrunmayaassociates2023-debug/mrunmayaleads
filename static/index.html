@@ -1066,13 +1066,18 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                         <div>
-                            <span class="text-[10px] font-black uppercase text-amber-400">ENTRY TICKET SERIAL NO.</span>
-                            <div id="passIdDisplay" class="text-lg font-mono font-black text-white">Dandia/2026/301</div>
+                            <span class="text-[11px] font-black uppercase text-amber-400 tracking-wide block mb-1">🎟️ OFFICIAL ENTRY TICKET SERIAL NO.</span>
+                            <div id="passIdDisplay" class="text-2xl sm:text-3xl font-mono font-black text-amber-300 tracking-wider bg-slate-950 px-4 py-1.5 rounded-xl border-2 border-amber-400 shadow-xl inline-block">Dandia/2026/001</div>
                         </div>
-                        <div class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/30">
-                            VERIFIED
+                        <div class="text-right space-y-1">
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/30 inline-block">
+                                ● VERIFIED
+                            </span>
+                            <span class="text-[9px] text-purple-300 font-bold bg-purple-950/70 px-2 py-0.5 rounded border border-purple-500/30 block">
+                                🎲 LUCKY DRAW COUPON
+                            </span>
                         </div>
                     </div>
 
@@ -1132,6 +1137,9 @@
 
                 <!-- Action Buttons -->
                 <div class="space-y-2 pt-2">
+                    <button type="button" id="btnPrintAllSlips" onclick="printAllSlipsTogether()" class="hidden w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:brightness-110 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-purple-900/40 border border-purple-400/40 transition">
+                        <span>🖨️ Print All Allocated Slips (Individual Vouchers)</span>
+                    </button>
                     <a id="btnDownloadPass" href="#" target="_blank" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow transition">
                         <span>📥 Download Official A4 Printable Ticket</span>
                     </a>
@@ -1273,6 +1281,13 @@
                             </button>
                             <button type="button" onclick="openAdminLuckyDrawModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-purple-900/40 border border-purple-400/40">
                                 <span>🎲 Run Lucky Draw</span>
+                            </button>
+                            <button type="button" onclick="openAdminRecycleBinModal()" class="px-3.5 py-2 rounded-xl bg-rose-950/90 hover:bg-rose-900 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-rose-500/50 shadow" title="View Deleted Tickets in Recycle Bin">
+                                <span>🗑️ Recycle Bin</span>
+                                <span id="recycleBinCountBadge" class="px-1.5 py-0.5 rounded-full bg-rose-500/30 text-rose-200 text-[10px] font-black">0</span>
+                            </button>
+                            <button type="button" onclick="downloadDatabaseBackup()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-emerald-500/40 shadow" title="Download Complete Tickets Backup (JSON)">
+                                <span>💾 Backup JSON</span>
                             </button>
                             <button onclick="exportTicketsCsv()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow">
                                 <span>📥 Export CSV</span>
@@ -2009,6 +2024,57 @@
                     <button type="button" id="startLuckyDrawBtn" onclick="runLuckyDrawSpin()" class="flex-2 py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white font-black uppercase tracking-wider shadow-lg shadow-purple-900/50 flex items-center justify-center gap-2 text-sm">
                         <span>🎰 SPIN & DRAW WINNER</span>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 4: ADMIN RECYCLE BIN (TRASH & UNDO RESTORE)                         -->
+    <!-- ========================================================================= -->
+    <div id="adminRecycleBinModal" style="display: none;" class="fixed inset-0 z-[80] hidden items-center justify-center p-3 sm:p-6 modal-backdrop" onclick="if(event.target===this)closeAdminRecycleBinModal()">
+        <div class="bg-slate-900 border-2 border-rose-500/40 rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative">
+            <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-lg">
+                        🗑️
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-black text-base sm:text-lg text-white">Tickets Recycle Bin (Trash)</h3>
+                        <p class="text-[11px] text-slate-400">Restore accidentally deleted tickets anytime with Undo or purge permanently</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="restoreAllRecycleBinTickets()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1">
+                        <span>↩️ Restore All</span>
+                    </button>
+                    <button type="button" onclick="emptyRecycleBinPermanently()" class="px-3 py-1.5 rounded-xl bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-500/40 flex items-center gap-1">
+                        <span>🗑️ Empty Bin</span>
+                    </button>
+                    <button type="button" onclick="closeAdminRecycleBinModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold">
+                        ✕
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto p-4 sm:p-6 bg-slate-950">
+                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                        <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Ticket Sl.No</th>
+                                <th class="p-3">Attendee Name</th>
+                                <th class="p-3">Mobile</th>
+                                <th class="p-3">Date Selected</th>
+                                <th class="p-3">Amount</th>
+                                <th class="p-3">Deleted At</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminRecycleBinTbody" class="divide-y divide-slate-850">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -2930,6 +2996,15 @@
                 multiContainer.classList.add("hidden");
             }
 
+            const printAllBtn = document.getElementById("btnPrintAllSlips");
+            if (printAllBtn) {
+                if (passIds.length > 1) {
+                    printAllBtn.classList.remove("hidden");
+                } else {
+                    printAllBtn.classList.add("hidden");
+                }
+            }
+
             document.getElementById("passIdDisplay").textContent = passIds.length > 1 ? `${passId} (1 of ${passIds.length})` : passId;
             document.getElementById("passNameDisplay").textContent = cName;
             document.getElementById("passQtyDisplay").textContent = `${cQty} Guest(s) [${passIds.length} Lucky Draw Tickets]`;
@@ -3208,7 +3283,18 @@
                 total_amount: 299,
                 event_title: "Family Dandia Night 2026"
             };
-            showGeneratedPass({ ticket: t, pass_id: passId });
+
+            // Discover all slips belonging to this customer / booking
+            let relatedPassIds = [passId];
+            if (t.pass_ids && Array.isArray(t.pass_ids) && t.pass_ids.length > 0) {
+                relatedPassIds = t.pass_ids;
+            } else if (t.phone) {
+                const sameCustomer = allTickets.filter(x => x.phone === t.phone && (x.date_selected === t.date_selected || !t.date_selected));
+                if (sameCustomer.length > 1) {
+                    relatedPassIds = sameCustomer.map(x => x.pass_id).filter(Boolean);
+                }
+            }
+            showGeneratedPass({ ticket: t, pass_id: passId, pass_ids: relatedPassIds });
         }
 
         function switchAdminTab(tabName) {
@@ -3310,21 +3396,28 @@
                 if (t.pass_id) map.set(t.pass_id, t);
             });
 
-            // 2. Also merge any locally booked tickets that are not yet on server
-            try {
-                const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
-                local.forEach(t => {
-                    if (t.pass_id && !map.has(t.pass_id)) {
-                        map.set(t.pass_id, t);
-                    }
-                });
-            } catch(e){}
+            // 2. Fallback to localStorage only if server is completely unreachable
+            if (serverTickets.length === 0) {
+                try {
+                    const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
+                    local.forEach(t => {
+                        if (t.pass_id && !map.has(t.pass_id)) {
+                            map.set(t.pass_id, t);
+                        }
+                    });
+                } catch(e){}
+            } else {
+                // Keep local cache clean with only active server tickets
+                try {
+                    localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(serverTickets));
+                } catch(e){}
+            }
 
             allTickets = Array.from(map.values());
 
-            // 3. Sync with Supabase Cloud
+            // 3. Sync with Supabase Cloud if available
             const sb = getSupabaseClient();
-            if (sb) {
+            if (sb && serverTickets.length === 0) {
                 try {
                     const { data, error } = await sb.from("tickets").select("*").order("id", { ascending: false });
                     if (!error && data && data.length > 0) {
@@ -3387,6 +3480,7 @@
             if (statPasses) statPasses.textContent = allTickets.length;
 
             renderTicketsTable();
+            loadRecycleBinTickets();
         }
 
         function renderTicketsTable() {
@@ -3429,12 +3523,14 @@
 
                 return `
                     <tr class="hover:bg-slate-900/60 transition">
-                        <td class="p-3 font-mono font-black text-amber-400 flex items-center gap-1.5">
-                            <span>${t.pass_id}</span>
-                            <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30" title="Lucky Draw Entry Coupon">🎲 Draw</span>
+                        <td class="p-3">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-mono text-sm sm:text-base font-black text-amber-300 bg-amber-950/70 border border-amber-400/60 px-2.5 py-1 rounded-lg tracking-wider shadow">${t.pass_id}</span>
+                                <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30" title="Lucky Draw Entry Coupon">🎲 Draw</span>
+                            </div>
                         </td>
                         <td class="p-3 font-bold text-white">${t.customer_name}</td>
-                        <td class="p-3 font-mono text-slate-300">${t.phone}</td>
+                        <td class="p-3 font-mono text-slate-300 font-semibold">${t.phone}</td>
                         <td class="p-3 text-slate-300">${t.date_selected}</td>
                         <td class="p-3 font-bold text-center">${t.quantity || 1}</td>
                         <td class="p-3 font-black text-amber-300">
@@ -3461,7 +3557,7 @@
                                     Cancel
                                 </button>
                             ` : ''}
-                            <button onclick="deleteTicketPermanently('${t.id}', '${t.pass_id}')" class="px-2 py-1 rounded bg-red-900/80 hover:bg-red-700 text-red-200 hover:text-white font-bold text-[10px] border border-red-500/40" title="Delete Ticket Permanently">
+                            <button onclick="moveTicketToRecycleBin('${t.id}', '${t.pass_id}')" class="px-2 py-1 rounded bg-rose-900/80 hover:bg-rose-700 text-rose-200 hover:text-white font-bold text-[10px] border border-rose-500/40" title="Move to Recycle Bin">
                                 🗑️ Delete
                             </button>
                         </td>
@@ -3470,9 +3566,9 @@
             }).join("");
         }
 
-        async function deleteTicketPermanently(ticketId, passId) {
+        async function moveTicketToRecycleBin(ticketId, passId) {
             const displayLabel = passId || (`#` + ticketId);
-            if (!confirm(`⚠️ Are you sure you want to PERMANENTLY DELETE Ticket ${displayLabel}?\n\nThis will remove ONLY this ticket from database and cloud. This action CANNOT be undone.`)) {
+            if (!confirm(`🗑️ Move Ticket ${displayLabel} to Recycle Bin (Trash)?\n\nYou can easily UNDO and RESTORE it anytime from the Recycle Bin button in the admin toolbar.`)) {
                 return;
             }
 
@@ -3480,16 +3576,16 @@
                 const targetIdent = passId || ticketId;
                 const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
 
-                // 1. Delete from Backend FastAPI / SQLite (exact match only)
+                // 1. Soft-delete on Backend (permanent=false)
                 try {
-                    await fetch(`/api/admin/tickets/${encodeURIComponent(targetIdent)}?pin=${encodeURIComponent(pin)}`, {
+                    await fetch(`/api/admin/tickets/${encodeURIComponent(targetIdent)}?pin=${encodeURIComponent(pin)}&permanent=false`, {
                         method: "DELETE"
                     });
                 } catch (netErr) {
-                    console.warn("Backend API delete warning:", netErr);
+                    console.warn("Backend soft-delete warning:", netErr);
                 }
 
-                // 2. Delete from LocalStorage booked tickets (ONLY this specific ticket)
+                // 2. Remove from LocalStorage active list
                 try {
                     const local = JSON.parse(localStorage.getItem("mrunmay_booked_tickets") || "[]");
                     const updated = local.filter(t => {
@@ -3498,41 +3594,257 @@
                         return true;
                     });
                     localStorage.setItem("mrunmay_booked_tickets", JSON.stringify(updated));
-                } catch(lsErr) {
-                    console.warn("LocalStorage delete error:", lsErr);
-                }
+                } catch(e){}
 
-                // 3. Delete from Supabase Cloud
-                const sb = getSupabaseClient();
-                if (sb && passId) {
-                    try {
-                        await sb.from("tickets").delete().eq("pass_id", passId);
-                        await sb.from("payments").delete().eq("pass_id", passId);
-                    } catch(sbErr) {
-                        console.warn("Supabase ticket delete notice:", sbErr);
-                    }
-                }
-
-                // 4. Update in-memory ticket list & UI (ONLY remove this specific ticket)
+                // 3. Remove from in-memory active tickets
                 allTickets = allTickets.filter(t => {
                     if (passId && t.pass_id === passId) return false;
                     if (ticketId && ticketId !== 'undefined' && String(t.id) === String(ticketId)) return false;
                     return true;
                 });
 
+                // Update UI counts
                 const badge = document.getElementById("adminTicketsCountBadge");
                 if (badge) badge.textContent = `${allTickets.length} Registered`;
                 const statPasses = document.getElementById("statPassesCount");
                 if (statPasses) statPasses.textContent = allTickets.length;
                 const adminCount = document.getElementById("adminPassesCount");
                 if (adminCount) adminCount.textContent = allTickets.length;
-                
-                renderTicketsTable();
 
-                alert(`✅ Ticket ${displayLabel} has been permanently deleted.`);
+                renderTicketsTable();
+                await loadRecycleBinTickets();
+
+                alert(`✅ Ticket ${displayLabel} moved to Recycle Bin.\n\nTo view or restore it, click the "🗑️ Recycle Bin" button above.`);
             } catch (err) {
-                alert("Failed to delete ticket: " + err.message);
+                alert("Failed to move ticket to Recycle Bin: " + err.message);
             }
+        }
+
+        // =========================================================================
+        // ADMIN RECYCLE BIN CONTROLLERS (RESTORE / UNDO / EMPTY)
+        // =========================================================================
+        let recycleBinTickets = [];
+
+        async function loadRecycleBinTickets() {
+            try {
+                const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
+                const res = await fetch(`/api/admin/recycle-bin?pin=${encodeURIComponent(pin)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    recycleBinTickets = data.recycle_bin || data.tickets || [];
+                }
+            } catch (err) {
+                console.warn("Error fetching recycle bin:", err);
+            }
+
+            const badge = document.getElementById("recycleBinCountBadge");
+            if (badge) {
+                badge.textContent = recycleBinTickets.length;
+            }
+
+            renderRecycleBinTable();
+        }
+
+        function renderRecycleBinTable() {
+            const tbody = document.getElementById("adminRecycleBinTbody");
+            if (!tbody) return;
+
+            if (recycleBinTickets.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 font-semibold">Recycle Bin is empty. No deleted tickets.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = recycleBinTickets.map(t => {
+                const deletedTime = t.deleted_at ? new Date(t.deleted_at).toLocaleString('en-IN') : 'Recently';
+                return `
+                    <tr class="hover:bg-slate-900/60 transition">
+                        <td class="p-3 font-mono font-bold text-amber-300 text-sm">${t.pass_id}</td>
+                        <td class="p-3 font-bold text-white">${t.customer_name}</td>
+                        <td class="p-3 font-mono text-slate-300">${t.phone}</td>
+                        <td class="p-3 text-slate-300">${t.date_selected}</td>
+                        <td class="p-3 font-black text-amber-300">₹${t.total_amount}</td>
+                        <td class="p-3 text-rose-300 text-[11px] font-mono">${deletedTime}</td>
+                        <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                            <button type="button" onclick="restoreTicketFromTrash('${t.pass_id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow inline-flex items-center gap-1">
+                                <span>↩️ Undo / Restore</span>
+                            </button>
+                            <button type="button" onclick="permanentlyDeleteFromTrash('${t.pass_id}')" class="px-2.5 py-1 rounded-lg bg-rose-900/80 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-500/40">
+                                <span>🗑️ Delete Forever</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function openAdminRecycleBinModal() {
+            const modal = document.getElementById("adminRecycleBinModal");
+            if (!modal) return;
+            modal.style.display = "flex";
+            modal.classList.remove("hidden");
+            loadRecycleBinTickets();
+        }
+
+        function closeAdminRecycleBinModal() {
+            const modal = document.getElementById("adminRecycleBinModal");
+            if (!modal) return;
+            modal.style.display = "none";
+            modal.classList.add("hidden");
+        }
+
+        async function restoreTicketFromTrash(passId) {
+            try {
+                const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
+                const res = await fetch(`/api/admin/recycle-bin/${encodeURIComponent(passId)}/restore?pin=${encodeURIComponent(pin)}`, {
+                    method: "POST"
+                });
+                if (res.ok) {
+                    alert(`✅ Ticket ${passId} restored successfully! It is now active in ticket history.`);
+                    await loadRecycleBinTickets();
+                    await loadAdminTickets();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert("Failed to restore ticket: " + (err.detail || "Error"));
+                }
+            } catch (err) {
+                alert("Restore error: " + err.message);
+            }
+        }
+
+        async function restoreAllRecycleBinTickets() {
+            if (recycleBinTickets.length === 0) {
+                alert("Recycle Bin is already empty.");
+                return;
+            }
+            if (!confirm(`↩️ Restore ALL ${recycleBinTickets.length} tickets from the Recycle Bin back to active status?`)) {
+                return;
+            }
+            try {
+                const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
+                const res = await fetch(`/api/admin/recycle-bin/restore-all?pin=${encodeURIComponent(pin)}`, {
+                    method: "POST"
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(`✅ Restored ${data.restored_count || recycleBinTickets.length} tickets to active list!`);
+                    await loadRecycleBinTickets();
+                    await loadAdminTickets();
+                } else {
+                    alert("Failed to restore all tickets.");
+                }
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+
+        async function emptyRecycleBinPermanently() {
+            if (recycleBinTickets.length === 0) {
+                alert("Recycle Bin is already empty.");
+                return;
+            }
+            if (!confirm(`⚠️ PERMANENTLY DELETE all ${recycleBinTickets.length} tickets from the Recycle Bin?\n\nThis will completely purge them from disk. This CANNOT be undone.`)) {
+                return;
+            }
+            try {
+                const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
+                const res = await fetch(`/api/admin/recycle-bin/empty?pin=${encodeURIComponent(pin)}`, {
+                    method: "DELETE"
+                });
+                if (res.ok) {
+                    alert("🗑️ Recycle Bin permanently emptied.");
+                    await loadRecycleBinTickets();
+                } else {
+                    alert("Failed to empty Recycle Bin.");
+                }
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+
+        async function permanentlyDeleteFromTrash(passId) {
+            if (!confirm(`⚠️ Permanently purge Ticket ${passId} forever?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+            try {
+                const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
+                const res = await fetch(`/api/admin/tickets/${encodeURIComponent(passId)}?pin=${encodeURIComponent(pin)}&permanent=true`, {
+                    method: "DELETE"
+                });
+                if (res.ok) {
+                    alert(`Ticket ${passId} purged permanently.`);
+                    await loadRecycleBinTickets();
+                } else {
+                    alert("Failed to delete permanently.");
+                }
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+
+        // =========================================================================
+        // BACKUP & MULTI-SLIP UTILITIES
+        // =========================================================================
+        function downloadDatabaseBackup() {
+            const pin = (currentAdminPin || localStorage.getItem("admin_custom_pin") || '1234').trim();
+            window.open(`/api/admin/tickets/download-backup?pin=${encodeURIComponent(pin)}`, '_blank');
+        }
+
+        function printAllSlipsTogether() {
+            if (!currentModalPassIds || currentModalPassIds.length === 0) {
+                alert("No slips available to print.");
+                return;
+            }
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+                alert("Please allow popups to open the printable slips window.");
+                return;
+            }
+            const title = "Family Dandia Night 2026 - Official Passes";
+            const slipsHtml = currentModalPassIds.map((pid, idx) => `
+                <div class="pass-page">
+                    <div class="page-header no-print">Slip ${idx + 1} of ${currentModalPassIds.length} — Pass No: ${pid}</div>
+                    <img src="/api/tickets/${encodeURIComponent(pid)}/image" alt="Pass ${pid}" class="pass-img" />
+                </div>
+            `).join('');
+
+            printWindow.document.open();
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>${title}</title>
+                    <style>
+                        @page { size: A4 portrait; margin: 8mm; }
+                        body { margin: 0; padding: 0; background: #0f172a; font-family: system-ui, -apple-system, sans-serif; color: #fff; }
+                        .no-print-bar { position: sticky; top: 0; z-index: 100; background: #1e293b; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f59e0b; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+                        .pass-page { page-break-after: always; text-align: center; padding: 10px 0; }
+                        .pass-page:last-child { page-break-after: auto; }
+                        .page-header { font-size: 13px; font-weight: bold; color: #f59e0b; margin-bottom: 8px; }
+                        .pass-img { max-width: 100%; height: auto; max-height: 96vh; display: block; margin: 0 auto; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+                        @media print {
+                            body { background: #fff; color: #000; }
+                            .no-print, .no-print-bar { display: none !important; }
+                            .pass-page { padding: 0; margin: 0; }
+                            .pass-img { box-shadow: none; max-height: 100vh; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print-bar">
+                        <div>
+                            <strong style="color: #f59e0b; font-size: 16px;">🎟️ ${currentModalPassIds.length} Official Entry Passes Ready</strong>
+                            <div style="font-size: 12px; color: #94a3b8;">Each guest has their own verified QR code and Lucky Draw serial number.</div>
+                        </div>
+                        <div>
+                            <button onclick="window.print()" style="background: linear-gradient(135deg, #f59e0b, #eab308); color: #020617; font-weight: 900; font-size: 13px; padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; text-transform: uppercase;">🖨️ Print All Slips</button>
+                        </div>
+                    </div>
+                    ${slipsHtml}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
         }
 
         // =========================================================================
