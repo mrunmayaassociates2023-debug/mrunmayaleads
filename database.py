@@ -133,6 +133,8 @@ def init_db():
         cursor.execute("ALTER TABLE tickets ADD COLUMN is_deleted INTEGER DEFAULT 0")
     if "deleted_at" not in ticket_cols:
         cursor.execute("ALTER TABLE tickets ADD COLUMN deleted_at TEXT")
+    if "is_vip" not in ticket_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN is_vip INTEGER DEFAULT 0")
 
     # Ensure phone and email exist in sponsors table
     cursor.execute("PRAGMA table_info(sponsors)")
@@ -149,7 +151,7 @@ def init_db():
         "tagline": "Citizen Services, Event Tickets & Digital Solutions",
         "address": "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
         "email": "mrunmay.service@gmail.com",
-        "admin_pin": "1234",
+        "admin_pin": "9906",
         "working_hours": "08:00 AM - 09:00 PM (All 7 Days)",
         "upi_id": "PPQR01.DOENZS@iob",
         "payee_name": "MRUNMAYA ASSOCIATES",
@@ -256,6 +258,10 @@ def init_db():
 
     conn.commit()
     conn.close()
+    try:
+        sync_supabase_pull_tickets_and_payments(force=True)
+    except Exception:
+        pass
 
 def save_lead(name: str, phone: str, service: str, specific_service: str = "", location: str = "", message: str = ""):
     conn = get_db_connection()
@@ -424,6 +430,118 @@ def sync_supabase_upsert(table: str, row_data: dict):
     except Exception as e:
         pass
 
+_last_supabase_sync = 0
+
+def sync_supabase_pull_tickets_and_payments(force: bool = False):
+    global _last_supabase_sync
+    import time
+    import urllib.request
+    import json
+    
+    now = time.time()
+    if not force and (now - _last_supabase_sync < 10):
+        return
+    _last_supabase_sync = now
+
+    sb_url = "https://ivhjhyjrbeodwsugpjxq.supabase.co"
+    sb_key = "sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn"
+    headers = {
+        "apikey": sb_key,
+        "Authorization": f"Bearer {sb_key}"
+    }
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # 1. Pull tickets
+        try:
+            req = urllib.request.Request(f"{sb_url}/rest/v1/tickets?select=*&order=id.asc", headers=headers)
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                cloud_tickets = json.loads(resp.read().decode())
+                for t in cloud_tickets:
+                    pid = t.get("pass_id")
+                    if not pid:
+                        continue
+                    p_status = str(t.get("payment_status") or "Paid")
+                    u_ref = str(t.get("utr_reference") or "")
+                    is_vip_val = 1 if ("vip" in p_status.lower() or "vip" in u_ref.lower() or "vip" in pid.lower() or t.get("is_vip") == 1) else 0
+
+                    cursor.execute("SELECT id FROM tickets WHERE pass_id = ? OR LOWER(pass_id) = LOWER(?)", (pid, pid))
+                    existing = cursor.fetchone()
+                    if existing:
+                        cursor.execute("""
+                            UPDATE tickets SET
+                                event_id = ?, event_title = ?, customer_name = ?, phone = ?, email = ?,
+                                city = ?, date_selected = ?, quantity = ?, rate_per_ticket = ?, total_amount = ?,
+                                payment_status = ?, utr_reference = ?, booking_status = ?,
+                                razorpay_order_id = ?, razorpay_payment_id = ?, is_vip = ?, created_at = ?
+                            WHERE id = ?
+                        """, (
+                            t.get("event_id", 1), t.get("event_title", ""), t.get("customer_name", ""), t.get("phone", ""), t.get("email", ""),
+                            t.get("city", ""), t.get("date_selected", ""), t.get("quantity", 1), t.get("rate_per_ticket", 299), t.get("total_amount", 299),
+                            p_status, u_ref, t.get("booking_status", "Confirmed"),
+                            t.get("razorpay_order_id", ""), t.get("razorpay_payment_id", ""), is_vip_val, t.get("created_at", ""),
+                            existing["id"]
+                        ))
+                    else:
+                        cursor.execute("""
+                            INSERT INTO tickets (
+                                pass_id, event_id, event_title, customer_name, phone, email,
+                                city, date_selected, quantity, rate_per_ticket, total_amount,
+                                payment_status, utr_reference, booking_status,
+                                razorpay_order_id, razorpay_payment_id, is_vip, created_at
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            pid, t.get("event_id", 1), t.get("event_title", ""), t.get("customer_name", ""), t.get("phone", ""), t.get("email", ""),
+                            t.get("city", ""), t.get("date_selected", ""), t.get("quantity", 1), t.get("rate_per_ticket", 299), t.get("total_amount", 299),
+                            p_status, u_ref, t.get("booking_status", "Confirmed"),
+                            t.get("razorpay_order_id", ""), t.get("razorpay_payment_id", ""), is_vip_val, t.get("created_at", "")
+                        ))
+        except Exception as e_t:
+            pass
+
+        # 2. Pull payments
+        try:
+            req_p = urllib.request.Request(f"{sb_url}/rest/v1/payments?select=*&order=id.asc", headers=headers)
+            with urllib.request.urlopen(req_p, timeout=5) as resp_p:
+                cloud_payments = json.loads(resp_p.read().decode())
+                for p in cloud_payments:
+                    pay_id = p.get("payment_id")
+                    if not pay_id:
+                        continue
+                    cursor.execute("SELECT id FROM payments WHERE payment_id = ?", (pay_id,))
+                    existing_p = cursor.fetchone()
+                    if existing_p:
+                        cursor.execute("""
+                            UPDATE payments SET
+                                order_id = ?, service_type = ?, customer_name = ?, phone = ?,
+                                amount = ?, payment_mode = ?, status = ?, pass_id = ?, created_at = ?
+                            WHERE id = ?
+                        """, (
+                            p.get("order_id", ""), p.get("service_type", ""), p.get("customer_name", ""), p.get("phone", ""),
+                            p.get("amount", 0.0), p.get("payment_mode", ""), p.get("status", "Success"), p.get("pass_id", ""),
+                            p.get("created_at", ""), existing_p["id"]
+                        ))
+                    else:
+                        cursor.execute("""
+                            INSERT INTO payments (
+                                payment_id, order_id, service_type, customer_name, phone,
+                                amount, payment_mode, status, pass_id, created_at
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            pay_id, p.get("order_id", ""), p.get("service_type", ""), p.get("customer_name", ""), p.get("phone", ""),
+                            p.get("amount", 0.0), p.get("payment_mode", ""), p.get("status", "Success"), p.get("pass_id", ""),
+                            p.get("created_at", "")
+                        ))
+        except Exception as e_p:
+            pass
+
+        conn.commit()
+        conn.close()
+    except Exception as e_outer:
+        pass
+
 def delete_sponsor(sponsor_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -443,6 +561,11 @@ def toggle_sponsor_status(sponsor_id: int):
 
 # Ticket Management
 def get_next_sequential_pass_info():
+    try:
+        sync_supabase_pull_tickets_and_payments(force=True)
+    except Exception:
+        pass
+
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, pass_id FROM tickets")
@@ -453,23 +576,30 @@ def get_next_sequential_pass_info():
         pid = row["pass_id"]
         if pid:
             existing_pass_ids.add(pid.strip().upper())
-            m = re.search(r"/(\d+)$", pid.strip())
-            if m:
+            for num_str in re.findall(r"\d+", pid):
                 try:
-                    num = int(m.group(1))
-                    if num > highest_num:
+                    num = int(num_str)
+                    if num != 2026 and num > highest_num:
                         highest_num = num
                 except:
                     pass
-            else:
-                nums = re.findall(r"\d+", pid)
-                if nums:
-                    try:
-                        num = int(nums[-1])
-                        if num != 2026 and num > highest_num:
-                            highest_num = num
-                    except:
-                        pass
+
+    # Also check payments table (handles multi-pass strings e.g. "Dandia/2026/310, Dandia/2026/311")
+    cursor.execute("SELECT pass_id FROM payments WHERE pass_id IS NOT NULL AND pass_id != ''")
+    for r in cursor.fetchall():
+        raw_passes = r["pass_id"]
+        if raw_passes:
+            for p_part in str(raw_passes).split(","):
+                clean_p = p_part.strip().upper()
+                if clean_p:
+                    existing_pass_ids.add(clean_p)
+                    for num_str in re.findall(r"\d+", clean_p):
+                        try:
+                            num = int(num_str)
+                            if num != 2026 and num > highest_num:
+                                highest_num = num
+                        except:
+                            pass
                         
     # Check deleted_pass_ids tombstone table
     cursor.execute("CREATE TABLE IF NOT EXISTS deleted_pass_ids (pass_id TEXT PRIMARY KEY, deleted_at TEXT NOT NULL)")
@@ -478,11 +608,10 @@ def get_next_sequential_pass_info():
         pid = r["pass_id"]
         if pid:
             existing_pass_ids.add(pid.strip().upper())
-            m = re.search(r"/(\d+)$", pid.strip())
-            if m:
+            for num_str in re.findall(r"\d+", pid):
                 try:
-                    num = int(m.group(1))
-                    if num > highest_num:
+                    num = int(num_str)
+                    if num != 2026 and num > highest_num:
                         highest_num = num
                 except:
                     pass
@@ -501,6 +630,11 @@ def get_next_sequential_pass_info():
     return next_seq, official_pass_id, len(rows)
 
 def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", customer_name: str = "", phone: str = "", quantity: int = 1, total_amount: int = 299, date_selected: str = "", email: str = "", city: str = "", rate_per_ticket: int = 299, utr_reference: str = "", payment_status: str = "Paid", razorpay_order_id: str = "", razorpay_payment_id: str = "", razorpay_signature: str = "", gst_amount: float = 0.0, gst_percent: float = 0.0):
+    try:
+        sync_supabase_pull_tickets_and_payments(force=True)
+    except Exception:
+        pass
+
     conn = get_db_connection()
     cursor = conn.cursor()
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -514,23 +648,29 @@ def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", c
         pid = row["pass_id"]
         if pid:
             existing_pass_ids.add(pid.strip().upper())
-            m = re.search(r"/(\d+)$", pid.strip())
-            if m:
+            for num_str in re.findall(r"\d+", pid):
                 try:
-                    num = int(m.group(1))
-                    if num > highest_num:
+                    num = int(num_str)
+                    if num != 2026 and num > highest_num:
                         highest_num = num
                 except:
                     pass
-            else:
-                nums = re.findall(r"\d+", pid)
-                if nums:
-                    try:
-                        num = int(nums[-1])
-                        if num != 2026 and num > highest_num:
-                            highest_num = num
-                    except:
-                        pass
+
+    cursor.execute("SELECT pass_id FROM payments WHERE pass_id IS NOT NULL AND pass_id != ''")
+    for r in cursor.fetchall():
+        raw_passes = r["pass_id"]
+        if raw_passes:
+            for p_part in str(raw_passes).split(","):
+                clean_p = p_part.strip().upper()
+                if clean_p:
+                    existing_pass_ids.add(clean_p)
+                    for num_str in re.findall(r"\d+", clean_p):
+                        try:
+                            num = int(num_str)
+                            if num != 2026 and num > highest_num:
+                                highest_num = num
+                        except:
+                            pass
 
     # Include deleted_pass_ids to never re-allocate an old deleted pass ID
     cursor.execute("CREATE TABLE IF NOT EXISTS deleted_pass_ids (pass_id TEXT PRIMARY KEY, deleted_at TEXT NOT NULL)")
@@ -539,11 +679,10 @@ def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", c
         pid = r["pass_id"]
         if pid:
             existing_pass_ids.add(pid.strip().upper())
-            m = re.search(r"/(\d+)$", pid.strip())
-            if m:
+            for num_str in re.findall(r"\d+", pid):
                 try:
-                    num = int(m.group(1))
-                    if num > highest_num:
+                    num = int(num_str)
+                    if num != 2026 and num > highest_num:
                         highest_num = num
                 except:
                     pass
@@ -586,6 +725,9 @@ def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", c
     primary_pass = allocated_pass_ids[0]
     passes_display = ", ".join(allocated_pass_ids)
 
+    # Check VIP classification
+    is_vip = 1 if ("vip" in str(payment_status).lower() or "vip" in str(utr_reference).lower() or (pass_id and "vip" in str(pass_id).lower()) or (total_amount == 0 and "complimentary" in str(payment_status).lower())) else 0
+
     # Insert individual record for each pass so each guest gets an individual lucky draw ticket
     for idx, pid in enumerate(allocated_pass_ids):
         c_name = customer_name.strip()
@@ -594,9 +736,9 @@ def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", c
             ref_text = f"{ref_text} [Pass {idx+1}/{qty}]" if ref_text else f"Pass {idx+1}/{qty}"
 
         cursor.execute("""
-        INSERT INTO tickets (pass_id, event_id, event_title, customer_name, phone, email, city, date_selected, quantity, rate_per_ticket, total_amount, payment_status, utr_reference, booking_status, razorpay_order_id, razorpay_payment_id, razorpay_signature, created_at, gst_amount, gst_percent)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, 'Confirmed', ?, ?, ?, ?, ?, ?)
-        """, (pid, event_id, event_title.strip(), c_name, phone.strip(), email.strip(), city.strip(), date_selected.strip(), rate_per_ticket, per_ticket_amt, payment_status, ref_text, razorpay_order_id.strip(), razorpay_payment_id.strip(), razorpay_signature.strip(), created_at, per_ticket_gst, gst_percent))
+        INSERT INTO tickets (pass_id, event_id, event_title, customer_name, phone, email, city, date_selected, quantity, rate_per_ticket, total_amount, payment_status, utr_reference, booking_status, razorpay_order_id, razorpay_payment_id, razorpay_signature, created_at, gst_amount, gst_percent, is_vip)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, 'Confirmed', ?, ?, ?, ?, ?, ?, ?)
+        """, (pid, event_id, event_title.strip(), c_name, phone.strip(), email.strip(), city.strip(), date_selected.strip(), rate_per_ticket, per_ticket_amt, payment_status, ref_text, razorpay_order_id.strip(), razorpay_payment_id.strip(), razorpay_signature.strip(), created_at, per_ticket_gst, gst_percent, is_vip))
         
         row_id = cursor.lastrowid
         all_ticket_ids.append(row_id)
@@ -604,9 +746,10 @@ def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", c
             first_ticket_id = row_id
 
     # Auto-record in payments transaction ledger (1 ledger row for the transaction)
+    p_id = ""
     try:
-        p_mode = "Razorpay" if razorpay_payment_id else "Shop UPI QR Scanner"
-        sub_m = "Online Gateway" if razorpay_payment_id else "UPI QR / Direct"
+        p_mode = "VIP / Complimentary" if is_vip else ("Razorpay" if razorpay_payment_id else "Shop UPI QR Scanner")
+        sub_m = "VIP Desk" if is_vip else ("Online Gateway" if razorpay_payment_id else "UPI QR / Direct")
         pay_ref = razorpay_payment_id or utr_reference or f"PASS-{primary_pass}"
         p_id = razorpay_payment_id if razorpay_payment_id else f"PAY-{primary_pass.replace('/', '-')}"
         detail_dict = {
@@ -615,7 +758,8 @@ def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", c
             "date_selected": date_selected,
             "rate_per_ticket": rate_per_ticket,
             "city": city,
-            "email": email
+            "email": email,
+            "is_vip": is_vip
         }
         cursor.execute("""
         INSERT OR REPLACE INTO payments (payment_id, order_id, service_type, customer_name, phone, amount, payment_mode, sub_method, transaction_ref, status, pass_id, details, created_at)
@@ -659,8 +803,27 @@ def save_ticket(pass_id: str = None, event_id: int = 1, event_title: str = "", c
             "booking_status": "Confirmed",
             "razorpay_order_id": razorpay_order_id.strip(),
             "razorpay_payment_id": razorpay_payment_id.strip(),
+            "is_vip": is_vip,
             "created_at": created_at
         })
+
+    # Also sync payment transaction to Supabase Cloud
+    if p_id:
+        try:
+            sync_supabase_upsert("payments", {
+                "payment_id": p_id,
+                "order_id": razorpay_order_id or "",
+                "service_type": f"Event Ticket: {event_title.strip()}",
+                "customer_name": customer_name.strip(),
+                "phone": phone.strip(),
+                "amount": total_amount,
+                "payment_mode": "VIP / Complimentary" if is_vip else ("Razorpay" if razorpay_payment_id else "Cash / Counter"),
+                "status": "Success",
+                "pass_id": passes_display if qty > 1 else primary_pass,
+                "created_at": created_at
+            })
+        except Exception:
+            pass
 
     return first_ticket_id, primary_pass, created_at, allocated_pass_ids
 
@@ -765,6 +928,10 @@ def auto_backup_tickets():
         return False
 
 def get_all_tickets(search: str = None, include_deleted: bool = False):
+    try:
+        sync_supabase_pull_tickets_and_payments(force=False)
+    except Exception:
+        pass
     # Automatically purge tickets cancelled more than 24 hours ago
     purge_expired_cancelled_tickets()
     

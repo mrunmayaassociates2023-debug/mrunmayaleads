@@ -95,6 +95,19 @@ def generate_ticket_image(
     except Exception:
         qty_int = 1
 
+    # VIP Pass Detection
+    is_vip = False
+    pm_upper = str(payment_mode or "").upper()
+    pass_upper = str(pass_id or "").upper()
+    utr_upper = str(utr_ref or "").upper()
+    if "VIP" in pm_upper or "VIP" in pass_upper or "VIP" in utr_upper or "COMPLIMENTARY" in pm_upper:
+        is_vip = True
+    try:
+        if float(amount or 0) == 0 and ("VIP" in pm_upper or "COMPLIMENTARY" in pm_upper or "VIP" in utr_upper):
+            is_vip = True
+    except Exception:
+        pass
+
     # Standard A4 at 150 DPI: 1240 x 1754 px
     WIDTH, HEIGHT = 1240, 1754
     im = Image.new("RGB", (WIDTH, HEIGHT), color=(255, 255, 255))
@@ -148,13 +161,18 @@ def generate_ticket_image(
     draw.text((margin + 25, margin + 48), "Citizen Services, Event Tickets & Digital Solutions Desk", fill=TEXT_MUTED, font=f_sub)
     draw.text((margin + 25, margin + 68), f"Helpline: +91 {org_phones} | Email: {org_email}", fill=GOLD, font=f_sub)
 
-    # Right Badge: Official Entry Pass
-    badge_w, badge_h = 320, 68
+    # Right Badge: Official Entry Pass / VIP Pass
+    badge_w, badge_h = 340, 68
     badge_x = WIDTH - margin - badge_w - 20
     badge_y = margin + 12
-    draw.rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], fill=GOLD_LIGHT, outline=GOLD_BORDER, width=1)
-    draw.text((badge_x + 16, badge_y + 10), "OFFICIAL ENTRY PASS", fill=GOLD, font=f_h2)
-    draw.text((badge_x + 16, badge_y + 36), "STANDARD A4 PRINTABLE VOUCHER", fill=NAVY_LIGHT, font=get_font(12, bold=False))
+    if is_vip:
+        draw.rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], fill=(254, 240, 138), outline=(217, 119, 6), width=2)
+        draw.text((badge_x + 16, badge_y + 10), "★ VIP ENTRY PASS ★", fill=(180, 83, 9), font=f_h2)
+        draw.text((badge_x + 16, badge_y + 36), "COMPLIMENTARY VIP GUEST ACCESS", fill=(113, 63, 18), font=get_font(12, bold=True))
+    else:
+        draw.rectangle([badge_x, badge_y, badge_x + badge_w, badge_y + badge_h], fill=GOLD_LIGHT, outline=GOLD_BORDER, width=1)
+        draw.text((badge_x + 16, badge_y + 10), "OFFICIAL ENTRY PASS", fill=GOLD, font=f_h2)
+        draw.text((badge_x + 16, badge_y + 36), "STANDARD A4 PRINTABLE VOUCHER", fill=NAVY_LIGHT, font=get_font(12, bold=False))
 
     # =========================================================================
     # 2. EVENT TITLE BANNER (WITH MELODY NIGHT SHOW & STRICT 7:00 PM - 10:00 PM)
@@ -182,12 +200,19 @@ def generate_ticket_image(
     draw.rectangle([pass_badge_x, bar_y + 8, pass_badge_x + pass_badge_w, bar_y + bar_h - 8], fill=(254, 243, 199), outline=GOLD_BORDER, width=2)
     draw.text((pass_badge_x + 18, bar_y + 10), sl_clean, fill=NAVY, font=get_font(38, bold=True))
 
-    # Status Pill (Confirmed & Paid)
-    stat_w, stat_h = 240, 44
-    stat_x = WIDTH - margin - stat_w - 28
-    stat_y = bar_y + 14
-    draw.rectangle([stat_x, stat_y, stat_x + stat_w, stat_y + stat_h], fill=GREEN_BG, outline=GREEN_BORDER, width=2)
-    draw.text((stat_x + 18, stat_y + 11), "STATUS: CONFIRMED", fill=GREEN, font=get_font(16, bold=True))
+    # Status Pill
+    if is_vip:
+        stat_w, stat_h = 280, 44
+        stat_x = WIDTH - margin - stat_w - 28
+        stat_y = bar_y + 14
+        draw.rectangle([stat_x, stat_y, stat_x + stat_w, stat_y + stat_h], fill=(254, 240, 138), outline=(217, 119, 6), width=2)
+        draw.text((stat_x + 14, stat_y + 11), "👑 STATUS: VIP GUEST", fill=(180, 83, 9), font=get_font(16, bold=True))
+    else:
+        stat_w, stat_h = 240, 44
+        stat_x = WIDTH - margin - stat_w - 28
+        stat_y = bar_y + 14
+        draw.rectangle([stat_x, stat_y, stat_x + stat_w, stat_y + stat_h], fill=GREEN_BG, outline=GREEN_BORDER, width=2)
+        draw.text((stat_x + 18, stat_y + 11), "STATUS: CONFIRMED", fill=GREEN, font=get_font(16, bold=True))
 
     # =========================================================================
     # 4. DUAL QR CODE BLOCKS (GPS MAPS NAVIGATION + GATE ENTRY DETAILS)
@@ -386,7 +411,8 @@ def generate_ticket_image(
     # Token Header Strip
     th_h = 42
     draw.rectangle([token_x, token_y, token_x + token_w, token_y + th_h], fill=NAVY)
-    draw.text((token_x + 18, token_y + 10), "ORGANIZER GATE ENTRY TOKEN / COUNTERFOIL", fill=(254, 240, 138), font=f_token_h)
+    token_hdr_txt = "👑 VIP GATE ADMISSION TOKEN / COUNTERFOIL" if is_vip else "ORGANIZER GATE ENTRY TOKEN / COUNTERFOIL"
+    draw.text((token_x + 18, token_y + 10), token_hdr_txt, fill=(254, 240, 138), font=f_token_h)
     draw.text((token_x + 550, token_y + 13), "SECURITY ADMISSION COPY (TEAR & RETAIN AT GATE)", fill=(203, 213, 225), font=get_font(12, bold=True))
 
     # Token 3-Column Layout:
@@ -403,13 +429,14 @@ def generate_ticket_image(
     draw.text((colA_x + 115, colA_y + 7), sl_clean, fill=NAVY, font=get_font(34, bold=True))
 
     # Token Key Fields
+    token_pay_status = "VIP COMPLIMENTARY (FREE)" if is_vip else f"Rs. {rate_str}/- PAID ({payment_mode})"
     token_fields = [
         ("Event Name:", clean_title[:45]),
         ("Attendee Name:", clean_name[:26]),
         ("Mobile Number:", f"+91 {clean_mob}"),
         ("Date & Timing:", f"{clean_date}  |  7 PM - 10 PM"),
         ("Persons Allowed:", f"{qty_int} Guest(s)"),
-        ("Payment Status:", f"Rs. {rate_str}/- PAID ({payment_mode})"),
+        ("Payment Status:", token_pay_status),
         ("Venue Location:", "Trilochan Resorts, Jatni Rd, BBSR"),
         ("Organizer Support:", f"+91 {org_phones}")
     ]

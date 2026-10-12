@@ -171,7 +171,7 @@ class SponsorRequest(BaseModel):
 
 def verify_admin_pin(pin: str):
     settings = get_settings()
-    correct_pin = settings.get("admin_pin", "1234")
+    correct_pin = settings.get("admin_pin", "9906")
     if pin != correct_pin:
         raise HTTPException(status_code=401, detail="Invalid Admin PIN")
     return True
@@ -498,7 +498,7 @@ def create_ticket(req: TicketBookingRequest, pin: Optional[str] = Query(None)):
 
     settings = get_settings()
     rzp_enabled = settings.get("razorpay_enabled", "1") == "1"
-    correct_pin = settings.get("admin_pin", "1234")
+    correct_pin = settings.get("admin_pin", "9906")
 
     # If razorpay is enabled and user is not an authenticated admin, disallow manual creation
     if rzp_enabled and (not pin or pin != correct_pin):
@@ -747,7 +747,8 @@ def get_ticket_image(ticket_id: str, download: bool = False):
         date_selected=ticket.get("date_selected", "18/10/2026 (Sunday)"),
         amount=ticket.get("total_amount", 299),
         event_title=ticket.get("event_title", "FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW"),
-        quantity=ticket.get("quantity", 1)
+        quantity=ticket.get("quantity", 1),
+        payment_mode=ticket.get("payment_status") or ticket.get("utr_reference", "Paid")
     )
     
     buf = io.BytesIO()
