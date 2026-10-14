@@ -4847,18 +4847,29 @@
             const dockWrap = document.getElementById("floatingRightSponsorsDock");
             if (dockList) {
                 if (list.length > 0) {
-                    dockList.innerHTML = list.map(s => `
+                    dockList.innerHTML = list.map(s => {
+                        const initials = (s.name || "P").split(" ").filter(Boolean).map(w => w[0]).join("").substring(0, 2).toUpperCase();
+                        return `
                         <button type="button" onclick="openSponsorDetailsModal(${s.id})" title="${s.name} - Click for details" 
                                 class="group flex flex-col items-center focus:outline-none transition-transform hover:scale-110 active:scale-95">
                             <div class="relative w-11 h-11 rounded-full p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 shadow-lg group-hover:shadow-amber-400/40">
-                                <img src="${s.logo_url || '/static/dandia_night_2026.jpg'}" alt="${s.name}" onerror="this.src='/static/dandia_night_2026.jpg'" 
-                                     class="w-full h-full object-cover rounded-full bg-slate-950">
+                                ${s.logo_url ? `
+                                    <img src="${s.logo_url}" alt="${s.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                         class="w-full h-full object-cover rounded-full bg-slate-950">
+                                    <div style="display:none;" class="w-full h-full rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-[11px] items-center justify-center">
+                                        ${initials}
+                                    </div>
+                                ` : `
+                                    <div class="w-full h-full rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-[11px] flex items-center justify-center">
+                                        ${initials}
+                                    </div>
+                                `}
                             </div>
                             <span class="text-[9px] font-bold text-slate-200 group-hover:text-amber-300 mt-0.5 max-w-[55px] truncate text-center block">
                                 ${s.name}
                             </span>
                         </button>
-                    `).join("");
+                    `;}).join("");
                     if (dockWrap) dockWrap.classList.remove("hidden");
                 } else {
                     if (dockWrap) dockWrap.classList.add("hidden");
@@ -4869,12 +4880,23 @@
             const grid = document.getElementById("publicSponsorsGrid");
             if (grid) {
                 if (list.length > 0) {
-                    grid.innerHTML = list.map(s => `
+                    grid.innerHTML = list.map(s => {
+                        const initials = (s.name || "P").split(" ").filter(Boolean).map(w => w[0]).join("").substring(0, 2).toUpperCase();
+                        return `
                         <div onclick="openSponsorDetailsModal(${s.id})" class="cursor-pointer bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-amber-400 rounded-2xl p-5 text-center flex flex-col items-center justify-between transition-all duration-200 shadow-lg group">
                             <div class="w-full flex flex-col items-center">
-                                <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-amber-400 to-yellow-300 shadow-xl mb-3 group-hover:scale-105 transition-transform">
-                                    <img src="${s.logo_url || '/static/dandia_night_2026.jpg'}" onerror="this.src='/static/dandia_night_2026.jpg'" 
-                                         alt="${s.name}" class="w-full h-full object-cover rounded-full bg-slate-950">
+                                <div class="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-amber-400 to-yellow-300 shadow-xl mb-3 group-hover:scale-105 transition-transform flex items-center justify-center">
+                                    ${s.logo_url ? `
+                                        <img src="${s.logo_url}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                             alt="${s.name}" class="w-full h-full object-cover rounded-full bg-slate-950">
+                                        <div style="display:none;" class="w-full h-full rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-xl items-center justify-center">
+                                            ${initials}
+                                        </div>
+                                    ` : `
+                                        <div class="w-full h-full rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-xl flex items-center justify-center">
+                                            ${initials}
+                                        </div>
+                                    `}
                                 </div>
                                 <span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-400 text-[10px] font-bold uppercase tracking-wider inline-block mb-1 border border-slate-700">
                                     ${s.category || 'Event Partner'}
@@ -4886,7 +4908,7 @@
                                 View Partner Details
                             </button>
                         </div>
-                    `).join("");
+                    `;}).join("");
                 } else {
                     grid.innerHTML = `
                         <div class="col-span-full text-center py-8 text-slate-500 text-xs">
@@ -4902,7 +4924,15 @@
                       (adminSponsorsData && adminSponsorsData.find(x => x.id == sponsorId));
             if (!s) return;
 
-            document.getElementById("modalSponsorLogo").src = s.logo_url || '/static/dandia_night_2026.jpg';
+            const mLogo = document.getElementById("modalSponsorLogo");
+            const sInit = (s.name || "P").split(" ").filter(Boolean).map(w => w[0]).join("").substring(0, 2).toUpperCase();
+            const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100%' height='100%' fill='%23f59e0b'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='%230f172a' font-family='sans-serif' font-weight='900' font-size='36'>" + sInit + "</text></svg>";
+            if (s.logo_url) {
+                mLogo.src = s.logo_url;
+                mLogo.onerror = function() { this.src = fallbackSvg; };
+            } else {
+                mLogo.src = fallbackSvg;
+            }
             document.getElementById("modalSponsorName").textContent = s.name || "Event Partner";
             document.getElementById("modalSponsorCategory").textContent = s.category || "Official Partner";
 
@@ -5047,9 +5077,23 @@
             }
 
             tbody.innerHTML = adminSponsorsData.map(s => {
-                const logoHtml = s.logo_url 
-                    ? `<img src="${s.logo_url}" onerror="this.src='/static/dandia_night_2026.jpg'" class="w-10 h-10 object-contain rounded-full border border-amber-400 bg-slate-950 p-0.5">`
-                    : `<div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-sm">🤝</div>`;
+                const initials = (s.name || "P").split(" ").filter(Boolean).map(w => w[0]).join("").substring(0, 2).toUpperCase();
+                const logoHtml = `
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="relative w-11 h-11 shrink-0">
+                            ${s.logo_url ? `
+                                <img src="${s.logo_url}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-11 h-11 object-contain rounded-full border border-amber-400 bg-slate-950 p-0.5">
+                                <div style="display:none;" class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-xs items-center justify-center border border-amber-300 shadow">${initials}</div>
+                            ` : `
+                                <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-xs flex items-center justify-center border border-amber-300 shadow">${initials}</div>
+                            `}
+                        </div>
+                        <label class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 text-[9px] font-bold border border-slate-700 cursor-pointer inline-flex items-center gap-0.5 shadow transition hover:border-amber-400" title="Upload permanent photo directly to Supabase">
+                            <span>📷 Logo</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="quickUploadSponsorLogo(${s.id}, event)">
+                        </label>
+                    </div>
+                `;
                 const statusBadge = s.enabled == 1 
                     ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Active</span>`
                     : `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold">Hidden</span>`;
@@ -5257,7 +5301,7 @@
                         phone: phone,
                         email: email,
                         enabled: enabled,
-                        sponsor_id: sid ? parseInt(sid) : null
+                        sponsor_id: spId
                     })
                 });
             } catch(err) {
@@ -5352,56 +5396,134 @@
             loadPublicSponsors();
         }
 
+        function compressImageToDataUrl(file, maxWidth = 320, maxHeight = 320, quality = 0.85) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxWidth || h > maxHeight) {
+                            if (w > h) {
+                                h = Math.round((h * maxWidth) / w);
+                                w = maxWidth;
+                            } else {
+                                w = Math.round((w * maxHeight) / h);
+                                h = maxHeight;
+                            }
+                        }
+                        const canvas = document.createElement("canvas");
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = () => resolve(e.target.result);
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function uploadSponsorLogo(e) {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
 
-            // 1. Immediately convert to Base64 Data URL so logo works 100% reliably
-            const reader = new FileReader();
-            reader.onload = async function(evt) {
-                const base64Url = evt.target.result;
+            try {
+                // 1. Client-side instant compression to lightweight Base64 Data URI
+                const dataUrl = await compressImageToDataUrl(file, 320, 320, 0.85);
                 const logoInput = document.getElementById("sponsorFormLogoUrl");
                 const logoPrev = document.getElementById("sponsorFormLogoPreview");
-                if (logoInput) {
-                    logoInput.value = base64Url;
-                }
+                if (logoInput) logoInput.value = dataUrl;
                 if (logoPrev) {
-                    logoPrev.src = base64Url;
+                    logoPrev.src = dataUrl;
                     logoPrev.classList.remove("hidden");
                 }
 
-                // 2. Also upload file to server static storage
+                // 2. Also send to server upload endpoint
                 const formData = new FormData();
                 formData.append("file", file);
-
                 try {
                     const res = await fetch(`/api/sponsors/upload-logo?pin=${encodeURIComponent(currentAdminPin)}`, {
                         method: "POST",
                         body: formData
                     });
                     if (res && res.ok) {
-                        const rawText = await res.text();
-                        if (rawText && rawText.trim().length > 0) {
-                            try {
-                                const data = JSON.parse(rawText);
-                                if (data && data.logo_url && logoInput) {
-                                    logoInput.value = data.logo_url;
-                                }
-                            } catch(pe) {
-                                console.warn("Could not parse server JSON, using Data URL fallback:", pe);
-                            }
+                        const data = await res.json();
+                        if (data && data.logo_url && logoInput) {
+                            logoInput.value = data.logo_url;
                         }
                     }
-                    alert("Logo uploaded and saved successfully!");
                 } catch(err) {
-                    console.warn("Server upload warning, keeping local Data URL:", err);
-                    alert("Logo selected and saved successfully!");
+                    console.warn("Server upload warning, retained client Data URI:", err);
                 }
-            };
-            reader.onerror = function(err) {
-                alert("Failed to read image file. Please select another image.");
-            };
-            reader.readAsDataURL(file);
+                alert("✅ Sponsor photo selected and saved to form!");
+            } catch(err) {
+                alert("Failed to process image: " + err);
+            }
+        }
+
+        async function quickUploadSponsorLogo(sponsorId, e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const sp = adminSponsorsData.find(item => item.id == sponsorId);
+            if (!sp) return;
+
+            try {
+                const dataUrl = await compressImageToDataUrl(file, 320, 320, 0.85);
+                sp.logo_url = dataUrl;
+                renderAdminSponsorsTable();
+
+                // 1. Update Supabase Cloud immediately
+                const sb = getSupabaseClient();
+                if (sb) {
+                    try {
+                        await sb.from("sponsors").upsert([{
+                            id: sp.id,
+                            name: sp.name,
+                            category: sp.category,
+                            logo_url: dataUrl,
+                            website_url: sp.website_url || "",
+                            phone: sp.phone || "",
+                            email: sp.email || "",
+                            enabled: sp.enabled,
+                            display_order: sp.display_order || 1
+                        }], { onConflict: "id" });
+                    } catch(sbErr) {
+                        console.warn("Supabase quick logo upsert notice:", sbErr);
+                    }
+                }
+
+                // 2. Update Backend FastAPI / SQLite
+                try {
+                    await fetch("/api/admin/sponsors", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            pin: currentAdminPin,
+                            sponsor_id: sp.id,
+                            name: sp.name,
+                            category: sp.category,
+                            logo_url: dataUrl,
+                            website_url: sp.website_url || "",
+                            phone: sp.phone || "",
+                            email: sp.email || "",
+                            enabled: sp.enabled
+                        })
+                    });
+                } catch(err){}
+
+                alert(`✅ Logo for "${sp.name}" permanently updated & synced to Supabase!`);
+                loadAdminSponsors();
+                loadPublicSponsors();
+            } catch(err) {
+                alert("Quick upload failed: " + err);
+            }
         }
 
         // =========================================================================

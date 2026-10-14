@@ -6,7 +6,14 @@ from PIL import Image, ImageDraw, ImageFont
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def get_font(size, bold=False):
+    bundled_font = os.path.join(BASE_DIR, "arialbd.ttf" if bold else "arial.ttf")
     paths = [
+        bundled_font,
+        # Linux standard truetype font paths (for Render / Docker / Debian / Ubuntu)
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf" if bold else "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+        # Windows standard fonts
         r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
         r"C:\Windows\Fonts\segoeuib.ttf" if bold else r"C:\Windows\Fonts\segoeui.ttf",
         r"C:\Windows\Fonts\calibrib.ttf" if bold else r"C:\Windows\Fonts\calibri.ttf",
@@ -17,7 +24,10 @@ def get_font(size, bold=False):
                 return ImageFont.truetype(p, size)
             except Exception:
                 pass
-    return ImageFont.load_default()
+    try:
+        return ImageFont.load_default(size=size)
+    except Exception:
+        return ImageFont.load_default()
 
 def format_serial_number(pass_id):
     """
@@ -62,7 +72,8 @@ def generate_ticket_image(
     event_title="FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW",
     venue="Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
     quantity=1,
-    payment_mode="Online (Razorpay)"
+    payment_mode="Online (Razorpay)",
+    utr_ref=""
 ):
     """
     Generates standard A4 printable ticket (1240 x 1754 px at 150 DPI)

@@ -352,8 +352,84 @@ def delete_event(event_id: int):
     conn.close()
     return True
 
+_last_sponsors_sync = 0
+
+def sync_supabase_pull_sponsors(force: bool = False):
+    global _last_sponsors_sync
+    import time
+    import urllib.request
+    import json
+    
+    now = time.time()
+    if not force and (now - _last_sponsors_sync < 5):
+        return
+    _last_sponsors_sync = now
+
+    sb_url = "https://ivhjhyjrbeodwsugpjxq.supabase.co"
+    sb_key = "sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn"
+    headers = {
+        "apikey": sb_key,
+        "Authorization": f"Bearer {sb_key}"
+    }
+
+    try:
+        req = urllib.request.Request(f"{sb_url}/rest/v1/sponsors?select=*&order=id.asc", headers=headers)
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            cloud_sponsors = json.loads(resp.read().decode())
+            
+        if not isinstance(cloud_sponsors, list) or len(cloud_sponsors) == 0:
+            return
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("PRAGMA table_info(sponsors)")
+        cols = [c["name"] for c in cursor.fetchall()]
+        if "phone" not in cols:
+            cursor.execute("ALTER TABLE sponsors ADD COLUMN phone TEXT")
+        if "email" not in cols:
+            cursor.execute("ALTER TABLE sponsors ADD COLUMN email TEXT")
+
+        for s in cloud_sponsors:
+            s_id = s.get("id")
+            s_name = s.get("name")
+            if not s_id or not s_name:
+                continue
+            s_cat = s.get("category") or "Event Partner"
+            s_logo = s.get("logo_url") or ""
+            s_web = s.get("website_url") or ""
+            s_phone = s.get("phone") or ""
+            s_email = s.get("email") or ""
+            s_order = s.get("display_order", 1)
+            s_enabled = s.get("enabled", 1)
+            s_created = s.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            cursor.execute("SELECT id FROM sponsors WHERE id = ?", (s_id,))
+            existing = cursor.fetchone()
+            if existing:
+                cursor.execute("""
+                    UPDATE sponsors SET
+                        name = ?, category = ?, logo_url = ?, website_url = ?,
+                        phone = ?, email = ?, display_order = ?, enabled = ?
+                    WHERE id = ?
+                """, (s_name, s_cat, s_logo, s_web, s_phone, s_email, s_order, s_enabled, s_id))
+            else:
+                cursor.execute("""
+                    INSERT INTO sponsors (id, name, category, logo_url, website_url, phone, email, display_order, enabled, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (s_id, s_name, s_cat, s_logo, s_web, s_phone, s_email, s_order, s_enabled, s_created))
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Supabase sponsor pull note: {e}")
+
 # Sponsorship Management
 def get_all_sponsors(enabled_only=False):
+    try:
+        sync_supabase_pull_sponsors()
+    except Exception:
+        pass
     conn = get_db_connection()
     cursor = conn.cursor()
     if enabled_only:
@@ -365,7 +441,7 @@ def get_all_sponsors(enabled_only=False):
     conn.close()
     return sponsors
 
-def save_sponsor(name: str, category: str = "Event Partner", logo_url: str = "", website_url: str = "", phone: str = "", email: str = "", display_order: int = 0, enabled: int = 1, sponsor_id: int = None):
+def save_sponsor(name: str, category: str = "Event Partner", logo_url: str = "", website_url: str = "", phone: str = "", email: str = "", display_order: int = 1, enabled: int = 1, sponsor_id: int = None):
     conn = get_db_connection()
     cursor = conn.cursor()
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -376,19 +452,41 @@ def save_sponsor(name: str, category: str = "Event Partner", logo_url: str = "",
     clean_phone = phone.strip() if phone else ""
     clean_email = email.strip() if email else ""
     
-    if sponsor_id:
+    if not sponsor_id:
+        import time
+        sponsor_id = int(time.time() * 1000)
+    
+    cursor.execute("SELECT id FROM sponsors WHERE id = ?", (sponsor_id,))
+    if cursor.fetchone():
         cursor.execute("""
         UPDATE sponsors SET name=?, category=?, logo_url=?, website_url=?, phone=?, email=?, display_order=?, enabled=?
         WHERE id=?
         """, (clean_name, clean_cat, clean_logo, clean_web, clean_phone, clean_email, display_order, enabled, sponsor_id))
     else:
         cursor.execute("""
-        INSERT INTO sponsors (name, category, logo_url, website_url, phone, email, display_order, enabled, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (clean_name, clean_cat, clean_logo, clean_web, clean_phone, clean_email, display_order, enabled, created_at))
-        sponsor_id = cursor.lastrowid
+        INSERT INTO sponsors (id, name, category, logo_url, website_url, phone, email, display_order, enabled, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (sponsor_id, clean_name, clean_cat, clean_logo, clean_web, clean_phone, clean_email, display_order, enabled, created_at))
     conn.commit()
     conn.close()
+
+    # Cloud Persistence: Sync to Supabase
+    try:
+        sync_supabase_upsert("sponsors", {
+            "id": sponsor_id,
+            "name": clean_name,
+            "category": clean_cat,
+            "logo_url": clean_logo,
+            "website_url": clean_web,
+            "phone": clean_phone,
+            "email": clean_email,
+            "display_order": display_order,
+            "enabled": enabled,
+            "created_at": created_at
+        })
+    except Exception as e_sb:
+        print(f"Supabase sponsor upsert notice: {e_sb}")
+
     return sponsor_id
 
 def sync_supabase_delete(table: str, column: str, value: str):
@@ -555,8 +653,27 @@ def toggle_sponsor_status(sponsor_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("UPDATE sponsors SET enabled = CASE WHEN enabled = 1 THEN 0 ELSE 1 END WHERE id = ?", (sponsor_id,))
+    cursor.execute("SELECT enabled FROM sponsors WHERE id = ?", (sponsor_id,))
+    row = cursor.fetchone()
+    new_state = row["enabled"] if row else 1
     conn.commit()
     conn.close()
+    try:
+        import urllib.request, json
+        sb_url = "https://ivhjhyjrbeodwsugpjxq.supabase.co"
+        sb_key = "sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn"
+        url = f"{sb_url}/rest/v1/sponsors?id=eq.{sponsor_id}"
+        headers = {
+            "apikey": sb_key,
+            "Authorization": f"Bearer {sb_key}",
+            "Content-Type": "application/json"
+        }
+        body = json.dumps({"enabled": new_state}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, headers=headers, method="PATCH")
+        with urllib.request.urlopen(req, timeout=5):
+            pass
+    except Exception:
+        pass
     return True
 
 # Ticket Management

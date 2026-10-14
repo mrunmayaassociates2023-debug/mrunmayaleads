@@ -748,7 +748,8 @@ def get_ticket_image(ticket_id: str, download: bool = False):
         amount=ticket.get("total_amount", 299),
         event_title=ticket.get("event_title", "FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW"),
         quantity=ticket.get("quantity", 1),
-        payment_mode=ticket.get("payment_status") or ticket.get("utr_reference", "Paid")
+        payment_mode=ticket.get("payment_status") or ticket.get("utr_reference", "Paid"),
+        utr_ref=ticket.get("utr_reference", "")
     )
     
     buf = io.BytesIO()
@@ -857,19 +858,53 @@ def toggle_sponsor(sponsor_id: int, pin: str = Query(...)):
 async def upload_sponsor_logo_endpoint(file: UploadFile = File(...), pin: str = Query(...)):
     verify_admin_pin(pin)
     try:
-        import time
+        import time, io, base64
+        from PIL import Image
+        
         ext = os.path.splitext(file.filename or "")[1].lower()
         if ext not in [".jpg", ".jpeg", ".png", ".webp", ".svg"]:
             ext = ".png"
         safe_name = f"sponsor_logo_{int(time.time())}{ext}"
-        dest_path = os.path.join(STATIC_DIR, safe_name)
         content = await file.read()
-        with open(dest_path, "wb") as f:
-            f.write(content)
-        base_dest = os.path.join(BASE_DIR, safe_name)
-        with open(base_dest, "wb") as f:
-            f.write(content)
-        return JSONResponse(status_code=200, content={"success": True, "logo_url": f"/static/{safe_name}"})
+        
+        # Save local copy for static cache
+        try:
+            dest_path = os.path.join(STATIC_DIR, safe_name)
+            with open(dest_path, "wb") as f:
+                f.write(content)
+            base_dest = os.path.join(BASE_DIR, safe_name)
+            with open(base_dest, "wb") as f:
+                f.write(content)
+        except Exception as e_fs:
+            logger.warning(f"Static file cache write notice: {e_fs}")
+
+        # Optimize image with PIL into a cloud-persistent Base64 Data URI
+        try:
+            pil_img = Image.open(io.BytesIO(content))
+            pil_img.thumbnail((320, 320), Image.Resampling.LANCZOS)
+            out_buf = io.BytesIO()
+            if pil_img.mode in ("RGBA", "P"):
+                pil_img.save(out_buf, format="PNG", optimize=True)
+                mime = "image/png"
+            else:
+                if pil_img.mode != "RGB":
+                    pil_img = pil_img.convert("RGB")
+                pil_img.save(out_buf, format="JPEG", quality=85, optimize=True)
+                mime = "image/jpeg"
+            out_buf.seek(0)
+            b64_str = base64.b64encode(out_buf.getvalue()).decode("utf-8")
+            data_uri = f"data:{mime};base64,{b64_str}"
+        except Exception:
+            mime = "image/png" if ext == ".png" else "image/jpeg"
+            b64_str = base64.b64encode(content).decode("utf-8")
+            data_uri = f"data:{mime};base64,{b64_str}"
+
+        # Return both data_uri for permanent cloud storage and local file path
+        return JSONResponse(status_code=200, content={
+            "success": True,
+            "logo_url": data_uri,
+            "file_path": f"/static/{safe_name}"
+        })
     except Exception as e:
         logger.error(f"Sponsor logo upload error: {e}")
         return JSONResponse(status_code=500, content={"success": False, "detail": str(e)})
