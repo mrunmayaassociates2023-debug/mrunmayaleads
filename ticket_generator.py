@@ -1,10 +1,12 @@
 import os
 import re
+import functools
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+@functools.lru_cache(maxsize=128)
 def get_font(size, bold=False):
     bundled_font = os.path.join(BASE_DIR, "arialbd.ttf" if bold else "arial.ttf")
     paths = [
@@ -28,6 +30,18 @@ def get_font(size, bold=False):
         return ImageFont.load_default(size=size)
     except Exception:
         return ImageFont.load_default()
+
+_CACHED_VENUE_QR_IMG = None
+def get_cached_venue_qr():
+    global _CACHED_VENUE_QR_IMG
+    if _CACHED_VENUE_QR_IMG is None:
+        venue_map_url = "https://maps.google.com/?q=Trilochan+Resorts+Trilochan+Vihar+Sundarpada+Ebaranga+Jatni+Road+Bhubaneswar+751002"
+        qr1 = qrcode.QRCode(version=1, box_size=5, border=1)
+        qr1.add_data(venue_map_url)
+        qr1.make(fit=True)
+        img = qr1.make_image(fill_color="black", back_color="white").convert("RGB")
+        _CACHED_VENUE_QR_IMG = img.resize((140, 140), Image.Resampling.LANCZOS)
+    return _CACHED_VENUE_QR_IMG.copy()
 
 def format_serial_number(pass_id):
     """
@@ -270,12 +284,7 @@ def generate_ticket_image(
     draw.rectangle([b1_x, qr_y, b1_x + box_w, qr_y + 34], fill=(241, 245, 249))
     draw.text((b1_x + 16, qr_y + 8), "1. VENUE LOCATION QR CODE (MAPS)", fill=NAVY, font=f_qr_title)
 
-    venue_map_url = "https://maps.google.com/?q=Trilochan+Resorts+Trilochan+Vihar+Sundarpada+Ebaranga+Jatni+Road+Bhubaneswar+751002"
-    qr1 = qrcode.QRCode(version=1, box_size=5, border=1)
-    qr1.add_data(venue_map_url)
-    qr1.make(fit=True)
-    qr1_img = qr1.make_image(fill_color="black", back_color="white").convert("RGB")
-    qr1_img = qr1_img.resize((140, 140), Image.Resampling.LANCZOS)
+    qr1_img = get_cached_venue_qr()
     im.paste(qr1_img, (b1_x + 16, qr_y + 44))
 
     b1_t_x = b1_x + 172

@@ -720,6 +720,20 @@ def export_tickets_csv(pin: str = Query(...)):
         headers={"Content-Disposition": "attachment; filename=mrunmaya_event_tickets.csv"}
     )
 
+_TICKET_IMG_CACHE: Dict[str, bytes] = {}
+_TICKET_IMG_CACHE_KEYS: List[str] = []
+_MAX_TICKET_IMG_CACHE = 200
+
+def get_cached_ticket_image(cache_key: str) -> Optional[bytes]:
+    return _TICKET_IMG_CACHE.get(cache_key)
+
+def set_cached_ticket_image(cache_key: str, data: bytes):
+    if len(_TICKET_IMG_CACHE_KEYS) >= _MAX_TICKET_IMG_CACHE:
+        oldest = _TICKET_IMG_CACHE_KEYS.pop(0)
+        _TICKET_IMG_CACHE.pop(oldest, None)
+    _TICKET_IMG_CACHE[cache_key] = data
+    _TICKET_IMG_CACHE_KEYS.append(cache_key)
+
 @app.get("/api/tickets/{ticket_id:path}/image")
 def get_ticket_image(
     ticket_id: str, 
@@ -793,6 +807,19 @@ def get_ticket_image(
         cust_utr = ""
         cust_city = "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002"
         
+    clean_pass = str(cust_pass).replace("/", "_").replace(",", "_")
+    cache_key = f"{cust_pass}_{cust_name}_{cust_phone}_{cust_date}_{cust_amount}_{cust_qty}_{cust_pay_mode}_{cust_utr}"
+    
+    cached_bytes = get_cached_ticket_image(cache_key)
+    if cached_bytes:
+        headers = {
+            "Cache-Control": "public, max-age=300",
+            "X-Ticket-Cache": "HIT"
+        }
+        if download:
+            headers["Content-Disposition"] = f'attachment; filename="Family_Dandia_Night_A4_Ticket_{clean_pass}.png"'
+        return Response(content=cached_bytes, media_type="image/png", headers=headers)
+        
     im = generate_ticket_image(
         pass_id=cust_pass,
         customer_name=cust_name,
@@ -809,17 +836,18 @@ def get_ticket_image(
     buf = io.BytesIO()
     im.save(buf, format="PNG")
     buf.seek(0)
+    img_bytes = buf.getvalue()
     
-    clean_pass = str(cust_pass).replace("/", "_").replace(",", "_")
+    set_cached_ticket_image(cache_key, img_bytes)
+    
     headers = {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0"
+        "Cache-Control": "public, max-age=300",
+        "X-Ticket-Cache": "MISS"
     }
     if download:
         headers["Content-Disposition"] = f'attachment; filename="Family_Dandia_Night_A4_Ticket_{clean_pass}.png"'
         
-    return Response(content=buf.getvalue(), media_type="image/png", headers=headers)
+    return Response(content=img_bytes, media_type="image/png", headers=headers)
 
 # ================= EVENT MANAGEMENT APIS =================
 @app.get("/api/events")
