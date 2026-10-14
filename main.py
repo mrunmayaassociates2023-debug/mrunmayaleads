@@ -1,6 +1,7 @@
 import os
 import io
 import csv
+import re
 import urllib.parse
 from fastapi import FastAPI, HTTPException, Depends, Query, Response, UploadFile, File
 from fastapi.staticfiles import StaticFiles
@@ -720,43 +721,96 @@ def export_tickets_csv(pin: str = Query(...)):
     )
 
 @app.get("/api/tickets/{ticket_id:path}/image")
-def get_ticket_image(ticket_id: str, download: bool = False):
+def get_ticket_image(
+    ticket_id: str, 
+    download: bool = False,
+    name: Optional[str] = Query(None),
+    phone: Optional[str] = Query(None),
+    date: Optional[str] = Query(None),
+    amount: Optional[float] = Query(None)
+):
     from ticket_generator import generate_ticket_image
-    ticket = None
-    all_tickets = get_all_tickets()
-    for t in all_tickets:
-        if str(t.get("id")) == str(ticket_id) or str(t.get("pass_id", "")).lower() == str(ticket_id).lower():
-            ticket = t
-            break
-            
+    
+    # 1. Use enhanced get_ticket_by_pass_id from database
+    ticket = get_ticket_by_pass_id(ticket_id)
+    
+    # 2. Secondary fallback scan across all tickets
     if not ticket:
-        ticket = {
-            "pass_id": ticket_id if "Dandia" in ticket_id else f"Dandia/2026/{str(ticket_id).zfill(3)}",
-            "customer_name": "Valued Guest",
-            "phone": "7992993433",
-            "city": "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
-            "date_selected": "17/10/2026 (Saturday)",
-            "total_amount": 299
-        }
+        all_tickets = get_all_tickets(include_deleted=True)
+        raw_id = str(ticket_id or "").strip()
+        decoded_id = urllib.parse.unquote(raw_id).strip()
+        normalized_id = decoded_id.replace("_", "/").strip()
+        nums = re.findall(r"\d+", decoded_id)
+        seq_str = nums[-1] if nums else ""
+        
+        for t in all_tickets:
+            p_id = str(t.get("pass_id", "")).strip()
+            if str(t.get("id")) in (raw_id, decoded_id):
+                ticket = t
+                break
+            if p_id.lower() in (raw_id.lower(), decoded_id.lower(), normalized_id.lower()):
+                ticket = t
+                break
+            p_tokens = [p.strip().lower() for p in p_id.split(",") if p.strip()]
+            if decoded_id.lower() in p_tokens or normalized_id.lower() in p_tokens:
+                ticket = t
+                break
+            if seq_str:
+                p_nums = re.findall(r"\d+", p_id)
+                if p_nums and p_nums[-1] == seq_str and "_OLD" not in p_id:
+                    ticket = t
+                    break
+                    
+    req_name = str(name or "").strip()
+    if req_name.lower() in ("none", "null", "undefined"):
+        req_name = ""
+
+    if ticket:
+        cust_name = req_name or ticket.get("customer_name") or "Attendee"
+        cust_phone = phone or ticket.get("phone", "7992993433")
+        cust_date = date or ticket.get("date_selected", "18/10/2026 (Sunday)")
+        cust_amount = amount if amount is not None else ticket.get("total_amount", 299)
+        cust_pass = ticket.get("pass_id") or ticket_id
+        cust_qty = ticket.get("quantity", 1)
+        cust_pay_mode = ticket.get("payment_status") or ticket.get("utr_reference", "Paid")
+        cust_utr = ticket.get("utr_reference", "")
+        cust_city = ticket.get("city", "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002")
+    else:
+        raw_clean = urllib.parse.unquote(ticket_id).replace("_", "/")
+        if "Dandia" not in raw_clean:
+            nums = re.findall(r"\d+", raw_clean)
+            seq = int(nums[-1]) if nums else 301
+            cust_pass = f"Dandia/2026/{seq:03d}"
+        else:
+            cust_pass = raw_clean
+            
+        cust_name = req_name or "Attendee"
+        cust_phone = phone or "7992993433"
+        cust_date = date or "18/10/2026 (Sunday)"
+        cust_amount = amount if amount is not None else 299
+        cust_qty = 1
+        cust_pay_mode = "Online (Razorpay)"
+        cust_utr = ""
+        cust_city = "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002"
         
     im = generate_ticket_image(
-        pass_id=ticket.get("pass_id", "Dandia/2026/301"),
-        customer_name=ticket.get("customer_name", "Attendee"),
-        phone=ticket.get("phone", "7992993433"),
-        address=ticket.get("city", "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002"),
-        date_selected=ticket.get("date_selected", "18/10/2026 (Sunday)"),
-        amount=ticket.get("total_amount", 299),
-        event_title=ticket.get("event_title", "FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW"),
-        quantity=ticket.get("quantity", 1),
-        payment_mode=ticket.get("payment_status") or ticket.get("utr_reference", "Paid"),
-        utr_ref=ticket.get("utr_reference", "")
+        pass_id=cust_pass,
+        customer_name=cust_name,
+        phone=cust_phone,
+        address=cust_city,
+        date_selected=cust_date,
+        amount=cust_amount,
+        event_title="FAMILY DANDIA NIGHT 2026 - MELODY NIGHT SHOW",
+        quantity=cust_qty,
+        payment_mode=cust_pay_mode,
+        utr_ref=cust_utr
     )
     
     buf = io.BytesIO()
     im.save(buf, format="PNG")
     buf.seek(0)
     
-    clean_pass = str(ticket.get("pass_id", "301")).replace("/", "_")
+    clean_pass = str(cust_pass).replace("/", "_").replace(",", "_")
     headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",

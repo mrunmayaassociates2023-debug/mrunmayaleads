@@ -1252,22 +1252,44 @@ def empty_recycle_bin():
     return True
 
 def get_ticket_by_pass_id(pass_id: str):
-    clean = str(pass_id or "").strip()
-    if not clean:
+    import urllib.parse
+    raw = str(pass_id or "").strip()
+    if not raw:
         return None
+    decoded = urllib.parse.unquote(raw).strip()
+    normalized = decoded.replace("_", "/").strip()
+    
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Match exact or case-insensitive or formatted Dandia/2026/XXX
-    clean_formatted = f"Dandia/2026/{int(clean):03d}" if clean.isdigit() else clean
+    clean_formatted = f"Dandia/2026/{int(decoded):03d}" if decoded.isdigit() else normalized
+    
     cursor.execute("""
         SELECT * FROM tickets 
         WHERE LOWER(pass_id) = LOWER(?) 
            OR LOWER(pass_id) = LOWER(?)
+           OR LOWER(pass_id) = LOWER(?)
+           OR LOWER(pass_id) = LOWER(?)
            OR pass_id LIKE ? 
+           OR pass_id LIKE ?
            OR id = ?
-        ORDER BY id DESC LIMIT 1
-    """, (clean, clean_formatted, f"%{clean}%", clean if clean.isdigit() else -1))
+        ORDER BY (CASE WHEN pass_id NOT LIKE '%_OLD%' THEN 0 ELSE 1 END), id DESC LIMIT 1
+    """, (raw, decoded, normalized, clean_formatted, f"%{decoded}%", f"%{normalized}%", int(decoded) if decoded.isdigit() else -1))
     row = cursor.fetchone()
+    
+    # If still not found, search by trailing sequential number (e.g. 302)
+    if not row:
+        nums = re.findall(r"\d+", decoded)
+        if nums:
+            seq = int(nums[-1])
+            target_pass = f"Dandia/2026/{seq:03d}"
+            cursor.execute("""
+                SELECT * FROM tickets
+                WHERE pass_id = ? OR pass_id LIKE ?
+                ORDER BY (CASE WHEN pass_id NOT LIKE '%_OLD%' THEN 0 ELSE 1 END), id DESC
+                LIMIT 1
+            """, (target_pass, f"%{target_pass}%"))
+            row = cursor.fetchone()
+            
     conn.close()
     return dict(row) if row else None
 

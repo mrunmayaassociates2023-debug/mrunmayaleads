@@ -3215,13 +3215,16 @@
             }
 
             // Set Download URL & View/Print URL for this specific pass
-            const a4ImageUrl = `/api/tickets/${encodeURIComponent(passId)}/image`;
+            const nameParam = encodeURIComponent(cName || '');
+            const dateParam = encodeURIComponent(cDate || '');
+            const phoneParam = encodeURIComponent(cPhone || '');
+            const a4ImageUrl = `/api/tickets/${encodeURIComponent(passId)}/image?name=${nameParam}&date=${dateParam}&phone=${phoneParam}`;
             const dlBtn = document.getElementById("btnDownloadPass");
             if (dlBtn) {
-                dlBtn.href = `${a4ImageUrl}?download=true`;
+                dlBtn.href = `${a4ImageUrl}&download=true`;
                 dlBtn.onclick = function(e) {
                     e.preventDefault();
-                    triggerClientTicketDownload(passId);
+                    triggerClientTicketDownload(passId, cName);
                 };
             }
 
@@ -3232,11 +3235,13 @@
             }
         }
 
-        async function triggerClientTicketDownload(passId) {
+        async function triggerClientTicketDownload(passId, attendeeName) {
             const cleanId = (passId || "Dandia_2026_301").replace(/[^a-zA-Z0-9]/g, '_');
             const targetFilename = `Family_Dandia_Night_A4_Ticket_${cleanId}.png`;
+            const nameParam = encodeURIComponent(attendeeName || '');
+            const url = `/api/tickets/${encodeURIComponent(passId)}/image?download=true${attendeeName ? '&name=' + nameParam : ''}`;
             try {
-                const res = await fetch(`/api/tickets/${encodeURIComponent(passId)}/image?download=true`, {
+                const res = await fetch(url, {
                     cache: "no-store"
                 });
                 if (res.ok) {
@@ -3257,7 +3262,7 @@
             }
             // Fallback direct link download
             const fallbackLink = document.createElement("a");
-            fallbackLink.href = `/api/tickets/${encodeURIComponent(passId)}/image?download=true`;
+            fallbackLink.href = url;
             fallbackLink.download = targetFilename;
             fallbackLink.target = "_blank";
             document.body.appendChild(fallbackLink);
