@@ -180,35 +180,55 @@ def init_db():
     cursor.execute("UPDATE settings SET value = 'Z67kRRLfcjLXoHcAA1ndrs37' WHERE key = 'razorpay_key_secret'")
     cursor.execute("UPDATE settings SET value = '1' WHERE key = 'razorpay_enabled'")
 
-    # Seed default Family Dandia Night 2026 event if not exists or update poster
-    cursor.execute("SELECT COUNT(*) as cnt FROM events WHERE title LIKE '%Dandia%'")
-    if cursor.fetchone()["cnt"] == 0:
-        cursor.execute("""
-        INSERT INTO events (title, poster_image, rate, dates, timings, venue, highlights, contacts, enabled, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
-        """, (
-            "Family Dandia Night 2026 - Melody Night Show",
-            "dandia_night_2026.jpg",
-            299,
-            "17/10/2026 (Saturday) & 18/10/2026 (Sunday)",
-            "7:00 PM TO 10:00 PM",
-            "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
-            "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
-            "7992993433, 7008955582",
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ))
-    else:
-        cursor.execute("""
-        UPDATE events SET 
-            rate = 299,
-            poster_image = 'dandia_night_2026.jpg',
-            dates = '17/10/2026 (Saturday) & 18/10/2026 (Sunday)',
-            timings = '7:00 PM TO 10:00 PM',
-            venue = 'Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002',
-            highlights = 'Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)',
-            contacts = '7992993433, 7008955582'
-        WHERE title LIKE '%Dandia%'
-        """)
+    # Create persistent tombstone table for permanent deletions
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS deleted_items (
+        item_type TEXT NOT NULL,
+        item_id TEXT NOT NULL,
+        deleted_at TEXT NOT NULL,
+        PRIMARY KEY (item_type, item_id)
+    )
+    """)
+
+    # Check if initial seeding has already been completed once
+    cursor.execute("SELECT value FROM settings WHERE key = 'app_init_done'")
+    init_done_row = cursor.fetchone()
+
+    if not init_done_row:
+        # Seed default Family Dandia Night 2026 event on initial fresh setup only
+        cursor.execute("SELECT COUNT(*) as cnt FROM events WHERE title LIKE '%Dandia%'")
+        if cursor.fetchone()["cnt"] == 0:
+            cursor.execute("""
+            INSERT INTO events (title, poster_image, rate, dates, timings, venue, highlights, contacts, enabled, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+            """, (
+                "Family Dandia Night 2026 - Melody Night Show",
+                "dandia_night_2026.jpg",
+                299,
+                "17/10/2026 (Saturday) & 18/10/2026 (Sunday)",
+                "7:00 PM TO 10:00 PM",
+                "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
+                "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
+                "7992993433, 7008955582",
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ))
+
+        # Seed default sponsors on initial fresh setup only
+        cursor.execute("SELECT COUNT(*) as cnt FROM sponsors")
+        if cursor.fetchone()["cnt"] == 0:
+            default_sponsors = [
+                ("Trilochan Resorts", "Venue Partner", "/static/dandia_night_2026.jpg", "https://maps.google.com/?q=Trilochan+Resorts+Trilochan+Vihar+Sundarpada+Ebaranga+Jatni+Road+Bhubaneswar+751002", 1),
+                ("Mrunmaya Associates", "Organizing & Ticketing Desk", "/static/logo.png", "https://mrunmayaleads.onrender.com/", 2),
+                ("Odisha Live Beats", "Live Sound & Entertainment Partner", "", "", 3)
+            ]
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            for s_name, s_cat, s_logo, s_web, s_order in default_sponsors:
+                cursor.execute("""
+                INSERT INTO sponsors (name, category, logo_url, website_url, display_order, enabled, created_at)
+                VALUES (?, ?, ?, ?, ?, 1, ?)
+                """, (s_name, s_cat, s_logo, s_web, s_order, now_str))
+
+        cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('app_init_done', '1')")
 
     # Migrate any existing tickets into payments table so admin ledger has complete history
     try:
@@ -240,21 +260,6 @@ def init_db():
                 ))
     except Exception as e:
         print(f"Ticket migration to payments notice: {e}")
-        
-    # Seed default sponsors if table is empty
-    cursor.execute("SELECT COUNT(*) as cnt FROM sponsors")
-    if cursor.fetchone()["cnt"] == 0:
-        default_sponsors = [
-            ("Trilochan Resorts", "Venue Partner", "/static/dandia_night_2026.jpg", "https://maps.google.com/?q=Trilochan+Resorts+Trilochan+Vihar+Sundarpada+Ebaranga+Jatni+Road+Bhubaneswar+751002", 1),
-            ("Mrunmaya Associates", "Organizing & Ticketing Desk", "/static/logo.png", "https://mrunmayaleads.onrender.com/", 2),
-            ("Odisha Live Beats", "Live Sound & Entertainment Partner", "", "", 3)
-        ]
-        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        for s_name, s_cat, s_logo, s_web, s_order in default_sponsors:
-            cursor.execute("""
-            INSERT INTO sponsors (name, category, logo_url, website_url, display_order, enabled, created_at)
-            VALUES (?, ?, ?, ?, ?, 1, ?)
-            """, (s_name, s_cat, s_logo, s_web, s_order, now_str))
 
     conn.commit()
     conn.close()
@@ -344,12 +349,53 @@ def save_event(title: str, rate: int, dates: str, timings: str, venue: str, high
     conn.close()
     return event_id
 
+def record_deleted_item(item_type: str, item_id: str):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS deleted_items (
+            item_type TEXT NOT NULL,
+            item_id TEXT NOT NULL,
+            deleted_at TEXT NOT NULL,
+            PRIMARY KEY (item_type, item_id)
+        )
+        """)
+        cursor.execute("INSERT OR REPLACE INTO deleted_items (item_type, item_id, deleted_at) VALUES (?, ?, ?)", (item_type, str(item_id).strip(), now_str))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Notice recording deleted item: {e}")
+
+def is_item_deleted(item_type: str, item_id: str) -> bool:
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS deleted_items (
+            item_type TEXT NOT NULL,
+            item_id TEXT NOT NULL,
+            deleted_at TEXT NOT NULL,
+            PRIMARY KEY (item_type, item_id)
+        )
+        """)
+        clean = str(item_id).strip()
+        cursor.execute("SELECT 1 FROM deleted_items WHERE item_type = ? AND (item_id = ? OR LOWER(item_id) = LOWER(?))", (item_type, clean, clean))
+        row = cursor.fetchone()
+        conn.close()
+        return row is not None
+    except Exception:
+        return False
+
 def delete_event(event_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
     conn.commit()
     conn.close()
+    record_deleted_item("event", str(event_id))
+    sync_supabase_delete("events", "id", str(event_id))
     return True
 
 _last_sponsors_sync = 0
@@ -395,6 +441,12 @@ def sync_supabase_pull_sponsors(force: bool = False):
             s_name = s.get("name")
             if not s_id or not s_name:
                 continue
+
+            # If sponsor was permanently deleted by admin, purge from Supabase and skip insertion!
+            if is_item_deleted("sponsor", str(s_id)):
+                sync_supabase_delete("sponsors", "id", str(s_id))
+                continue
+
             s_cat = s.get("category") or "Event Partner"
             s_logo = s.get("logo_url") or ""
             s_web = s.get("website_url") or ""
@@ -561,6 +613,12 @@ def sync_supabase_pull_tickets_and_payments(force: bool = False):
                     pid = t.get("pass_id")
                     if not pid:
                         continue
+                    
+                    # If ticket was permanently deleted by admin, purge from Supabase and skip!
+                    if is_item_deleted("ticket", pid) or is_item_deleted("ticket", str(t.get("id"))):
+                        sync_supabase_delete("tickets", "pass_id", pid)
+                        continue
+
                     p_status = str(t.get("payment_status") or "Paid")
                     u_ref = str(t.get("utr_reference") or "")
                     is_vip_val = 1 if ("vip" in p_status.lower() or "vip" in u_ref.lower() or "vip" in pid.lower() or t.get("is_vip") == 1) else 0
@@ -608,6 +666,13 @@ def sync_supabase_pull_tickets_and_payments(force: bool = False):
                     pay_id = p.get("payment_id")
                     if not pay_id:
                         continue
+                    
+                    p_pass = p.get("pass_id") or ""
+                    # If payment or its linked ticket was deleted, purge from Supabase and skip!
+                    if is_item_deleted("payment", pay_id) or (p_pass and is_item_deleted("ticket", p_pass)):
+                        sync_supabase_delete("payments", "payment_id", pay_id)
+                        continue
+
                     cursor.execute("SELECT id FROM payments WHERE payment_id = ?", (pay_id,))
                     existing_p = cursor.fetchone()
                     if existing_p:
@@ -641,6 +706,7 @@ def sync_supabase_pull_tickets_and_payments(force: bool = False):
         pass
 
 def delete_sponsor(sponsor_id: int):
+    record_deleted_item("sponsor", str(sponsor_id))
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM sponsors WHERE id = ?", (sponsor_id,))
@@ -1105,10 +1171,122 @@ def update_ticket_status(ticket_id: int, status: str):
     auto_backup_tickets()
     return True
 
-def delete_ticket(ticket_identifier, permanent: bool = False):
+def update_ticket_details(ticket_identifier, updates: dict):
     """
+    Allow Admin to edit ticket details (date, name, phone, email, city, amount, qty, VIP, payment status, etc.)
+    Syncs changes to SQLite and Supabase Cloud.
+    """
+    clean_id = str(ticket_identifier).strip()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT * FROM tickets 
+        WHERE id = ? 
+           OR pass_id = ? 
+           OR LOWER(pass_id) = LOWER(?)
+    """, (int(clean_id) if clean_id.isdigit() else -1, clean_id, clean_id))
+    ticket = cursor.fetchone()
+    if not ticket and ("dandia" in clean_id.lower() or "/" in clean_id):
+        cursor.execute("SELECT * FROM tickets WHERE pass_id = ? OR LOWER(pass_id) = LOWER(?)", (clean_id, clean_id))
+        ticket = cursor.fetchone()
+        
+    if not ticket:
+        conn.close()
+        return False, "Ticket not found"
+        
+    tid = ticket["id"]
+    current_pass_id = ticket["pass_id"]
+    
+    allowed_fields = [
+        "date_selected", "customer_name", "phone", "email", "city",
+        "quantity", "rate_per_ticket", "total_amount", "payment_status",
+        "utr_reference", "booking_status", "is_vip", "event_title",
+        "razorpay_payment_id"
+    ]
+    
+    set_clauses = []
+    params = []
+    
+    for f in allowed_fields:
+        if f in updates and updates[f] is not None:
+            val = updates[f]
+            if f in ("quantity", "rate_per_ticket", "total_amount"):
+                try:
+                    val = int(round(float(val)))
+                except:
+                    pass
+            elif f == "is_vip":
+                val = 1 if str(val).lower() in ("1", "true", "yes", "vip") else 0
+            elif isinstance(val, str):
+                val = val.strip()
+            set_clauses.append(f"{f} = ?")
+            params.append(val)
+            
+    if not set_clauses:
+        conn.close()
+        return False, "No valid fields provided to update"
+        
+    params.append(tid)
+    cursor.execute(f"UPDATE tickets SET {', '.join(set_clauses)} WHERE id = ?", params)
+    
+    # Also update corresponding payment record if customer_name, phone, or amount changed
+    update_pay_clauses = []
+    pay_params = []
+    if "customer_name" in updates:
+        update_pay_clauses.append("customer_name = ?")
+        pay_params.append(str(updates["customer_name"]).strip())
+    if "phone" in updates:
+        update_pay_clauses.append("phone = ?")
+        pay_params.append(str(updates["phone"]).strip())
+    if "total_amount" in updates:
+        try:
+            update_pay_clauses.append("amount = ?")
+            pay_params.append(float(updates["total_amount"]))
+        except:
+            pass
+    if update_pay_clauses:
+        pay_params.append(current_pass_id)
+        cursor.execute(f"UPDATE payments SET {', '.join(update_pay_clauses)} WHERE pass_id = ? OR pass_id LIKE ?", pay_params + [f"%{current_pass_id}%"])
+        
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM tickets WHERE id = ?", (tid,))
+    updated_ticket = dict(cursor.fetchone())
+    conn.close()
+    
+    # Sync update to Supabase Cloud
+    try:
+        sync_supabase_upsert("tickets", {
+            "pass_id": updated_ticket.get("pass_id"),
+            "event_id": updated_ticket.get("event_id", 1),
+            "event_title": updated_ticket.get("event_title", ""),
+            "customer_name": updated_ticket.get("customer_name", ""),
+            "phone": updated_ticket.get("phone", ""),
+            "email": updated_ticket.get("email", ""),
+            "city": updated_ticket.get("city", ""),
+            "date_selected": updated_ticket.get("date_selected", ""),
+            "quantity": updated_ticket.get("quantity", 1),
+            "rate_per_ticket": updated_ticket.get("rate_per_ticket", 299),
+            "total_amount": updated_ticket.get("total_amount", 299),
+            "payment_status": updated_ticket.get("payment_status", "Paid"),
+            "utr_reference": updated_ticket.get("utr_reference", ""),
+            "booking_status": updated_ticket.get("booking_status", "Confirmed"),
+            "razorpay_order_id": updated_ticket.get("razorpay_order_id", ""),
+            "razorpay_payment_id": updated_ticket.get("razorpay_payment_id", ""),
+            "is_vip": updated_ticket.get("is_vip", 0),
+            "created_at": updated_ticket.get("created_at", "")
+        })
+    except Exception as e_sb:
+        print(f"Supabase update sync note: {e_sb}")
+        
+    auto_backup_tickets()
+    return True, updated_ticket
+
+def delete_ticket(ticket_identifier, permanent: bool = True):
+    """
+    If permanent=True: Completely purges ticket from DB, payments, deleted_items tombstone, and Supabase.
     If permanent=False: Moves ticket to Recycle Bin (Trash) with deleted_at timestamp.
-    If permanent=True: Completely purges ticket from DB, payments, and Supabase.
     """
     clean_id = str(ticket_identifier).strip()
     conn = get_db_connection()
@@ -1131,6 +1309,9 @@ def delete_ticket(ticket_identifier, permanent: bool = False):
         # Move to Recycle Bin (soft delete)
         for r in rows:
             cursor.execute("UPDATE tickets SET is_deleted = 1, deleted_at = ? WHERE id = ?", (now_str, r["id"]))
+            if r["pass_id"]:
+                record_deleted_item("ticket", r["pass_id"])
+            record_deleted_item("ticket", str(r["id"]))
         conn.commit()
         conn.close()
         auto_backup_tickets()
@@ -1149,7 +1330,9 @@ def delete_ticket(ticket_identifier, permanent: bool = False):
         if pid:
             deleted_passes.add(pid)
             cursor.execute("INSERT OR REPLACE INTO deleted_pass_ids (pass_id, deleted_at) VALUES (?, ?)", (pid, now_str))
+            record_deleted_item("ticket", pid)
             cursor.execute("DELETE FROM payments WHERE pass_id = ? OR payment_id LIKE ? OR details LIKE ?", (pid, f"%{pid}%", f"%{pid}%"))
+        record_deleted_item("ticket", str(r["id"]))
         cursor.execute("DELETE FROM tickets WHERE id = ?", (r["id"],))
 
     conn.commit()
@@ -1161,6 +1344,7 @@ def delete_ticket(ticket_identifier, permanent: bool = False):
         sync_supabase_delete("payments", "pass_id", pid)
     if clean_id.isdigit():
         sync_supabase_delete("tickets", "id", clean_id)
+        record_deleted_item("ticket", clean_id)
         
     auto_backup_tickets()
     return True
@@ -1186,7 +1370,9 @@ def restore_ticket_from_recycle_bin(ticket_identifier):
         pid = r["pass_id"]
         if pid:
             cursor.execute("DELETE FROM deleted_pass_ids WHERE pass_id = ? OR LOWER(pass_id) = LOWER(?)", (pid, pid))
+            cursor.execute("DELETE FROM deleted_items WHERE item_type = 'ticket' AND (item_id = ? OR LOWER(item_id) = LOWER(?))", (pid, pid))
             restored_list.append(dict(r))
+        cursor.execute("DELETE FROM deleted_items WHERE item_type = 'ticket' AND item_id = ?", (str(r["id"]),))
             
     conn.commit()
     conn.close()

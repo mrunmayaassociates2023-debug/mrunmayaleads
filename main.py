@@ -35,6 +35,7 @@ from database import (
     toggle_sponsor_status,
     purge_expired_cancelled_tickets,
     delete_ticket,
+    update_ticket_details,
     get_recycle_bin_tickets,
     restore_ticket_from_recycle_bin,
     restore_all_recycle_bin_tickets,
@@ -100,6 +101,24 @@ class TicketBookingRequest(BaseModel):
     payment_status: Optional[str] = "Paid"
     gst_amount: Optional[float] = 0.0
     gst_percent: Optional[float] = 0.0
+
+class TicketEditRequest(BaseModel):
+    pin: str
+    date_selected: Optional[str] = None
+    customer_name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    city: Optional[str] = None
+    quantity: Optional[int] = None
+    rate_per_ticket: Optional[int] = None
+    total_amount: Optional[int] = None
+    payment_status: Optional[str] = None
+    utr_reference: Optional[str] = None
+    booking_status: Optional[str] = None
+    is_vip: Optional[int] = None
+    event_title: Optional[str] = None
+    razorpay_payment_id: Optional[str] = None
+
 
 class GeneralPaymentRequest(BaseModel):
     service_type: str = Field(..., min_length=2)
@@ -618,10 +637,25 @@ def purge_cancelled_tickets_endpoint(pin: str = Query(...)):
     count = purge_expired_cancelled_tickets()
     return {"success": True, "purged_count": count, "message": f"Purged {count} expired cancelled tickets."}
 
+@app.put("/api/admin/tickets/{ticket_identifier:path}")
+def edit_ticket_endpoint(ticket_identifier: str, req: TicketEditRequest):
+    verify_admin_pin(req.pin)
+    updates = req.dict(exclude={"pin"}, exclude_none=True)
+    success, result = update_ticket_details(ticket_identifier, updates)
+    if not success:
+        raise HTTPException(status_code=400, detail=result)
+    
+    # Invalidate image cache so edited ticket renders immediately with updated info
+    _TICKET_IMG_CACHE.clear()
+    _TICKET_IMG_CACHE_KEYS.clear()
+    return {"success": True, "message": "Ticket updated successfully!", "ticket": result}
+
 @app.delete("/api/admin/tickets/{ticket_identifier:path}")
-def remove_ticket_endpoint(ticket_identifier: str, pin: str = Query(...), permanent: bool = False):
+def remove_ticket_endpoint(ticket_identifier: str, pin: str = Query(...), permanent: bool = True):
     verify_admin_pin(pin)
     delete_ticket(ticket_identifier, permanent=permanent)
+    _TICKET_IMG_CACHE.clear()
+    _TICKET_IMG_CACHE_KEYS.clear()
     msg = f"Ticket {ticket_identifier} permanently deleted." if permanent else f"Ticket {ticket_identifier} moved to Recycle Bin (Trash)."
     return {"success": True, "message": msg}
 
