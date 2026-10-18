@@ -164,12 +164,17 @@ def init_db():
         "gst_type": "exclusive",
         "gstin": "",
         "booking_status": "open",
-        "booking_close_date": "2026-10-16T23:59",
+        "booking_close_date": "",
         "booking_close_message": "Online ticket booking is officially closed for Family Dandia Night 2026. For VIP / gate passes, please contact organizer."
     }
     
     for key, value in default_settings.items():
         cursor.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
+
+    # Clean up old expired hardcoded cutoff date if present in SQLite
+    cursor.execute("UPDATE settings SET value = '' WHERE key = 'booking_close_date' AND value = '2026-10-16T23:59'")
+    cursor.execute("UPDATE settings SET value = 'open' WHERE key = 'booking_status' AND value = 'closed'")
+    cursor.execute("UPDATE events SET dates = '18/10/2026 (Sunday) & Melody Night Show' WHERE dates LIKE '%17/10/2026%'")
 
     # Update business name, contacts, email, address and default Razorpay credentials in settings table
     cursor.execute("UPDATE settings SET value = 'MRUNMAYA ASSOCIATES' WHERE key = 'business_name'")
@@ -205,7 +210,7 @@ def init_db():
                 "Family Dandia Night 2026 - Melody Night Show",
                 "dandia_night_2026.jpg",
                 299,
-                "17/10/2026 (Saturday) & 18/10/2026 (Sunday)",
+                "18/10/2026 (Sunday) & Melody Night Show",
                 "7:00 PM TO 10:00 PM",
                 "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
                 "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
@@ -347,7 +352,18 @@ def save_event(title: str, rate: int, dates: str, timings: str, venue: str, high
         event_id = cursor.lastrowid
     conn.commit()
     conn.close()
+
+    # Cloud Persistence: Sync events to Supabase payments table
+    sync_events_to_supabase()
+
     return event_id
+
+def sync_events_to_supabase():
+    try:
+        events = get_all_events()
+        sync_supabase_config_save("CONFIG_PORTAL_EVENTS", events)
+    except Exception as e:
+        print(f"Sync events notice: {e}")
 
 def record_deleted_item(item_type: str, item_id: str):
     try:
@@ -396,6 +412,7 @@ def delete_event(event_id: int):
     conn.close()
     record_deleted_item("event", str(event_id))
     sync_supabase_delete("events", "id", str(event_id))
+    sync_events_to_supabase()
     return True
 
 _last_sponsors_sync = 0
@@ -580,6 +597,56 @@ def sync_supabase_upsert(table: str, row_data: dict):
     except Exception as e:
         pass
 
+def sync_supabase_config_save(config_key: str, data_dict_or_list):
+    import urllib.request
+    import json
+    sb_url = "https://ivhjhyjrbeodwsugpjxq.supabase.co"
+    sb_key = "sb_publishable_AfBcq6xJZM0YI_6dHOsyqQ__J16HqDn"
+    headers = {
+        "apikey": sb_key,
+        "Authorization": f"Bearer {sb_key}",
+        "Content-Type": "application/json"
+    }
+    json_payload = json.dumps(data_dict_or_list)
+    patch_url = f"{sb_url}/rest/v1/payments?payment_id=eq.{config_key}"
+    patch_body = json.dumps({
+        "service_type": json_payload,
+        "customer_name": "System Configuration",
+        "amount": 0.0,
+        "status": "Active"
+    }).encode("utf-8")
+    
+    patched = False
+    try:
+        req = urllib.request.Request(patch_url, data=patch_body, headers=headers, method="PATCH")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            if resp.status in (200, 204):
+                patched = True
+    except Exception:
+        pass
+
+    try:
+        check_req = urllib.request.Request(f"{patch_url}&select=id", headers=headers)
+        with urllib.request.urlopen(check_req, timeout=5) as check_resp:
+            rows = json.loads(check_resp.read().decode())
+            if not rows:
+                post_url = f"{sb_url}/rest/v1/payments"
+                post_body = json.dumps([{
+                    "payment_id": config_key,
+                    "order_id": config_key,
+                    "service_type": json_payload,
+                    "customer_name": "System Configuration",
+                    "phone": "917992993433",
+                    "amount": 0.0,
+                    "payment_mode": "CONFIG",
+                    "status": "Active"
+                }]).encode("utf-8")
+                req_post = urllib.request.Request(post_url, data=post_body, headers=headers, method="POST")
+                with urllib.request.urlopen(req_post, timeout=5):
+                    pass
+    except Exception as e:
+        print(f"Supabase config save notice: {e}")
+
 _last_supabase_sync = 0
 
 def sync_supabase_pull_tickets_and_payments(force: bool = False):
@@ -667,6 +734,41 @@ def sync_supabase_pull_tickets_and_payments(force: bool = False):
                     if not pay_id:
                         continue
                     
+                    if pay_id == "CONFIG_PORTAL_SETTINGS":
+                        try:
+                            cfg_text = p.get("service_type")
+                            if cfg_text:
+                                cfg_data = json.loads(cfg_text)
+                                for k, v in cfg_data.items():
+                                    if k != "booking_close_date" or v != "2026-10-16T23:59":
+                                        cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (k, str(v)))
+                        except Exception:
+                            pass
+                        continue
+
+                    if pay_id == "CONFIG_PORTAL_EVENTS":
+                        try:
+                            evs_text = p.get("service_type")
+                            if evs_text:
+                                evs_list = json.loads(evs_text)
+                                for ev in evs_list:
+                                    eid = ev.get("id")
+                                    if eid:
+                                        cursor.execute("SELECT id FROM events WHERE id = ?", (eid,))
+                                        if cursor.fetchone():
+                                            cursor.execute("""
+                                                UPDATE events SET title=?, rate=?, dates=?, timings=?, venue=?, highlights=?, contacts=?, poster_image=?, enabled=?
+                                                WHERE id=?
+                                            """, (ev.get("title",""), ev.get("rate",299), ev.get("dates",""), ev.get("timings",""), ev.get("venue",""), ev.get("highlights",""), ev.get("contacts",""), ev.get("poster_image",""), ev.get("enabled",1), eid))
+                                        else:
+                                            cursor.execute("""
+                                                INSERT INTO events (id, title, rate, dates, timings, venue, highlights, contacts, poster_image, enabled, created_at)
+                                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                            """, (eid, ev.get("title",""), ev.get("rate",299), ev.get("dates",""), ev.get("timings",""), ev.get("venue",""), ev.get("highlights",""), ev.get("contacts",""), ev.get("poster_image",""), ev.get("enabled",1), ev.get("created_at") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                        except Exception:
+                            pass
+                        continue
+
                     p_pass = p.get("pass_id") or ""
                     # If payment or its linked ticket was deleted, purge from Supabase and skip!
                     if is_item_deleted("payment", pay_id) or (p_pass and is_item_deleted("ticket", p_pass)):
@@ -1049,7 +1151,7 @@ def save_payment(service_type: str, customer_name: str, phone: str, amount: floa
 def get_all_payments(search: str = None, status: str = None, mode: str = None):
     conn = get_db_connection()
     cursor = conn.cursor()
-    query = "SELECT * FROM payments WHERE 1=1"
+    query = "SELECT * FROM payments WHERE (payment_id NOT LIKE 'CONFIG_%')"
     params = []
     if status and status != "All":
         query += " AND status = ?"
@@ -1486,6 +1588,19 @@ def get_settings():
     rows = cursor.fetchall()
     settings = {row["key"]: row["value"] for row in rows}
     conn.close()
+
+    # Auto-sanitize expired date
+    if settings.get("booking_close_date") == "2026-10-16T23:59":
+        settings["booking_close_date"] = ""
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("UPDATE settings SET value = '' WHERE key = 'booking_close_date'")
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
     return settings
 
 def update_settings(updates: dict):
@@ -1495,6 +1610,16 @@ def update_settings(updates: dict):
         cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
     conn.commit()
     conn.close()
+
+    # Cloud Persistence: Sync updated settings to Supabase payments table
+    try:
+        all_s = get_settings()
+        # Clean out secrets before syncing
+        safe_s = {k: v for k, v in all_s.items() if k not in ["admin_pin", "razorpay_key_secret"]}
+        sync_supabase_config_save("CONFIG_PORTAL_SETTINGS", safe_s)
+    except Exception as e:
+        print(f"Supabase settings sync notice: {e}")
+
     return True
 
 def get_statistics():
@@ -1524,20 +1649,20 @@ def get_statistics():
     cursor.execute("SELECT SUM(total_amount) as total_revenue FROM tickets")
     total_revenue = cursor.fetchone()["total_revenue"] or 0
 
-    # Payments ledger statistics
-    cursor.execute("SELECT COUNT(*) as total_payments FROM payments")
+    # Payments ledger statistics (exclude internal configuration records)
+    cursor.execute("SELECT COUNT(*) as total_payments FROM payments WHERE payment_id NOT LIKE 'CONFIG_%'")
     total_payments = cursor.fetchone()["total_payments"]
 
-    cursor.execute("SELECT SUM(amount) as payments_revenue FROM payments")
+    cursor.execute("SELECT SUM(amount) as payments_revenue FROM payments WHERE payment_id NOT LIKE 'CONFIG_%'")
     payments_revenue = cursor.fetchone()["payments_revenue"] or 0
 
-    cursor.execute("SELECT COUNT(*) as today_payments FROM payments WHERE created_at LIKE ?", (f"{today_str}%",))
+    cursor.execute("SELECT COUNT(*) as today_payments FROM payments WHERE created_at LIKE ? AND payment_id NOT LIKE 'CONFIG_%'", (f"{today_str}%",))
     today_payments = cursor.fetchone()["today_payments"]
 
     cursor.execute("SELECT COUNT(*) as total_admitted FROM tickets WHERE LOWER(booking_status) = 'admitted'")
     total_admitted = cursor.fetchone()["total_admitted"]
 
-    cursor.execute("SELECT payment_mode, COUNT(*) as cnt, SUM(amount) as total FROM payments GROUP BY payment_mode")
+    cursor.execute("SELECT payment_mode, COUNT(*) as cnt, SUM(amount) as total FROM payments WHERE payment_id NOT LIKE 'CONFIG_%' GROUP BY payment_mode")
     by_payment_mode = {row["payment_mode"]: {"count": row["cnt"], "total": row["total"]} for row in cursor.fetchall()}
     
     conn.close()

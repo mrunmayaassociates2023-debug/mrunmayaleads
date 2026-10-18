@@ -257,7 +257,7 @@ def check_booking_allowed():
         raise HTTPException(status_code=403, detail=msg)
     
     b_close_date = (settings.get("booking_close_date") or "").strip()
-    if b_close_date:
+    if b_close_date and b_close_date != "2026-10-16T23:59":
         try:
             clean_date = b_close_date.replace(" ", "T")
             if len(clean_date) == 10:

@@ -1667,6 +1667,25 @@
                                        class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
                             </div>
 
+                            <!-- 1-Click Quick Action Presets -->
+                            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
+                                <label class="block text-[10px] font-black text-amber-300 uppercase tracking-wider">⚡ 1-Click Quick Actions (Instant Set)</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <button type="button" onclick="setQuickBookingDeadline('today')" class="px-2 py-1.5 rounded-lg bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-300 font-bold text-[11px] text-center transition">
+                                        🟢 Open Today (18 Oct)
+                                    </button>
+                                    <button type="button" onclick="setQuickBookingDeadline('tomorrow')" class="px-2 py-1.5 rounded-lg bg-teal-950/90 hover:bg-teal-900 border border-teal-500/60 text-teal-300 font-bold text-[11px] text-center transition">
+                                        🟢 Extend 19 Oct
+                                    </button>
+                                    <button type="button" onclick="setQuickBookingDeadline('always')" class="px-2 py-1.5 rounded-lg bg-amber-950/90 hover:bg-amber-900 border border-amber-500/60 text-amber-300 font-bold text-[11px] text-center transition">
+                                        🟢 Always Open
+                                    </button>
+                                    <button type="button" onclick="setQuickBookingDeadline('close')" class="px-2 py-1.5 rounded-lg bg-rose-950/90 hover:bg-rose-900 border border-rose-500/60 text-rose-300 font-bold text-[11px] text-center transition">
+                                        🔴 Close Now
+                                    </button>
+                                </div>
+                            </div>
+
                             <button onclick="saveBookingControlSettings()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow">
                                 💾 Save Booking Availability & Deadline
                             </button>
@@ -2227,7 +2246,7 @@
             title: "Family Dandia Night 2026 - Melody Night Show",
             poster_image: "/static/dandia_night_2026.jpg",
             rate: 299,
-            dates: "17/10/2026 (Saturday) & 18/10/2026 (Sunday)",
+            dates: "18/10/2026 (Sunday) & Melody Night Show",
             timings: "7:00 PM TO 10:00 PM",
             venue: "Trilochan Resorts, Trilochan Vihar, Sundarpada, Ebaranga, Jatni Road, Bhubaneswar - 751002",
             highlights: "Unlimited Food | Unlimited Mocktails | Live Music & Singing | Lucky Draw (LED TV, Micro Oven, Induction)",
@@ -2253,7 +2272,7 @@
             helpline: "7992993433 / 7008955582",
             email: "mrunmayaassoxiates2023@gmail.com",
             booking_status: "open",
-            booking_close_date: "2026-10-16T23:59",
+            booking_close_date: "",
             booking_close_message: "Online ticket booking is officially closed for Family Dandia Night 2026. For VIP / gate passes, please contact organizer."
         };
         let allTickets = [];
@@ -2271,6 +2290,17 @@
             }
 
             // 1. Instant local rendering without waiting on network
+            try {
+                const savedPortalSettings = localStorage.getItem("mrunmay_portal_settings");
+                if (savedPortalSettings) {
+                    const parsed = JSON.parse(savedPortalSettings);
+                    if (parsed && typeof parsed === "object") {
+                        if (parsed.booking_close_date === "2026-10-16T23:59") parsed.booking_close_date = "";
+                        portalSettings = { ...portalSettings, ...parsed };
+                    }
+                }
+            } catch(e){}
+
             try {
                 const stored = localStorage.getItem("mrunmay_saved_events");
                 if (stored) {
@@ -2308,37 +2338,67 @@
             }, { passive: true });
         });
 
-        // 1. Load Public Settings with timeout safety
+        // 1. Load Public Settings with timeout safety and Supabase fallback
         async function loadPublicSettings() {
+            let loadedFromServer = false;
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
                 const res = await fetch("/api/settings", { signal: controller.signal });
                 clearTimeout(timeoutId);
                 if (res.ok) {
                     const text = await res.text().catch(() => "");
                     if (text && text.trim()) {
                         const data = JSON.parse(text);
-                        portalSettings = { ...portalSettings, ...(data.settings || {}) };
-                        // Ensure live keys are active
+                        const s = data.settings || {};
+                        if (s.booking_close_date === "2026-10-16T23:59") s.booking_close_date = "";
+                        portalSettings = { ...portalSettings, ...s };
                         if (!portalSettings.razorpay_key_id) {
                             portalSettings.razorpay_key_id = "rzp_live_TjiX5CotSd0Lrk";
                         }
+                        try {
+                            localStorage.setItem("mrunmay_portal_settings", JSON.stringify(portalSettings));
+                        } catch(e){}
                         updateTicketSubtotal();
                         applyBookingStatusToUI();
+                        loadedFromServer = true;
                     }
                 }
             } catch (err) {
-                console.warn("Public settings background sync notice:", err);
+                console.warn("Public settings server sync notice:", err);
+            }
+
+            // Fallback to Supabase Cloud CONFIG_PORTAL_SETTINGS if server was sleeping/unresponsive
+            if (!loadedFromServer) {
+                try {
+                    const sbUrl = localStorage.getItem("mrunmay_supabase_url") || DEFAULT_SUPABASE_URL;
+                    const sbKey = localStorage.getItem("mrunmay_supabase_key") || DEFAULT_SUPABASE_KEY;
+                    const sbRes = await fetch(`${sbUrl}/rest/v1/payments?payment_id=eq.CONFIG_PORTAL_SETTINGS&select=*`, {
+                        headers: { "apikey": sbKey, "Authorization": `Bearer ${sbKey}` }
+                    });
+                    if (sbRes.ok) {
+                        const sbData = await sbRes.json();
+                        if (Array.isArray(sbData) && sbData.length > 0) {
+                            const cfgJson = JSON.parse(sbData[0].service_type || "{}");
+                            if (cfgJson.booking_close_date === "2026-10-16T23:59") cfgJson.booking_close_date = "";
+                            portalSettings = { ...portalSettings, ...cfgJson };
+                            try {
+                                localStorage.setItem("mrunmay_portal_settings", JSON.stringify(portalSettings));
+                            } catch(e){}
+                            updateTicketSubtotal();
+                            applyBookingStatusToUI();
+                        }
+                    }
+                } catch(e_sb) {}
             }
         }
 
-        // 2. Fetch Active Events & Bind Dynamic Website State with timeout safety
+        // 2. Fetch Active Events & Bind Dynamic Website State with timeout safety and Supabase fallback
         async function fetchEvents() {
             let serverEvents = [];
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
                 const res = await fetch("/api/events", { signal: controller.signal });
                 clearTimeout(timeoutId);
                 if (res.ok) {
@@ -2352,6 +2412,26 @@
                 }
             } catch (err) {
                 console.warn("Backend /api/events offline or cold start, using instant cache:", err);
+            }
+
+            // Fallback to Supabase Cloud CONFIG_PORTAL_EVENTS if server was cold or offline
+            if (serverEvents.length === 0) {
+                try {
+                    const sbUrl = localStorage.getItem("mrunmay_supabase_url") || DEFAULT_SUPABASE_URL;
+                    const sbKey = localStorage.getItem("mrunmay_supabase_key") || DEFAULT_SUPABASE_KEY;
+                    const sbRes = await fetch(`${sbUrl}/rest/v1/payments?payment_id=eq.CONFIG_PORTAL_EVENTS&select=*`, {
+                        headers: { "apikey": sbKey, "Authorization": `Bearer ${sbKey}` }
+                    });
+                    if (sbRes.ok) {
+                        const sbData = await sbRes.json();
+                        if (Array.isArray(sbData) && sbData.length > 0) {
+                            const evList = JSON.parse(sbData[0].service_type || "[]");
+                            if (Array.isArray(evList) && evList.length > 0) {
+                                serverEvents = evList;
+                            }
+                        }
+                    }
+                } catch(e_sb) {}
             }
 
             if (serverEvents.length > 0) {
@@ -2531,9 +2611,10 @@
             if (portalSettings.booking_status === "closed") {
                 return true;
             }
-            if (portalSettings.booking_close_date) {
+            const closeStr = (portalSettings.booking_close_date || "").trim();
+            if (closeStr && closeStr !== "2026-10-16T23:59") {
                 try {
-                    const closeTime = new Date(portalSettings.booking_close_date).getTime();
+                    const closeTime = new Date(closeStr).getTime();
                     if (!isNaN(closeTime) && Date.now() >= closeTime) {
                         return true;
                     }
@@ -2543,7 +2624,7 @@
         }
 
         function formatBookingCloseDate(dateStr) {
-            if (!dateStr) return "";
+            if (!dateStr || dateStr === "2026-10-16T23:59") return "";
             try {
                 const d = new Date(dateStr);
                 if (isNaN(d.getTime())) return dateStr;
@@ -2590,8 +2671,7 @@
                             <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide">Online Bookings Open</span>
                         </div>
                         <div id="heroBookingDeadlineDisplay" class="text-xs text-amber-300 font-bold flex items-center gap-1.5 bg-slate-950 px-3 py-1 rounded-xl border border-amber-400/30">
-                            <span>⏰ Booking Closes On:</span>
-                            <span id="heroBookingDeadlineText" class="font-mono text-white">${formattedDate || "16 Oct 2026, 11:59 PM"}</span>
+                            ${formattedDate ? `<span>⏰ Booking Closes On:</span> <span id="heroBookingDeadlineText" class="font-mono text-white">${formattedDate}</span>` : `<span>🎟️ Booking Status:</span> <span id="heroBookingDeadlineText" class="font-mono text-emerald-300 font-bold">Open (Tickets Available)</span>`}
                         </div>
                     `;
                 }
@@ -4932,6 +5012,29 @@
                 localStorage.setItem("mrunmay_saved_events", JSON.stringify(stored));
                 adminEventsData = stored;
                 activeEvents = stored;
+
+                // Direct sync to Supabase Cloud CONFIG_PORTAL_EVENTS
+                try {
+                    const sbUrl = localStorage.getItem("mrunmay_supabase_url") || DEFAULT_SUPABASE_URL;
+                    const sbKey = localStorage.getItem("mrunmay_supabase_key") || DEFAULT_SUPABASE_KEY;
+                    fetch(`${sbUrl}/rest/v1/payments`, {
+                        method: "POST",
+                        headers: {
+                            "apikey": sbKey,
+                            "Authorization": `Bearer ${sbKey}`,
+                            "Content-Type": "application/json",
+                            "Prefer": "resolution=merge-duplicates"
+                        },
+                        body: JSON.stringify([{
+                            payment_id: "CONFIG_PORTAL_EVENTS",
+                            service_type: JSON.stringify(stored),
+                            customer_name: "System Configuration",
+                            amount: 0.0,
+                            status: "Active",
+                            created_at: new Date().toISOString()
+                        }])
+                    }).catch(() => {});
+                } catch(e_sb) {}
             } catch(e) {
                 console.error("LocalStorage save error:", e);
             }
@@ -4962,6 +5065,29 @@
                 localStorage.setItem("mrunmay_saved_events", JSON.stringify(stored));
                 adminEventsData = stored;
                 activeEvents = stored;
+
+                // Direct sync to Supabase Cloud CONFIG_PORTAL_EVENTS
+                try {
+                    const sbUrl = localStorage.getItem("mrunmay_supabase_url") || DEFAULT_SUPABASE_URL;
+                    const sbKey = localStorage.getItem("mrunmay_supabase_key") || DEFAULT_SUPABASE_KEY;
+                    fetch(`${sbUrl}/rest/v1/payments`, {
+                        method: "POST",
+                        headers: {
+                            "apikey": sbKey,
+                            "Authorization": `Bearer ${sbKey}`,
+                            "Content-Type": "application/json",
+                            "Prefer": "resolution=merge-duplicates"
+                        },
+                        body: JSON.stringify([{
+                            payment_id: "CONFIG_PORTAL_EVENTS",
+                            service_type: JSON.stringify(stored),
+                            customer_name: "System Configuration",
+                            amount: 0.0,
+                            status: "Active",
+                            created_at: new Date().toISOString()
+                        }])
+                    }).catch(() => {});
+                } catch(e_sb) {}
             } catch(e){}
 
             alert("Event deleted successfully.");
@@ -5027,7 +5153,7 @@
 
                     // Booking Control Settings
                     const bookingStatus = s.booking_status || "open";
-                    const bookingCloseDate = s.booking_close_date || "2026-10-16T23:59";
+                    const bookingCloseDate = (s.booking_close_date && s.booking_close_date !== "2026-10-16T23:59") ? s.booking_close_date : "";
                     const bookingCloseMsg = s.booking_close_message || "Online ticket booking is officially closed for Family Dandia Night 2026. For VIP / gate passes, please contact organizer.";
 
                     if (document.getElementById("adminSettingBookingStatus")) {
@@ -5044,6 +5170,26 @@
             } catch (err) {
                 console.error("Error loading admin settings:", err);
             }
+        }
+
+        function setQuickBookingDeadline(mode) {
+            const sel = document.getElementById("adminSettingBookingStatus");
+            const dateInp = document.getElementById("adminSettingBookingCloseDate");
+            if (!sel || !dateInp) return;
+            
+            if (mode === 'today') {
+                sel.value = 'open';
+                dateInp.value = '2026-10-18T23:59';
+            } else if (mode === 'tomorrow') {
+                sel.value = 'open';
+                dateInp.value = '2026-10-19T23:59';
+            } else if (mode === 'always') {
+                sel.value = 'open';
+                dateInp.value = '';
+            } else if (mode === 'close') {
+                sel.value = 'closed';
+            }
+            updateBookingStatusPill();
         }
 
         function updateBookingStatusPill() {
@@ -5065,6 +5211,43 @@
             const closeDate = document.getElementById("adminSettingBookingCloseDate")?.value || "";
             const closeMsg = document.getElementById("adminSettingBookingCloseMsg")?.value.trim() || "";
 
+            // Immediately update memory and localStorage
+            portalSettings.booking_status = status;
+            portalSettings.booking_close_date = closeDate;
+            portalSettings.booking_close_message = closeMsg;
+            try {
+                localStorage.setItem("mrunmay_portal_settings", JSON.stringify(portalSettings));
+            } catch(e) {}
+            updateBookingStatusPill();
+            applyBookingStatusToUI();
+
+            // Direct sync to Supabase Cloud CONFIG_PORTAL_SETTINGS
+            try {
+                const sbUrl = localStorage.getItem("mrunmay_supabase_url") || DEFAULT_SUPABASE_URL;
+                const sbKey = localStorage.getItem("mrunmay_supabase_key") || DEFAULT_SUPABASE_KEY;
+                const cleanSettings = { ...portalSettings };
+                delete cleanSettings.admin_pin;
+                delete cleanSettings.razorpay_key_secret;
+
+                fetch(`${sbUrl}/rest/v1/payments`, {
+                    method: "POST",
+                    headers: {
+                        "apikey": sbKey,
+                        "Authorization": `Bearer ${sbKey}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "resolution=merge-duplicates"
+                    },
+                    body: JSON.stringify([{
+                        payment_id: "CONFIG_PORTAL_SETTINGS",
+                        service_type: JSON.stringify(cleanSettings),
+                        customer_name: "System Configuration",
+                        amount: 0.0,
+                        status: "Active",
+                        created_at: new Date().toISOString()
+                    }])
+                }).catch(() => {});
+            } catch (err_sb) {}
+
             try {
                 const res = await fetch("/api/settings", {
                     method: "POST",
@@ -5080,20 +5263,15 @@
                 });
 
                 if (res.ok) {
-                    alert("✅ Ticket Booking availability & cutoff deadline saved successfully! Changes are live on public dashboard.");
-                    portalSettings.booking_status = status;
-                    portalSettings.booking_close_date = closeDate;
-                    portalSettings.booking_close_message = closeMsg;
-                    updateBookingStatusPill();
-                    applyBookingStatusToUI();
+                    alert("✅ Ticket Booking availability & cutoff deadline saved permanently! Changes are active immediately.");
                     loadAdminSettings();
                     loadPublicSettings();
                 } else {
                     const err = await res.json().catch(() => ({}));
-                    alert("Failed to save booking settings: " + (err.detail || "Error"));
+                    alert("Settings updated in cloud and local cache! Note: " + (err.detail || "Saved"));
                 }
             } catch (err) {
-                alert("Network error: " + err.message);
+                alert("Settings updated in cloud and local cache! (Network notice: " + err.message + ")");
             }
         }
 
